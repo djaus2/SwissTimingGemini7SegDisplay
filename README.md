@@ -1,5 +1,7 @@
 # Swiss Timing 6 Digit 7 Segment Display
 
+> Nb: Under development
+
 ## About
 This is a WPF app that can generate display timing messages for a Gemini 6 Digit 7 segment display that issues, for exampl, as a running clock in Athletics events.
 Times (wallclcok or race running time) is also displayed in a simulated 6 x 7 Segement display in-app.  When not the Serial-In port is not connected, that display displays teh transmitted time.
