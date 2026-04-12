@@ -1,0 +1,96 @@
+﻿<Window x:Class="SwissTimingDisplay.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:SwissTimingDisplay"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800">
+    <Grid Margin="12">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" FontSize="18" FontWeight="SemiBold" Text="SwissTimingDisplay" />
+
+        <StackPanel Grid.Row="1" Margin="0,12,0,0" Orientation="Horizontal">
+            <CheckBox VerticalAlignment="Center" Content="Only Prolific (PL*)" IsChecked="{Binding OnlyProlific}" />
+            <Button Margin="12,0,0,0" Padding="10,4" Content="Refresh Ports" Command="{Binding RefreshPortsCommand}" />
+        </StackPanel>
+
+        <GroupBox Grid.Row="2" Margin="0,12,0,0" Header="Serial">
+            <Grid Margin="10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="2*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <ComboBox Grid.Column="0"
+                          MinWidth="360"
+                          ItemsSource="{Binding Ports}"
+                          SelectedItem="{Binding SelectedPort}"
+                          DisplayMemberPath="DisplayName" />
+
+                <Button Grid.Column="1" Margin="12,0,0,0" Padding="10,4" Content="Connect" Command="{Binding ConnectCommand}" />
+                <Button Grid.Column="2" Margin="8,0,0,0" Padding="10,4" Content="Disconnect" Command="{Binding DisconnectCommand}" />
+            </Grid>
+        </GroupBox>
+
+        <GroupBox Grid.Row="3" Margin="0,12,0,0" Header="Commands">
+            <Grid Margin="10">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="2*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,0,0,6" Text="TCP Command" />
+
+                <ComboBox Grid.Row="1" Grid.Column="0"
+                          MinWidth="360"
+                          ItemsSource="{Binding TcpCommands}"
+                          SelectedItem="{Binding SelectedTcpCommand}" />
+
+                <StackPanel Grid.Row="1" Grid.Column="1" Margin="12,0,0,0" Orientation="Horizontal">
+                    <Button x:Name="btnSend" Padding="10,4" Content="Send" Click="Button_Click" />
+                    <Button x:Name="btnRaceTimer" Margin="8,0,0,0" Padding="10,4" Content="Start" Click="RaceTimerButton_Click" />
+                </StackPanel>
+
+                <TextBlock Grid.Row="2" Grid.Column="0" Margin="0,12,0,6" Text="Time" />
+                <TextBox x:Name="tbTime" Grid.Row="3" Grid.Column="0" MinWidth="220" Text="{Binding TimeInput, UpdateSourceTrigger=PropertyChanged}">
+                    <TextBox.Style>
+                        <Style TargetType="TextBox">
+                            <Setter Property="IsEnabled" Value="True" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding UseWallClockTimeOfDay}" Value="True">
+                                    <Setter Property="IsEnabled" Value="False" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBox.Style>
+                </TextBox>
+
+                <CheckBox x:Name="cbUseWallClock" Grid.Row="3" Grid.Column="1" Margin="12,0,0,0" VerticalAlignment="Center" Content="Use wall clock" IsChecked="{Binding UseWallClockTimeOfDay}" Checked="UseWallClock_Checked" Unchecked="UseWallClock_Unchecked" />
+
+                <TextBlock Grid.Row="4" Grid.Column="0" Margin="0,12,0,6" Text="Bib No. (1-999)" />
+                <TextBox Grid.Row="5" Grid.Column="0" MinWidth="180" Text="{Binding BibNo, UpdateSourceTrigger=PropertyChanged}" />
+            </Grid>
+        </GroupBox>
+
+        <Border Grid.Row="4" Margin="0,12,0,0" Padding="10" Background="#FFEFEFEF" CornerRadius="4">
+            <TextBlock Text="{Binding Status}" TextWrapping="Wrap" />
+        </Border>
+    </Grid>
+</Window>
