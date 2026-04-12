@@ -20,6 +20,7 @@ namespace SwissTimingDisplay.ViewModels
         private bool _onlyProlific = true;
         private string _timeInput = "";
         private bool _useWallClockTimeOfDay = false;
+        private bool _anchorDisplay = false;
         private string _bibNo = "";
         private string _status = "";
 
@@ -91,6 +92,12 @@ namespace SwissTimingDisplay.ViewModels
         {
             get => _useWallClockTimeOfDay;
             set => Set(ref _useWallClockTimeOfDay, value);
+        }
+
+        public bool AnchorDisplay
+        {
+            get => _anchorDisplay;
+            set => Set(ref _anchorDisplay, value);
         }
 
         public string BibNo

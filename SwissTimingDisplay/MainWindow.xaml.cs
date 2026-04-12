@@ -2,6 +2,8 @@
 using System.ComponentModel;
 using System.Linq;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Media;
 using System.Windows.Threading;
 
 using SwissTimingDisplay.Models;
@@ -16,7 +18,6 @@ namespace SwissTimingDisplay
     {
         private readonly MainViewModel _vm = new MainViewModel();
 
-        private readonly DispatcherTimer _wallClockTimer;
         private readonly DispatcherTimer _raceTimer;
         private bool _raceIsRunning = false;
         private TimeSpan _raceElapsed = TimeSpan.Zero;
@@ -30,18 +31,8 @@ namespace SwissTimingDisplay
 
             _vm.PropertyChanged += VmOnPropertyChanged;
 
-            _wallClockTimer = new DispatcherTimer
-            {
-                Interval = TimeSpan.FromSeconds(1),
-            };
-            _wallClockTimer.Tick += (_, _) =>
-            {
-                if (_vm.UseWallClockTimeOfDay)
-                {
-                    _vm.TimeInput = DateTime.Now.ToString("HH:mm:ss");
-                }
-            };
-            _wallClockTimer.Start();
+            Loaded += (_, _) => ApplyAnchorLayout();
+            SizeChanged += (_, _) => ApplyAnchorLayout();
 
             _raceTimer = new DispatcherTimer
             {
@@ -94,11 +85,119 @@ namespace SwissTimingDisplay
                 UpdateRaceTimerEnabledState();
                 UpdateSendEnabledState();
             }
+
+            if (e.PropertyName == nameof(MainViewModel.AnchorDisplay))
+            {
+                ApplyAnchorLayout();
+            }
+        }
+
+        private void ApplyAnchorLayout()
+        {
+            if (rightDisplayColumn is null
+                || rightSevenSegBorder is null
+                || rightSevenSegViewbox is null
+                || rightSevenSegContent is null
+                || bottomSevenSegBorder is null
+                || bottomSevenSegViewbox is null
+                || bottomSevenSegContent is null)
+            {
+                return;
+            }
+
+            if (!_vm.AnchorDisplay)
+            {
+                rightDisplayColumn.Width = new GridLength(0);
+                rightSevenSegBorder.Visibility = Visibility.Collapsed;
+
+                bottomSevenSegBorder.Visibility = Visibility.Visible;
+                bottomSevenSegBorder.HorizontalAlignment = HorizontalAlignment.Left;
+                bottomSevenSegBorder.VerticalAlignment = VerticalAlignment.Top;
+                bottomSevenSegViewbox.HorizontalAlignment = HorizontalAlignment.Left;
+                bottomSevenSegViewbox.VerticalAlignment = VerticalAlignment.Center;
+                bottomSevenSegViewbox.Stretch = Stretch.None;
+                bottomSevenSegViewbox.StretchDirection = StretchDirection.Both;
+                return;
+            }
+
+            Dispatcher.BeginInvoke(() =>
+            {
+                if (!_vm.AnchorDisplay)
+                {
+                    return;
+                }
+
+                var scaleRight = EvaluateRightAnchorScale();
+                var scaleBottom = EvaluateBottomAnchorScale();
+
+                if (scaleRight >= scaleBottom)
+                {
+                    ShowRightAnchored();
+                }
+                else
+                {
+                    ShowBottomAnchored();
+                }
+            }, DispatcherPriority.Loaded);
+        }
+
+        private double EvaluateRightAnchorScale()
+        {
+            ShowRightAnchored();
+            UpdateLayout();
+            return ComputeUniformScale(rightSevenSegViewbox, rightSevenSegContent);
+        }
+
+        private double EvaluateBottomAnchorScale()
+        {
+            ShowBottomAnchored();
+            UpdateLayout();
+            return ComputeUniformScale(bottomSevenSegViewbox, bottomSevenSegContent);
+        }
+
+        private void ShowRightAnchored()
+        {
+            rightDisplayColumn.Width = GridLength.Auto;
+            rightSevenSegBorder.Visibility = Visibility.Visible;
+            rightSevenSegViewbox.Stretch = Stretch.Uniform;
+            rightSevenSegViewbox.StretchDirection = StretchDirection.Both;
+
+            bottomSevenSegBorder.Visibility = Visibility.Collapsed;
+        }
+
+        private void ShowBottomAnchored()
+        {
+            rightDisplayColumn.Width = new GridLength(0);
+            rightSevenSegBorder.Visibility = Visibility.Collapsed;
+
+            bottomSevenSegBorder.Visibility = Visibility.Visible;
+            bottomSevenSegBorder.HorizontalAlignment = HorizontalAlignment.Stretch;
+            bottomSevenSegBorder.VerticalAlignment = VerticalAlignment.Top;
+            bottomSevenSegViewbox.HorizontalAlignment = HorizontalAlignment.Center;
+            bottomSevenSegViewbox.VerticalAlignment = VerticalAlignment.Top;
+            bottomSevenSegViewbox.Stretch = Stretch.Uniform;
+            bottomSevenSegViewbox.StretchDirection = StretchDirection.Both;
+        }
+
+        private static double ComputeUniformScale(Viewbox viewbox, FrameworkElement child)
+        {
+            if (viewbox.ActualWidth <= 0 || viewbox.ActualHeight <= 0)
+            {
+                return 0;
+            }
+
+            child.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+            var desired = child.DesiredSize;
+            if (desired.Width <= 0 || desired.Height <= 0)
+            {
+                return 0;
+            }
+
+            return Math.Min(viewbox.ActualWidth / desired.Width, viewbox.ActualHeight / desired.Height);
         }
 
         private void UseWallClock_Checked(object sender, RoutedEventArgs e)
         {
-            _vm.TimeInput = DateTime.Now.ToString("HH:mm:ss");
             UpdateWallClockEnabledState();
             UpdateSendEnabledState();
         }
@@ -111,7 +210,6 @@ namespace SwissTimingDisplay
 
         protected override void OnClosed(EventArgs e)
         {
-            _wallClockTimer.Stop();
             _raceTimer.Stop();
             _vm.PropertyChanged -= VmOnPropertyChanged;
             _vm.Dispose();
