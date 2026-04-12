@@ -20,3 +20,6 @@ The capability for receiving messages as sent and displaying the received times 
 ## RollerMode Commands
 <img width="1584" height="918" alt="image" src="https://github.com/user-attachments/assets/283229b8-4c18-467b-b261-169f04f8c451" />
 
+
+Also see [Models/CharCommand.cs](SwissTimingDisplay/Models/CharCommand.cs)
+
