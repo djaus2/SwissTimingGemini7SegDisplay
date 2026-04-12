@@ -42,20 +42,60 @@
 
         <GroupBox Grid.Row="2" Margin="0,12,0,0" Header="Serial">
             <Grid Margin="10">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="2*" />
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
-                <ComboBox Grid.Column="0"
+                <TextBlock Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" Text="Send Port" />
+                <ComboBox Grid.Row="0" Grid.Column="1"
+                          Margin="12,0,0,0"
                           MinWidth="360"
-                          ItemsSource="{Binding Ports}"
-                          SelectedItem="{Binding SelectedPort}"
+                          ItemsSource="{Binding SendPortsView}"
+                          SelectedValuePath="PortName"
+                          SelectedValue="{Binding SelectedSendPortName}"
                           DisplayMemberPath="DisplayName" />
 
-                <Button Grid.Column="1" Margin="12,0,0,0" Padding="10,4" Content="Connect" Command="{Binding ConnectCommand}" />
-                <Button Grid.Column="2" Margin="8,0,0,0" Padding="10,4" Content="Disconnect" Command="{Binding DisconnectCommand}" />
+                <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,8,0,0" VerticalAlignment="Center" Text="Receive Port" />
+                <ComboBox Grid.Row="1" Grid.Column="1"
+                          Margin="12,8,0,0"
+                          MinWidth="360"
+                          ItemsSource="{Binding ReceivePortsView}"
+                          SelectedValuePath="PortName"
+                          SelectedValue="{Binding SelectedReceivePortName}"
+                          DisplayMemberPath="DisplayName" />
+
+                <Button Grid.Row="0" Grid.Column="2" Grid.ColumnSpan="2" Margin="12,0,0,0" Padding="10,4" Command="{Binding SendConnectToggleCommand}">
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Setter Property="Content" Value="Connect" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsConnected}" Value="True">
+                                    <Setter Property="Content" Value="Disconnect" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+
+                <Button Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="2" Margin="12,8,0,0" Padding="10,4" Command="{Binding ReceiveConnectToggleCommand}">
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Setter Property="Content" Value="Connect" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsReceiveConnected}" Value="True">
+                                    <Setter Property="Content" Value="Disconnect" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
             </Grid>
         </GroupBox>
 
@@ -68,6 +108,8 @@
             <GroupBox x:Name="commandsGroupBox" Grid.Column="0" Header="Commands">
                 <Grid Margin="10">
                     <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
@@ -92,7 +134,7 @@
                         <Button x:Name="btnRaceTimer" Margin="8,0,0,0" Padding="10,4" Content="Start" Click="RaceTimerButton_Click" />
                     </StackPanel>
 
-                    <TextBlock Grid.Row="2" Grid.Column="0" Margin="0,12,0,6" Text="Time" />
+                    <TextBlock Grid.Row="2" Grid.Column="0" Margin="0,12,0,6" Text="Time Out" />
                     <TextBox x:Name="tbTime" Grid.Row="3" Grid.Column="0" MinWidth="220" Text="{Binding TimeInput, UpdateSourceTrigger=PropertyChanged}">
                         <TextBox.Style>
                             <Style TargetType="TextBox">
@@ -106,8 +148,12 @@
                         </TextBox.Style>
                     </TextBox>
 
-                    <TextBlock Grid.Row="4" Grid.Column="0" Margin="0,12,0,6" Text="Bib No. (1-999)" />
-                    <StackPanel Grid.Row="5" Grid.Column="0" Orientation="Vertical">
+                    <TextBlock Grid.Row="4" Grid.Column="0" Margin="0,12,0,6" Text="Time In" />
+
+                    <TextBox x:Name="tbTimeIn" Grid.Row="5" Grid.Column="0" MinWidth="220" Text="{Binding TimeInputIn, UpdateSourceTrigger=PropertyChanged}" />
+
+                    <TextBlock Grid.Row="6" Grid.Column="0" Margin="0,12,0,6" Text="Bib No. (1-999)" />
+                    <StackPanel Grid.Row="7" Grid.Column="0" Orientation="Vertical">
                         <TextBox MinWidth="180" Text="{Binding BibNo, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
                 </Grid>
@@ -115,14 +161,14 @@
 
             <Border x:Name="rightSevenSegBorder" Grid.Column="1" Margin="12,0,0,0" BorderBrush="#FFCC0000" BorderThickness="3" CornerRadius="4" Background="Black" Padding="10" VerticalAlignment="Stretch" Visibility="Collapsed">
                 <Viewbox x:Name="rightSevenSegViewbox" Stretch="Uniform" StretchDirection="Both" HorizontalAlignment="Center" VerticalAlignment="Center">
-                    <controls:SevenSegmentDisplay x:Name="rightSevenSegContent" TimeInput="{Binding TimeInput}" />
+                    <controls:SevenSegmentDisplay x:Name="rightSevenSegContent" TimeInput="{Binding DisplayTime}" />
                 </Viewbox>
             </Border>
         </Grid>
 
-        <Border x:Name="bottomSevenSegBorder" Grid.Row="4" Margin="0,12,0,0" BorderBrush="#FFCC0000" BorderThickness="3" CornerRadius="4" Background="Black" Padding="10" HorizontalAlignment="Left">
-            <Viewbox x:Name="bottomSevenSegViewbox" VerticalAlignment="Center" HorizontalAlignment="Left">
-                <controls:SevenSegmentDisplay x:Name="bottomSevenSegContent" TimeInput="{Binding TimeInput}" />
+        <Border x:Name="bottomSevenSegBorder" Grid.Row="4" Margin="0,12,0,0" BorderBrush="#FFCC0000" BorderThickness="3" CornerRadius="4" Background="Black" Padding="10" HorizontalAlignment="Left" Visibility="Visible">
+            <Viewbox x:Name="bottomSevenSegViewbox" Stretch="None" StretchDirection="Both" HorizontalAlignment="Left" VerticalAlignment="Center">
+                <controls:SevenSegmentDisplay x:Name="bottomSevenSegContent" TimeInput="{Binding DisplayTime}" />
             </Viewbox>
         </Border>
 
