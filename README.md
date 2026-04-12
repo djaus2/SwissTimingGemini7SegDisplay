@@ -3,9 +3,11 @@
 > Nb: Under development
 
 ## About
-This is a WPF app that can generate display timing messages for a Gemini 6 Digit 7 segment display that issues, for exampl, as a running clock in Athletics events.
-Times (wallclcok or race running time) is also displayed in a simulated 6 x 7 Segement display in-app.  When not the Serial-In port is not connected, that display displays teh transmitted time.
-The capability for receiving messages as sent and displaying the received times has also been added but not yet tested,
+This is a WPF app that can generate display timing messages for a Gemini 6 Digit 7 segment display, functionimg for example, as a running clock or elapsed race time for Athletics events. Messages are sent via the selected Serial-Send port.
+
+Times (wallclcok or race running time) is also displayed in a simulated 6 x 7 Segement display in-app. When the Serial-Receive port is not connected, that display displays thr transmitted time.
+
+The capability for receiving messages as sent and displaying the received times has also been added but not yet tested, In this mode, the Serial-Receive port is connected and as such the received data is displayed in the 7 segments rather than the transmitted data. In this the app can simulate the physical display.
 
 ## Related Documents
 - [INT31 Manual](SwissTimingDisplay/docs/INT131.pdf)
