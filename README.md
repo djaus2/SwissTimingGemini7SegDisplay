@@ -7,7 +7,7 @@ This is a WPF app that can generate display timing messages for a Gemini 6 Digit
 
 Times (wallclcok or race running time) are also displayed in a simulated 6 x 7 Segement display in-app. When the Serial-Receive port is not connected, that display displays the transmitted time.
 
-The capability for receiving messages as sent and displaying the received times has also been added but not yet tested. In this mode, the Serial-Receive port is connected and as such the received data is displayed in the 7 segments rather than the transmitted data. In this mode,the app can simulate the physical display.
+The capability for receiving messages as sent and displaying the received times has also been added but not yet tested. To enable serial reception,the Serial-Receive port is connected and as such the received data is displayed in the 7 segments rather than the transmitted data. In this mode,the app can simulate the physical display.
 
 > Note that it is intended that the app can simultaneously send and receive timing messages
 
