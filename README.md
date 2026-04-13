@@ -1,7 +1,7 @@
 # Swiss Timing 6 Digit 7 Segment Display
 
 > Nb: Under development  
-> Latest: Null modem cable across 2 INT31 enables sent time to be displayed in 7 seg display, without colon and dot between digits.  
+> Latest: Null modem cable across 2 INT131 enables sent time to be displayed in 7 seg display, without colon and dot between digits.  
 > Next: Test with actual display.
 
 ## About
@@ -25,6 +25,11 @@ The capability for receiving messages as sent and displaying the received times 
       - HHMMSS/MMSSDD selection determines what separators show on the receive display.
       - Note that selecting Wallclock triggers this to select HHMMSS. 
 - Selected ports are now persisted.
+
+## Hint
+For testing using one INT31:
+- Connected tINT31 to the PC USB port
+- Connected a standard null modem cable between the 2 INT131 RS232 (DB9) ports. 
 
 ## Related Documents
 - [INT31 Manual](SwissTimingDisplay/docs/INT131.pdf)
