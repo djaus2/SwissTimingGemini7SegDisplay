@@ -12,6 +12,7 @@
         <converters:TimeInputDigitConverter x:Key="TimeInputDigitConverter" />
         <converters:StringNotEmptyToVisibilityConverter x:Key="StringNotEmptyToVisibilityConverter" />
         <converters:TimeInputSeparatorVisibilityConverter x:Key="TimeInputSeparatorVisibilityConverter" />
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
     </Window.Resources>
     <Grid x:Name="rootGrid" Margin="12">
         <Grid.RowDefinitions>
@@ -31,6 +32,8 @@
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
@@ -38,6 +41,8 @@
             <Button Grid.Column="1" Margin="12,0,0,0" Padding="10,4" Content="Refresh Ports" Command="{Binding RefreshPortsCommand}" />
             <CheckBox x:Name="cbUseWallClock" Grid.Column="2" Margin="12,0,0,0" VerticalAlignment="Center" Content="Use wall clock" IsChecked="{Binding UseWallClockTimeOfDay}" Checked="UseWallClock_Checked" Unchecked="UseWallClock_Unchecked" />
             <CheckBox x:Name="cbAnchorDisplay" Grid.Column="3" Margin="12,0,0,0" VerticalAlignment="Center" Content="Anchor Display" IsChecked="{Binding AnchorDisplay}" />
+            <CheckBox Grid.Column="4" Margin="12,0,0,0" VerticalAlignment="Center" Content="Cosmetic" IsChecked="{Binding Cosmetic}" />
+            <CheckBox Grid.Column="5" Margin="12,0,0,0" VerticalAlignment="Center" Content="{Binding DisplayModeLabel}" IsChecked="{Binding IsDisplayModeHHMMSS}" IsEnabled="{Binding Cosmetic}" Visibility="{Binding Cosmetic, Converter={StaticResource BooleanToVisibilityConverter}}" />
         </Grid>
 
         <GroupBox Grid.Row="2" Margin="0,12,0,0" Header="Serial">

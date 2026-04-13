@@ -14,6 +14,12 @@ using SwissTimingDisplay.Services;
 
 namespace SwissTimingDisplay.ViewModels
 {
+    public enum DisplayMode
+    {
+        MMSSDD,
+        HHMMSS,
+    }
+
     public sealed class MainViewModel : INotifyPropertyChanged, IDisposable
     {
         private readonly SerialPortDiscoveryService _discoveryService = new SerialPortDiscoveryService();
@@ -31,6 +37,8 @@ namespace SwissTimingDisplay.ViewModels
         private bool _anchorDisplay = false;
         private string _bibNo = "";
         private string _status = "";
+        private DisplayMode _displayMode = DisplayMode.MMSSDD;
+        private bool _cosmetic = false;
         private bool _isReceiveConnected;
         private string? _connectedReceivePortName;
         private bool _isUpdatingPortLists;
@@ -274,12 +282,85 @@ namespace SwissTimingDisplay.ViewModels
             }
         }
 
-        public string DisplayTime => IsReceiveConnected ? TimeInputIn : TimeInput;
+        public string DisplayTime
+        {
+            get
+            {
+                if (!IsReceiveConnected)
+                {
+                    return TimeInput;
+                }
+
+                if (!Cosmetic)
+                {
+                    return TimeInputIn;
+                }
+
+                var raw = TimeInputIn ?? string.Empty;
+                var digits = new string(raw.Where(char.IsDigit).ToArray());
+                if (digits.Length < 6)
+                {
+                    return raw;
+                }
+
+                digits = digits[..6];
+
+                if (DisplayMode == DisplayMode.HHMMSS)
+                {
+                    return $"{digits.Substring(0, 2)}:{digits.Substring(2, 2)}:{digits.Substring(4, 2)}";
+                }
+
+                return $"{digits.Substring(0, 2)}:{digits.Substring(2, 2)}.{digits.Substring(4, 2)}";
+            }
+        }
+
+        public bool Cosmetic
+        {
+            get => _cosmetic;
+            set
+            {
+                if (Set(ref _cosmetic, value))
+                {
+                    OnPropertyChanged(nameof(DisplayTime));
+                }
+            }
+        }
+
+        public DisplayMode DisplayMode
+        {
+            get => _displayMode;
+            set
+            {
+                if (Set(ref _displayMode, value))
+                {
+                    OnPropertyChanged(nameof(IsDisplayModeHHMMSS));
+                    OnPropertyChanged(nameof(DisplayModeLabel));
+                    OnPropertyChanged(nameof(DisplayTime));
+                }
+            }
+        }
+
+        public string DisplayModeLabel => DisplayMode == DisplayMode.HHMMSS ? "HH:MM:SS" : "MM:SS.DD";
+
+        public bool IsDisplayModeHHMMSS
+        {
+            get => DisplayMode == DisplayMode.HHMMSS;
+            set => DisplayMode = value ? DisplayMode.HHMMSS : DisplayMode.MMSSDD;
+        }
 
         public bool UseWallClockTimeOfDay
         {
             get => _useWallClockTimeOfDay;
-            set => Set(ref _useWallClockTimeOfDay, value);
+            set
+            {
+                if (Set(ref _useWallClockTimeOfDay, value))
+                {
+                    if (value)
+                    {
+                        DisplayMode = DisplayMode.HHMMSS;
+                    }
+                }
+            }
         }
 
         public bool AnchorDisplay
