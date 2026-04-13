@@ -14,9 +14,17 @@ The capability for receiving messages as sent and displaying the received times 
 > Note that it is intended that the app can simultaneously send and receive timing messages
 
 ## Latest
-There is now a **Cosmetic** state variable that if true, the app adds appropiate colon/s and dot between digits in the simulated display for the selected time format. If not selected then no colons/dot show on the receive display. HHMMSS/MMSSDD checkbox displays. 
-- Note that selecting Wallclcok triggers this to select HHMMSS. 
-- If Receive mode is not selected then colon/s and dot show as per the input format.
+- There is now a **Cosmetic** state variable that if true, the app adds appropiate colon/s and dot between digits in the simulated display for the selected time format. 
+  - If Receive port not connected then Cosmetic checkbox does not show.
+    - 7 Segement display shows the Sent data (Time out) directly.
+    - Colon/s and dot show as per the Sent Data format
+  - If Receive port is connected then Cosmetic checkbox shows
+    - If not selected then no colons/dot show on the receive display. 
+      - HHMMSS/MMSSDD checkbox does not display. 
+    - If selected then HHMMSS/MMSSDD checkbox shows which determines the displayed time format:
+      - HHMMSS/MMSSDD selection determines what separators show on the receive display.
+      - Note that selecting Wallclock triggers this to select HHMMSS. 
+- Selected ports are now persisted.
 
 ## Related Documents
 - [INT31 Manual](SwissTimingDisplay/docs/INT131.pdf)
