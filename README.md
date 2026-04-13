@@ -28,7 +28,7 @@ The capability for receiving messages as sent and displaying the received times 
 
 ## Hint
 For testing using one INT31:
-- Connected tINT31 to the PC USB port
+- Connected INT131 to the PC USB port
 - Connected a standard null modem cable between the 2 INT131 RS232 (DB9) ports. 
 
 ## Related Documents
