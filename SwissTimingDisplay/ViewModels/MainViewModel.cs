@@ -1,9 +1,11 @@
 using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.IO;
 using System.IO.Ports;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Text.Json;
 using System.Threading;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -22,6 +24,12 @@ namespace SwissTimingDisplay.ViewModels
 
     public sealed class MainViewModel : INotifyPropertyChanged, IDisposable
     {
+        private static readonly string SettingsDirectoryPath = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+            "SwissTimingDisplay");
+
+        private static readonly string SettingsFilePath = Path.Combine(SettingsDirectoryPath, "settings.json");
+
         private readonly SerialPortDiscoveryService _discoveryService = new SerialPortDiscoveryService();
         private readonly SerialPortService _serialPortService = new SerialPortService();
 
@@ -48,6 +56,9 @@ namespace SwissTimingDisplay.ViewModels
         private CancellationTokenSource? _receiveCts;
         private Task? _receiveTask;
 
+        private string? _pendingPersistedSendPortName;
+        private string? _pendingPersistedReceivePortName;
+
         private readonly CollectionViewSource _sendPortsViewSource = new CollectionViewSource();
         private readonly CollectionViewSource _receivePortsViewSource = new CollectionViewSource();
 
@@ -70,6 +81,7 @@ namespace SwissTimingDisplay.ViewModels
             _receivePortsViewSource.Source = Ports;
             _receivePortsViewSource.Filter += ReceivePortsViewSourceOnFilter;
 
+            LoadPersistedPortNames();
             RefreshPorts();
         }
 
@@ -167,6 +179,7 @@ namespace SwissTimingDisplay.ViewModels
 
                 if (Set(ref _selectedSendPortName, value))
                 {
+                    SavePersistedPortNames();
                     RefreshPortViews();
 
                     if (!string.IsNullOrWhiteSpace(value))
@@ -200,6 +213,7 @@ namespace SwissTimingDisplay.ViewModels
 
                 if (Set(ref _selectedReceivePortName, value))
                 {
+                    SavePersistedPortNames();
                     RefreshPortViews();
 
                     if (!string.IsNullOrWhiteSpace(value))
@@ -249,7 +263,15 @@ namespace SwissTimingDisplay.ViewModels
         public bool IsReceiveConnected
         {
             get => _isReceiveConnected;
-            private set => Set(ref _isReceiveConnected, value);
+            private set
+            {
+                if (Set(ref _isReceiveConnected, value))
+                {
+                    OnPropertyChanged(nameof(ShowCosmeticOptions));
+                    OnPropertyChanged(nameof(ShowDisplayModeOptions));
+                    OnPropertyChanged(nameof(DisplayTime));
+                }
+            }
         }
 
         public string? ConnectedReceivePortName
@@ -321,10 +343,15 @@ namespace SwissTimingDisplay.ViewModels
             {
                 if (Set(ref _cosmetic, value))
                 {
+                    OnPropertyChanged(nameof(ShowDisplayModeOptions));
                     OnPropertyChanged(nameof(DisplayTime));
                 }
             }
         }
+
+        public bool ShowCosmeticOptions => IsReceiveConnected;
+
+        public bool ShowDisplayModeOptions => IsReceiveConnected && Cosmetic;
 
         public DisplayMode DisplayMode
         {
@@ -401,6 +428,21 @@ namespace SwissTimingDisplay.ViewModels
                 {
                     Ports.Add(p);
                 }
+
+                if (!string.IsNullOrWhiteSpace(_pendingPersistedSendPortName)
+                    && Ports.Any(p => string.Equals(p.PortName, _pendingPersistedSendPortName, StringComparison.OrdinalIgnoreCase)))
+                {
+                    SelectedSendPortName = _pendingPersistedSendPortName;
+                }
+
+                if (!string.IsNullOrWhiteSpace(_pendingPersistedReceivePortName)
+                    && Ports.Any(p => string.Equals(p.PortName, _pendingPersistedReceivePortName, StringComparison.OrdinalIgnoreCase)))
+                {
+                    SelectedReceivePortName = _pendingPersistedReceivePortName;
+                }
+
+                _pendingPersistedSendPortName = null;
+                _pendingPersistedReceivePortName = null;
 
                 RefreshPortViews();
 
@@ -706,8 +748,65 @@ namespace SwissTimingDisplay.ViewModels
 
         public void Dispose()
         {
+            SavePersistedPortNames();
             DisconnectReceive();
             _serialPortService.Dispose();
+        }
+
+        private sealed class PersistedSettings
+        {
+            public string? SendPortName { get; set; }
+            public string? ReceivePortName { get; set; }
+        }
+
+        private void LoadPersistedPortNames()
+        {
+            try
+            {
+                if (!File.Exists(SettingsFilePath))
+                {
+                    return;
+                }
+
+                var json = File.ReadAllText(SettingsFilePath);
+                var settings = JsonSerializer.Deserialize<PersistedSettings>(json);
+                if (settings is null)
+                {
+                    return;
+                }
+
+                if (!string.IsNullOrWhiteSpace(settings.SendPortName))
+                {
+                    _pendingPersistedSendPortName = settings.SendPortName;
+                }
+
+                if (!string.IsNullOrWhiteSpace(settings.ReceivePortName))
+                {
+                    _pendingPersistedReceivePortName = settings.ReceivePortName;
+                }
+            }
+            catch
+            {
+            }
+        }
+
+        private void SavePersistedPortNames()
+        {
+            try
+            {
+                Directory.CreateDirectory(SettingsDirectoryPath);
+                var settings = new PersistedSettings
+                {
+                    SendPortName = SelectedSendPortName,
+                    ReceivePortName = SelectedReceivePortName,
+                };
+
+                var json = JsonSerializer.Serialize(settings);
+                File.WriteAllText(SettingsFilePath, json);
+            }
+            catch
+            {
+            }
         }
 
         private void RaiseCommandStates()
