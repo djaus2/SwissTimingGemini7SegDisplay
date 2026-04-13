@@ -489,11 +489,12 @@ namespace SwissTimingDisplay
                 if (_vm.IsConnected)
                 {
                     var portName = _vm.ConnectedPortName ?? "(unknown)";
-                    var send = MessageBox.Show(
-                        $"Send {expandedBytes.Length} byte(s) to {portName}?",
-                        "Send",
-                        MessageBoxButton.YesNo,
-                        MessageBoxImage.Question);
+                    var send = MessageBoxResult.Yes;
+                    //MessageBox.Show(
+                    //    $"Send {expandedBytes.Length} byte(s) to {portName}?",
+                    //    "Send",
+                    //    MessageBoxButton.YesNo,
+                    //    MessageBoxImage.Question);
 
                     if (send == MessageBoxResult.Yes)
                     {

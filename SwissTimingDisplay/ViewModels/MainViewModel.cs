@@ -491,7 +491,11 @@ namespace SwissTimingDisplay.ViewModels
         {
             var buffer = new byte[256];
             var frame = new List<byte>(256);
+
+            // We dispatch frames as: [cmd, payload...]
+            // where cmd is 'I' or 'B'. STX and terminator (EOT/ETX) are not included.
             var inFrame = false;
+            var gotCmd = false;
 
             while (!cancellationToken.IsCancellationRequested)
             {
@@ -524,16 +528,36 @@ namespace SwissTimingDisplay.ViewModels
                         {
                             frame.Clear();
                             inFrame = true;
+                            gotCmd = false;
                         }
 
                         continue;
                     }
 
-                    if (b == (byte)CharCommand.ETX)
+                    // In frame: first byte must be command
+                    if (!gotCmd)
+                    {
+                        if (b == (byte)CharCommand.I || b == (byte)CharCommand.B)
+                        {
+                            frame.Add(b);
+                            gotCmd = true;
+                            continue;
+                        }
+
+                        // Invalid cmd - reset and hunt for next STX
+                        frame.Clear();
+                        inFrame = false;
+                        gotCmd = false;
+                        continue;
+                    }
+
+                    // End-of-frame: accept EOT (per spec) and ETX (current definitions)
+                    if (b == (byte)CharCommand.EOT || b == (byte)CharCommand.ETX)
                     {
                         var completed = frame.ToArray();
                         frame.Clear();
                         inFrame = false;
+                        gotCmd = false;
 
                         Application.Current?.Dispatcher?.BeginInvoke(() => ProcessReceivedFrame(completed));
                         continue;
