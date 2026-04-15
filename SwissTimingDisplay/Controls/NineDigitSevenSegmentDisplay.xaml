@@ -6,13 +6,39 @@
              xmlns:controls="clr-namespace:SwissTimingDisplay.Controls"
              xmlns:converters="clr-namespace:SwissTimingDisplay.Converters"
              mc:Ignorable="d" 
-             d:DesignHeight="120" d:DesignWidth="500">
+             d:DesignHeight="120" d:DesignWidth="900">
     <UserControl.Resources>
         <converters:TimeInputDigitConverter x:Key="TimeInputDigitConverter" />
         <converters:TimeInputSeparatorVisibilityConverter x:Key="TimeInputSeparatorVisibilityConverter" />
     </UserControl.Resources>
 
     <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
+        <!-- Digit 0 (unused/blank) -->
+        <controls:SevenSegmentDigit Digit="-1" />
+
+        <Grid Width="18" Height="120" Margin="10,0,10,0" />
+
+        <!-- Digit 1 (unused/blank) -->
+        <controls:SevenSegmentDigit Margin="6,0,0,0" Digit="-1" />
+
+        <Grid Width="18" Height="120" Margin="10,0,10,0" />
+
+        <!-- Digit 2 (unused/blank) -->
+        <controls:SevenSegmentDigit Digit="-1" />
+
+        <Grid Width="18" Height="120" Margin="10,0,10,0" />
+
+        <!-- Digit 3 (hidden, takes space) -->
+        <controls:SevenSegmentDigit Margin="6,0,0,0" Digit="-1" Visibility="Hidden" />
+
+        <Grid Width="18" Height="120" Margin="10,0,10,0" Visibility="Hidden" />
+
+        <!-- Digit 4 (hidden, takes space) -->
+        <controls:SevenSegmentDigit Digit="-1" Visibility="Hidden" />
+
+        <Grid Width="18" Height="120" Margin="10,0,10,0" Visibility="Hidden" />
+
+        <!-- Digit 5 -->
         <controls:SevenSegmentDigit Digit="{Binding TimeInput, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource TimeInputDigitConverter}, ConverterParameter=0}" />
 
         <Grid Width="18" Height="120" Margin="10,0,10,0">
@@ -21,6 +47,7 @@
             <Ellipse Width="10" Height="10" Fill="#FFF6E600" VerticalAlignment="Bottom" Margin="0,0,0,20" HorizontalAlignment="Center" Visibility="{Binding TimeInput, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource TimeInputSeparatorVisibilityConverter}, ConverterParameter=dot:1}" />
         </Grid>
 
+        <!-- Digit 6 -->
         <controls:SevenSegmentDigit Margin="6,0,0,0" Digit="{Binding TimeInput, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource TimeInputDigitConverter}, ConverterParameter=1}" />
 
         <Grid Width="18" Height="120" Margin="10,0,10,0">
@@ -29,6 +56,7 @@
             <Ellipse Width="10" Height="10" Fill="#FFF6E600" VerticalAlignment="Bottom" Margin="0,0,0,20" HorizontalAlignment="Center" Visibility="{Binding TimeInput, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource TimeInputSeparatorVisibilityConverter}, ConverterParameter=dot:2}" />
         </Grid>
 
+        <!-- Digit 7 -->
         <controls:SevenSegmentDigit Digit="{Binding TimeInput, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource TimeInputDigitConverter}, ConverterParameter=2}" />
 
         <Grid Width="18" Height="120" Margin="10,0,10,0">
@@ -37,6 +65,7 @@
             <Ellipse Width="10" Height="10" Fill="#FFF6E600" VerticalAlignment="Bottom" Margin="0,0,0,20" HorizontalAlignment="Center" Visibility="{Binding TimeInput, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource TimeInputSeparatorVisibilityConverter}, ConverterParameter=dot:3}" />
         </Grid>
 
+        <!-- Digit 8 -->
         <controls:SevenSegmentDigit Margin="6,0,0,0" Digit="{Binding TimeInput, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource TimeInputDigitConverter}, ConverterParameter=3}" />
 
         <Grid Width="18" Height="120" Margin="10,0,10,0">
@@ -45,6 +74,7 @@
             <Ellipse Width="10" Height="10" Fill="#FFF6E600" VerticalAlignment="Bottom" Margin="0,0,0,20" HorizontalAlignment="Center" Visibility="{Binding TimeInput, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource TimeInputSeparatorVisibilityConverter}, ConverterParameter=dot:4}" />
         </Grid>
 
+        <!-- Digit 9 -->
         <controls:SevenSegmentDigit Digit="{Binding TimeInput, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource TimeInputDigitConverter}, ConverterParameter=4}" />
 
         <Grid Width="18" Height="120" Margin="10,0,10,0">
@@ -53,6 +83,7 @@
             <Ellipse Width="10" Height="10" Fill="#FFF6E600" VerticalAlignment="Bottom" Margin="0,0,0,20" HorizontalAlignment="Center" Visibility="{Binding TimeInput, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource TimeInputSeparatorVisibilityConverter}, ConverterParameter=dot:5}" />
         </Grid>
 
+        <!-- Digit 10 (hundredths) -->
         <controls:SevenSegmentDigit Margin="6,0,0,0" Digit="{Binding TimeInput, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource TimeInputDigitConverter}, ConverterParameter=5}" />
     </StackPanel>
 </UserControl>
