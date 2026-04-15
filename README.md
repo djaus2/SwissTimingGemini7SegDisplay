@@ -1,8 +1,12 @@
 # Swiss Timing 6 Digit 7 Segment Display
 
 > Nb: Under development  
-> Latest: Null modem cable across 2 INT131 enables sent time to be displayed in 7 seg display, without colon and dot between digits.  
+> Latest: Null modem cable across 2 INT131 enables sent time to be displayed in 7 seg display, without colon and dot between digits.
+> 6 Digit diplay implemented. Working on 3 + 6 digit display.  
 > Next: Test with actual display.
+
+ <img width="670" height="466" alt="image" src="https://github.com/user-attachments/assets/97eaf5da-db7e-40c1-b3d6-943201e157c1" />
+
 
 ## About
 This is a WPF app that can generate display timing messages for a Gemini 6 Digit 7 segment display, functionimg for example, as a running clock or elapsed race time for Athletics events. Messages are sent via the selected Serial-Send port.
