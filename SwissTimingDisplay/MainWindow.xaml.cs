@@ -76,6 +76,7 @@ namespace SwissTimingDisplay
 
             UpdateRaceTimerButtonContent();
             UpdateWallClockEnabledState();
+            UpdateNumDigitsEnabledState();
             UpdateSendEnabledState();
             UpdateRaceTimerEnabledState();
         }
@@ -202,12 +203,14 @@ namespace SwissTimingDisplay
         private void UseWallClock_Checked(object sender, RoutedEventArgs e)
         {
             UpdateWallClockEnabledState();
+            UpdateNumDigitsEnabledState();
             UpdateSendEnabledState();
         }
 
         private void UseWallClock_Unchecked(object sender, RoutedEventArgs e)
         {
             UpdateWallClockEnabledState();
+            UpdateNumDigitsEnabledState();
             UpdateSendEnabledState();
         }
 
@@ -234,6 +237,7 @@ namespace SwissTimingDisplay
 
                 UpdateRaceTimerButtonContent();
                 UpdateWallClockEnabledState();
+                UpdateNumDigitsEnabledState();
                 UpdateSendEnabledState();
 
                 return;
@@ -250,6 +254,7 @@ namespace SwissTimingDisplay
 
                 UpdateRaceTimerButtonContent();
                 UpdateWallClockEnabledState();
+                UpdateNumDigitsEnabledState();
                 UpdateSendEnabledState();
 
                 return;
@@ -264,6 +269,7 @@ namespace SwissTimingDisplay
 
             UpdateRaceTimerButtonContent();
             UpdateWallClockEnabledState();
+            UpdateNumDigitsEnabledState();
             UpdateSendEnabledState();
         }
 
@@ -283,6 +289,7 @@ namespace SwissTimingDisplay
             }
             UpdateRaceTimerButtonContent();
             UpdateWallClockEnabledState();
+            UpdateNumDigitsEnabledState();
             UpdateSendEnabledState();
         }
 
@@ -317,6 +324,16 @@ namespace SwissTimingDisplay
 
             // Enabled only when race timer button is showing "Start".
             cbUseWallClock.IsEnabled = content == "Start";
+        }
+
+        private void UpdateNumDigitsEnabledState()
+        {
+            if (cbNumDigits is null)
+            {
+                return;
+            }
+
+            cbNumDigits.IsEnabled = !_raceIsRunning && !_raceHasStartedSinceReset;
         }
 
         private void UpdateSendEnabledState()
@@ -357,6 +374,7 @@ namespace SwissTimingDisplay
 
             UpdateRaceTimerButtonContent();
             UpdateWallClockEnabledState();
+            UpdateNumDigitsEnabledState();
             UpdateSendEnabledState();
         }
 
