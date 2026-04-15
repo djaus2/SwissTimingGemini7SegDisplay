@@ -10,23 +10,26 @@
     <UserControl.Resources>
         <converters:TimeInputDigitConverter x:Key="TimeInputDigitConverter" />
         <converters:TimeInputSeparatorVisibilityConverter x:Key="TimeInputSeparatorVisibilityConverter" />
+        <converters:BibNoDigitConverter x:Key="BibNoDigitConverter" />
     </UserControl.Resources>
 
     <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
-        <!-- Digit 0 (unused/blank) -->
-        <controls:SevenSegmentDigit Digit="-1" />
+        <!-- Digit 0 (BibNo hundreds) -->
+        <controls:SevenSegmentDigit Digit="{Binding BibNoInput, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BibNoDigitConverter}, ConverterParameter=0}" />
 
         <Grid Width="18" Height="120" Margin="10,0,10,0" />
 
-        <!-- Digit 1 (unused/blank) -->
-        <controls:SevenSegmentDigit Margin="6,0,0,0" Digit="-1" />
+        <!-- Digit 1 (BibNo tens) -->
+        <controls:SevenSegmentDigit Margin="6,0,0,0" Digit="{Binding BibNoInput, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BibNoDigitConverter}, ConverterParameter=1}" />
 
         <Grid Width="18" Height="120" Margin="10,0,10,0" />
 
-        <!-- Digit 2 (unused/blank) -->
-        <controls:SevenSegmentDigit Digit="-1" />
+        <!-- Digit 2 (BibNo ones) -->
+        <controls:SevenSegmentDigit Digit="{Binding BibNoInput, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BibNoDigitConverter}, ConverterParameter=2}" />
 
-        <Grid Width="18" Height="120" Margin="10,0,10,0" />
+        <Grid Width="18" Height="120" Margin="10,0,10,0">
+            <Ellipse Width="10" Height="10" Fill="#FFF6E600" VerticalAlignment="Bottom" Margin="0,0,0,20" HorizontalAlignment="Center" Visibility="{Binding BibNoInput, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource TimeInputSeparatorVisibilityConverter}, ConverterParameter=dot:3}" />
+        </Grid>
 
         <!-- Digit 3 (hidden, takes space) -->
         <controls:SevenSegmentDigit Margin="6,0,0,0" Digit="-1" Visibility="Hidden" />

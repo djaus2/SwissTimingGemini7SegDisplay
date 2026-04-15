@@ -2,7 +2,8 @@
 
 > Nb: Under development  
 > Latest: Null modem cable across 2 INT131 enables sent time to be displayed in 7 seg display, without colon and dot between digits.
-> 6 Digit diplay implemented. Working on 3 + 6 digit display.  
+> 6 Digit diplay implemented.  
+> 3 + 6 digit display option now works.    
 > Next: Test with actual display.
 
  <img width="670" height="466" alt="image" src="https://github.com/user-attachments/assets/97eaf5da-db7e-40c1-b3d6-943201e157c1" />
@@ -28,7 +29,10 @@ The capability for receiving messages as sent and displaying the received times 
     - If selected then HHMMSS/MMSSDD checkbox shows which determines the displayed time format:
       - HHMMSS/MMSSDD selection determines what separators show on the receive display.
       - Note that selecting Wallclock triggers this to select HHMMSS. 
-- Selected ports are now persisted.
+- Selected ports are now persisted as well as other app settings
+- 3 + 6 Digit display now works.
+  - 3 left most digits can display Bib Number, Event No or Lap Count etc. 
+  - Note that the 3 digit display is not intended for use with the Gemini 6 Digit Gemini display.
 
 ## Hint
 For testing using one INT31:

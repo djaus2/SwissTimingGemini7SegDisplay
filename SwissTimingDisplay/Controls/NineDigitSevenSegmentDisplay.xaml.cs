@@ -17,6 +17,18 @@ namespace SwissTimingDisplay.Controls
             set => SetValue(TimeInputProperty, value);
         }
 
+        public static readonly DependencyProperty BibNoInputProperty = DependencyProperty.Register(
+            nameof(BibNoInput),
+            typeof(string),
+            typeof(NineDigitSevenSegmentDisplay),
+            new PropertyMetadata(string.Empty));
+
+        public string BibNoInput
+        {
+            get => (string)GetValue(BibNoInputProperty);
+            set => SetValue(BibNoInputProperty, value);
+        }
+
         public NineDigitSevenSegmentDisplay()
         {
             InitializeComponent();

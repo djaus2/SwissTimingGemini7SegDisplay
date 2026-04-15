@@ -44,6 +44,9 @@ namespace SwissTimingDisplay.ViewModels
         private bool _useWallClockTimeOfDay = false;
         private bool _anchorDisplay = false;
         private string _bibNo = "";
+        private int _bibNoInt = -1;
+        private string _recvBibNoStr = "   ";
+        private int _recvBibNoInt = -1;
         private string _status = "";
         private DisplayMode _displayMode = DisplayMode.MMSSDD;
         private bool _cosmetic = false;
@@ -72,6 +75,10 @@ namespace SwissTimingDisplay.ViewModels
 
             SendConnectToggleCommand = new RelayCommand(ToggleSendConnection, () => (!string.IsNullOrWhiteSpace(SelectedSendPortName) && !IsConnected) || IsConnected);
             ReceiveConnectToggleCommand = new RelayCommand(ToggleReceiveConnection, () => (!string.IsNullOrWhiteSpace(SelectedReceivePortName) && !IsReceiveConnected) || IsReceiveConnected);
+
+            BibNoDecrementCommand = new RelayCommand(() => BibNoInt--, () => BibNoInt > 0);
+            BibNoIncrementCommand = new RelayCommand(() => BibNoInt++, () => BibNoInt < 999);
+            BibNoClearCommand = new RelayCommand(() => BibNo = string.Empty, () => BibNoInt >= 0);
 
             TcpCommands = new ObservableCollection<TcpCommand>(Enum.GetValues<TcpCommand>());
             SelectedTcpCommand = TcpCommands.FirstOrDefault();
@@ -272,6 +279,7 @@ namespace SwissTimingDisplay.ViewModels
                     OnPropertyChanged(nameof(ShowCosmeticOptions));
                     OnPropertyChanged(nameof(ShowDisplayModeOptions));
                     OnPropertyChanged(nameof(DisplayTime));
+                    OnPropertyChanged(nameof(BibNoInputForDisplay));
                 }
             }
         }
@@ -437,7 +445,83 @@ namespace SwissTimingDisplay.ViewModels
         public string BibNo
         {
             get => _bibNo;
-            set => Set(ref _bibNo, value);
+            set
+            {
+                if (Set(ref _bibNo, value))
+                {
+                    if (string.IsNullOrWhiteSpace(value))
+                    {
+                        Set(ref _bibNoInt, -1, nameof(BibNoInt));
+                    }
+                    else if (int.TryParse(value, out var n) && n >= 0 && n <= 999)
+                    {
+                        Set(ref _bibNoInt, n, nameof(BibNoInt));
+                    }
+
+                    OnPropertyChanged(nameof(BibNoDisplay));
+                }
+            }
+        }
+
+        public string BibNoDisplay => _bibNoInt < 0 ? string.Empty : _bibNoInt.ToString("D3") + ".";
+
+        public string BibNoInputForDisplay
+        {
+            get
+            {
+                if (IsReceiveConnected)
+                {
+                    return _recvBibNoInt >= 0 ? _recvBibNoInt.ToString("D3") + "." : string.Empty;
+                }
+                return BibNoDisplay;
+            }
+        }
+
+        public string RecvBibNoStr
+        {
+            get => _recvBibNoStr;
+            set
+            {
+                if (Set(ref _recvBibNoStr, value))
+                {
+                    if (string.IsNullOrWhiteSpace(value) || value.Trim().Length == 0)
+                    {
+                        _recvBibNoInt = -1;
+                        OnPropertyChanged(nameof(RecvBibNoInt));
+                        OnPropertyChanged(nameof(BibNoInputForDisplay));
+                    }
+                    else if (int.TryParse(value.Trim(), out var n) && n >= 0 && n <= 999)
+                    {
+                        _recvBibNoInt = n;
+                        OnPropertyChanged(nameof(RecvBibNoInt));
+                        OnPropertyChanged(nameof(BibNoInputForDisplay));
+                    }
+                }
+            }
+        }
+
+        public int RecvBibNoInt
+        {
+            get => _recvBibNoInt;
+        }
+
+        public int BibNoInt
+        {
+            get => _bibNoInt;
+            set
+            {
+                var clamped = value < -1 ? -1 : (value > 999 ? 999 : value);
+                if (Set(ref _bibNoInt, clamped, nameof(BibNoInt)))
+                {
+                    _bibNo = clamped == -1 ? string.Empty : clamped.ToString();
+                    OnPropertyChanged(nameof(BibNo));
+                    OnPropertyChanged(nameof(BibNoDisplay));
+                    OnPropertyChanged(nameof(BibNoInputForDisplay));
+                    BibNoDecrementCommand.RaiseCanExecuteChanged();
+                    BibNoIncrementCommand.RaiseCanExecuteChanged();
+                    BibNoClearCommand.RaiseCanExecuteChanged();
+                }
+            }
         }
 
         public string Status
@@ -454,6 +538,10 @@ namespace SwissTimingDisplay.ViewModels
         public RelayCommand SendConnectToggleCommand { get; }
 
         public RelayCommand ReceiveConnectToggleCommand { get; }
+
+        public RelayCommand BibNoDecrementCommand { get; }
+        public RelayCommand BibNoIncrementCommand { get; }
+        public RelayCommand BibNoClearCommand { get; }
 
         public void RefreshPorts()
         {
@@ -759,6 +847,13 @@ namespace SwissTimingDisplay.ViewModels
         private void RollerTimeofDayorRunningTime(IReadOnlyList<char> chars)
         {
             TimeInputIn = new string(chars.ToArray());
+
+            // Extract BibNo (NNN) - should be at indices 6-8 after TIME (6 bytes)
+            if (chars.Count >= 9)
+            {
+                var bibNoChars = chars.Skip(6).Take(3).ToArray();
+                RecvBibNoStr = new string(bibNoChars);
+            }
         }
 
         public async Task SendAsync()

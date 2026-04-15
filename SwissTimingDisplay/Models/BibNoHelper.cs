@@ -17,9 +17,9 @@ namespace SwissTimingDisplay.Models
                 throw new FormatException("Bib No. must be a number.");
             }
 
-            if (bib < 1 || bib > 999)
+            if (bib < -1 || bib > 999)
             {
-                throw new FormatException("Bib No. must be between 1 and 999.");
+                throw new FormatException("Bib No. must be between -1 and 999.");
             }
 
             return bib.ToString("000", CultureInfo.InvariantCulture);

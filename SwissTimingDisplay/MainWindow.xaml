@@ -159,9 +159,14 @@
 
                     <TextBox x:Name="tbTimeIn" Grid.Row="5" Grid.Column="0" MinWidth="220" Text="{Binding TimeInputIn, UpdateSourceTrigger=PropertyChanged}" />
 
-                    <TextBlock Grid.Row="6" Grid.Column="0" Margin="0,12,0,6" Text="Bib No. (1-999)" />
-                    <StackPanel Grid.Row="7" Grid.Column="0" Orientation="Vertical">
-                        <TextBox MinWidth="180" Text="{Binding BibNo, UpdateSourceTrigger=PropertyChanged}" />
+                    <TextBlock Grid.Row="6" Grid.Column="0" Margin="0,12,0,6" Text="Send Bib No/Lap (0-999)            -             Recv Bib No/Lap (0-999) " />
+                    <StackPanel Grid.Row="7" Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                        <RepeatButton Margin="0,0,4,0" Padding="8,4" Content="−" Command="{Binding BibNoDecrementCommand}" />
+                        <TextBox MinWidth="60" VerticalAlignment="Center" TextAlignment="Center" Text="{Binding BibNo, UpdateSourceTrigger=PropertyChanged}" FontWeight="SemiBold" FontSize="14" />
+                        <RepeatButton Margin="4,0,0,0" Padding="8,4" Content="+" Command="{Binding BibNoIncrementCommand}" />
+                        <Button Margin="12,0,0,0" Padding="8,4" Content="Clear" Command="{Binding BibNoClearCommand}" />
+                        <TextBlock Margin="12,0,0,0" VerticalAlignment="Center" Text="Recv:" />
+                        <TextBox MinWidth="60" MaxWidth="80" VerticalAlignment="Center" TextAlignment="Center" Text="{Binding RecvBibNoStr}" IsReadOnly="True" FontWeight="SemiBold" FontSize="14" Background="#FFEFEFEF" />
                     </StackPanel>
                 </Grid>
             </GroupBox>
@@ -181,7 +186,7 @@
                                 </Style>
                             </controls:SixDigitSevenSegmentDisplay.Style>
                         </controls:SixDigitSevenSegmentDisplay>
-                        <controls:NineDigitSevenSegmentDisplay TimeInput="{Binding DisplayTime}">
+                        <controls:NineDigitSevenSegmentDisplay TimeInput="{Binding DisplayTime}" BibNoInput="{Binding BibNoInputForDisplay}">
                             <controls:NineDigitSevenSegmentDisplay.Style>
                                 <Style TargetType="controls:NineDigitSevenSegmentDisplay">
                                     <Setter Property="Visibility" Value="Collapsed" />
@@ -213,7 +218,7 @@
                             </Style>
                         </controls:SixDigitSevenSegmentDisplay.Style>
                     </controls:SixDigitSevenSegmentDisplay>
-                    <controls:NineDigitSevenSegmentDisplay TimeInput="{Binding DisplayTime}">
+                    <controls:NineDigitSevenSegmentDisplay TimeInput="{Binding DisplayTime}" BibNoInput="{Binding BibNoInputForDisplay}">
                         <controls:NineDigitSevenSegmentDisplay.Style>
                             <Style TargetType="controls:NineDigitSevenSegmentDisplay">
                                 <Setter Property="Visibility" Value="Collapsed" />
