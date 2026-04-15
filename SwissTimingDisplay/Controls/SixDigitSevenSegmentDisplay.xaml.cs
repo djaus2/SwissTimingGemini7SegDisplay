@@ -3,19 +3,13 @@ using System.Windows.Controls;
 
 namespace SwissTimingDisplay.Controls
 {
-    public partial class SevenSegmentDisplay : UserControl
+    public partial class SixDigitSevenSegmentDisplay : UserControl
     {
         public static readonly DependencyProperty TimeInputProperty = DependencyProperty.Register(
             nameof(TimeInput),
             typeof(string),
-            typeof(SevenSegmentDisplay),
+            typeof(SixDigitSevenSegmentDisplay),
             new PropertyMetadata(string.Empty));
-
-        public static readonly DependencyProperty NumDigitsProperty = DependencyProperty.Register(
-            nameof(NumDigits),
-            typeof(int),
-            typeof(SevenSegmentDisplay),
-            new PropertyMetadata(6));
 
         public string TimeInput
         {
@@ -23,13 +17,7 @@ namespace SwissTimingDisplay.Controls
             set => SetValue(TimeInputProperty, value);
         }
 
-        public int NumDigits
-        {
-            get => (int)GetValue(NumDigitsProperty);
-            set => SetValue(NumDigitsProperty, value);
-        }
-
-        public SevenSegmentDisplay()
+        public SixDigitSevenSegmentDisplay()
         {
             InitializeComponent();
         }

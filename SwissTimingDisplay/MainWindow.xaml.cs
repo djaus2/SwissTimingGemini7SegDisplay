@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -19,10 +20,13 @@ namespace SwissTimingDisplay
         private readonly MainViewModel _vm = new MainViewModel();
 
         private readonly DispatcherTimer _raceTimer;
+        private readonly Stopwatch _raceStopwatch = new Stopwatch();
         private bool _raceIsRunning = false;
         private TimeSpan _raceElapsed = TimeSpan.Zero;
         private bool _sendWallClockWhileRunning = false;
         private bool _raceHasStartedSinceReset = false;
+        private bool _autoSendInProgress = false;
+        private static readonly TimeSpan RaceTimerInterval = TimeSpan.FromMilliseconds(200);
 
         public MainWindow()
         {
@@ -36,9 +40,9 @@ namespace SwissTimingDisplay
 
             _raceTimer = new DispatcherTimer
             {
-                Interval = TimeSpan.FromSeconds(1),
+                Interval = RaceTimerInterval,
             };
-            _raceTimer.Tick += async (_, _) =>
+            _raceTimer.Tick += (_, _) =>
             {
                 if (!_raceIsRunning)
                 {
@@ -51,7 +55,7 @@ namespace SwissTimingDisplay
                 }
                 else
                 {
-                    _raceElapsed = _raceElapsed.Add(TimeSpan.FromSeconds(1));
+                    _raceElapsed = _raceStopwatch.Elapsed;
                     UpdateTimeInputFromRaceElapsed();
                 }
 
@@ -66,8 +70,7 @@ namespace SwissTimingDisplay
                 }
 
                 var payload = BuildExpandedPayload(_vm.SelectedTcpCommand, charCommands, _sendWallClockWhileRunning);
-                await _vm.SendRawAsync(payload);
-                _vm.Status = $"Auto-sent {payload.Length} byte(s).";
+                BeginAutoSend(payload);
             };
             _raceTimer.Start();
 
@@ -221,21 +224,30 @@ namespace SwissTimingDisplay
             if (_raceIsRunning)
             {
                 _raceIsRunning = false;
+                _raceStopwatch.Stop();
+                if (!_sendWallClockWhileRunning)
+                {
+                    _raceElapsed = _raceStopwatch.Elapsed;
+                    UpdateTimeInputFromRaceElapsed();
+                }
                 _vm.Status = "Race timer stopped.";
 
                 UpdateRaceTimerButtonContent();
                 UpdateWallClockEnabledState();
                 UpdateSendEnabledState();
+
                 return;
             }
 
             if (_raceHasStartedSinceReset)
             {
+                _raceStopwatch.Reset();
                 _raceElapsed = TimeSpan.Zero;
                 _sendWallClockWhileRunning = false;
                 _raceHasStartedSinceReset = false;
                 UpdateTimeInputFromRaceElapsed();
                 _vm.Status = "Race timer reset.";
+
                 UpdateRaceTimerButtonContent();
                 UpdateWallClockEnabledState();
                 UpdateSendEnabledState();
@@ -244,10 +256,12 @@ namespace SwissTimingDisplay
             }
 
             _raceIsRunning = true;
+            _raceStopwatch.Start();
             _sendWallClockWhileRunning = _vm.UseWallClockTimeOfDay;
             _raceHasStartedSinceReset = true;
             UpdateTimeInputFromRaceElapsed();
             _vm.Status = "Race timer started.";
+
             UpdateRaceTimerButtonContent();
             UpdateWallClockEnabledState();
             UpdateSendEnabledState();
@@ -261,6 +275,12 @@ namespace SwissTimingDisplay
             }
 
             _raceIsRunning = false;
+            _raceStopwatch.Stop();
+            if (!_sendWallClockWhileRunning)
+            {
+                _raceElapsed = _raceStopwatch.Elapsed;
+                UpdateTimeInputFromRaceElapsed();
+            }
             UpdateRaceTimerButtonContent();
             UpdateWallClockEnabledState();
             UpdateSendEnabledState();
@@ -329,13 +349,37 @@ namespace SwissTimingDisplay
         private void ResetRaceTimerState()
         {
             _raceIsRunning = false;
+            _raceStopwatch.Reset();
             _raceElapsed = TimeSpan.Zero;
             _sendWallClockWhileRunning = false;
             _raceHasStartedSinceReset = false;
             UpdateTimeInputFromRaceElapsed();
+
             UpdateRaceTimerButtonContent();
             UpdateWallClockEnabledState();
             UpdateSendEnabledState();
+        }
+
+        private async void BeginAutoSend(byte[] payload)
+        {
+            if (_autoSendInProgress)
+            {
+                return;
+            }
+
+            _autoSendInProgress = true;
+            try
+            {
+                await _vm.SendRawAsync(payload);
+            }
+            catch (Exception ex)
+            {
+                _vm.Status = ex.Message;
+            }
+            finally
+            {
+                _autoSendInProgress = false;
+            }
         }
 
         private void UpdateTimeInputFromRaceElapsed()
@@ -343,6 +387,8 @@ namespace SwissTimingDisplay
             var hours = (int)_raceElapsed.TotalHours;
             var minutes = _raceElapsed.Minutes;
             var seconds = _raceElapsed.Seconds;
+            var tenths = _raceElapsed.Milliseconds / 100;
+            var hundredths = (_raceElapsed.Milliseconds / 10) % 100;
 
             if (hours > 0)
             {
@@ -351,7 +397,7 @@ namespace SwissTimingDisplay
                     hours = 9;
                 }
 
-                _vm.TimeInput = $"{hours}:{minutes:00}:{seconds:00}.0";
+                _vm.TimeInput = $"{hours}:{minutes:00}:{seconds:00}.{tenths}";
                 return;
             }
 
@@ -361,7 +407,7 @@ namespace SwissTimingDisplay
                 totalMinutes = 99;
             }
 
-            _vm.TimeInput = $"{totalMinutes:00}:{seconds:00}.00";
+            _vm.TimeInput = $"{totalMinutes:00}:{seconds:00}.{hundredths:00}";
         }
 
         private byte[] BuildExpandedPayload(TcpCommand cmd, System.Collections.Generic.IReadOnlyList<CharCommand> charCommands, bool useWallClockTimeOfDay)

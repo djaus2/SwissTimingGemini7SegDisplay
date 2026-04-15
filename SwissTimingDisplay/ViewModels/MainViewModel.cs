@@ -47,6 +47,7 @@ namespace SwissTimingDisplay.ViewModels
         private string _status = "";
         private DisplayMode _displayMode = DisplayMode.MMSSDD;
         private bool _cosmetic = false;
+        private int _numDigits = 6;
         private bool _isReceiveConnected;
         private string? _connectedReceivePortName;
         private bool _isUpdatingPortLists;
@@ -251,6 +252,7 @@ namespace SwissTimingDisplay.ViewModels
             {
                 if (Set(ref _onlyProlific, value))
                 {
+                    SavePersistedPortNames();
                     RefreshPorts();
                 }
             }
@@ -308,18 +310,19 @@ namespace SwissTimingDisplay.ViewModels
         {
             get
             {
-                if (!IsReceiveConnected)
-                {
-                    return TimeInput;
-                }
+                var raw = TimeInput ?? string.Empty;
+                var digits = new string(raw.Where(char.IsDigit).ToArray());
 
                 if (!Cosmetic)
                 {
-                    return TimeInputIn;
+                    if (UseWallClockTimeOfDay)
+                    {
+                        return raw;
+                    }
+
+                    return digits;
                 }
 
-                var raw = TimeInputIn ?? string.Empty;
-                var digits = new string(raw.Where(char.IsDigit).ToArray());
                 if (digits.Length < 6)
                 {
                     return raw;
@@ -327,7 +330,9 @@ namespace SwissTimingDisplay.ViewModels
 
                 digits = digits[..6];
 
-                if (DisplayMode == DisplayMode.HHMMSS)
+                var effectiveDisplayMode = UseWallClockTimeOfDay ? DisplayMode.HHMMSS : DisplayMode;
+
+                if (effectiveDisplayMode == DisplayMode.HHMMSS)
                 {
                     return $"{digits.Substring(0, 2)}:{digits.Substring(2, 2)}:{digits.Substring(4, 2)}";
                 }
@@ -349,9 +354,9 @@ namespace SwissTimingDisplay.ViewModels
             }
         }
 
-        public bool ShowCosmeticOptions => IsReceiveConnected;
+        public bool ShowCosmeticOptions => true;
 
-        public bool ShowDisplayModeOptions => IsReceiveConnected && Cosmetic;
+        public bool ShowDisplayModeOptions => Cosmetic;
 
         public DisplayMode DisplayMode
         {
@@ -386,6 +391,10 @@ namespace SwissTimingDisplay.ViewModels
                     {
                         DisplayMode = DisplayMode.HHMMSS;
                     }
+
+                    OnPropertyChanged(nameof(DisplayTime));
+                    OnPropertyChanged(nameof(DisplayModeLabel));
+                    OnPropertyChanged(nameof(IsDisplayModeHHMMSS));
                 }
             }
         }
@@ -393,8 +402,37 @@ namespace SwissTimingDisplay.ViewModels
         public bool AnchorDisplay
         {
             get => _anchorDisplay;
-            set => Set(ref _anchorDisplay, value);
+            set
+            {
+                if (Set(ref _anchorDisplay, value))
+                {
+                    SavePersistedPortNames();
+                }
+            }
         }
+
+        public int NumDigits
+        {
+            get => _numDigits;
+            set
+            {
+                var normalized = value == 9 ? 9 : 6;
+                if (Set(ref _numDigits, normalized))
+                {
+                    OnPropertyChanged(nameof(IsNumDigits9));
+                    OnPropertyChanged(nameof(NumDigitsLabel));
+                    SavePersistedPortNames();
+                }
+            }
+        }
+
+        public bool IsNumDigits9
+        {
+            get => NumDigits == 9;
+            set => NumDigits = value ? 9 : 6;
+        }
+
+        public string NumDigitsLabel => $"Digits: {NumDigits}";
 
         public string BibNo
         {
@@ -757,6 +795,9 @@ namespace SwissTimingDisplay.ViewModels
         {
             public string? SendPortName { get; set; }
             public string? ReceivePortName { get; set; }
+            public bool OnlyProlific { get; set; } = true;
+            public bool AnchorDisplay { get; set; }
+            public int NumDigits { get; set; } = 6;
         }
 
         private void LoadPersistedPortNames()
@@ -774,6 +815,10 @@ namespace SwissTimingDisplay.ViewModels
                 {
                     return;
                 }
+
+                OnlyProlific = settings.OnlyProlific;
+                AnchorDisplay = settings.AnchorDisplay;
+                NumDigits = settings.NumDigits;
 
                 if (!string.IsNullOrWhiteSpace(settings.SendPortName))
                 {
@@ -799,6 +844,9 @@ namespace SwissTimingDisplay.ViewModels
                 {
                     SendPortName = SelectedSendPortName,
                     ReceivePortName = SelectedReceivePortName,
+                    OnlyProlific = OnlyProlific,
+                    AnchorDisplay = AnchorDisplay,
+                    NumDigits = NumDigits,
                 };
 
                 var json = JsonSerializer.Serialize(settings);

@@ -34,6 +34,7 @@
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
@@ -43,6 +44,7 @@
             <CheckBox x:Name="cbAnchorDisplay" Grid.Column="3" Margin="12,0,0,0" VerticalAlignment="Center" Content="Anchor Display" IsChecked="{Binding AnchorDisplay}" />
             <CheckBox Grid.Column="4" Margin="12,0,0,0" VerticalAlignment="Center" Content="Cosmetic" IsChecked="{Binding Cosmetic}" Visibility="{Binding ShowCosmeticOptions, Converter={StaticResource BooleanToVisibilityConverter}}" />
             <CheckBox Grid.Column="5" Margin="12,0,0,0" VerticalAlignment="Center" Content="{Binding DisplayModeLabel}" IsChecked="{Binding IsDisplayModeHHMMSS}" IsEnabled="{Binding Cosmetic}" Visibility="{Binding ShowDisplayModeOptions, Converter={StaticResource BooleanToVisibilityConverter}}" />
+            <CheckBox Grid.Column="6" Margin="12,0,0,0" VerticalAlignment="Center" Content="{Binding NumDigitsLabel}" IsChecked="{Binding IsNumDigits9}" />
         </Grid>
 
         <GroupBox Grid.Row="2" Margin="0,12,0,0" Header="Serial">
@@ -166,14 +168,14 @@
 
             <Border x:Name="rightSevenSegBorder" Grid.Column="1" Margin="12,0,0,0" BorderBrush="#FFCC0000" BorderThickness="3" CornerRadius="4" Background="Black" Padding="10" VerticalAlignment="Stretch" Visibility="Collapsed">
                 <Viewbox x:Name="rightSevenSegViewbox" Stretch="Uniform" StretchDirection="Both" HorizontalAlignment="Center" VerticalAlignment="Center">
-                    <controls:SevenSegmentDisplay x:Name="rightSevenSegContent" TimeInput="{Binding DisplayTime}" />
+                    <controls:SevenSegmentDisplay x:Name="rightSevenSegContent" TimeInput="{Binding DisplayTime}" NumDigits="{Binding NumDigits}" />
                 </Viewbox>
             </Border>
         </Grid>
 
         <Border x:Name="bottomSevenSegBorder" Grid.Row="4" Margin="0,12,0,0" BorderBrush="#FFCC0000" BorderThickness="3" CornerRadius="4" Background="Black" Padding="10" HorizontalAlignment="Left" Visibility="Visible">
             <Viewbox x:Name="bottomSevenSegViewbox" Stretch="None" StretchDirection="Both" HorizontalAlignment="Left" VerticalAlignment="Center">
-                <controls:SevenSegmentDisplay x:Name="bottomSevenSegContent" TimeInput="{Binding DisplayTime}" />
+                <controls:SevenSegmentDisplay x:Name="bottomSevenSegContent" TimeInput="{Binding DisplayTime}" NumDigits="{Binding NumDigits}" />
             </Viewbox>
         </Border>
 
