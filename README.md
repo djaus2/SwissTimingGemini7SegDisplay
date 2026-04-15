@@ -1,7 +1,7 @@
 # Swiss Timing 6 Digit (or 3 + 6 Digit) 7 Segment Display
 
 > Nb: Under development  
-> Latest: Null modem cable across 2 INT131 enables sent time to be displayed in 7 seg display, without colon and dot between digits.
+> Latest: Null modem cable across 2 INT131 enables sent time to be displayed in 7 seg display, with/without colon and dot between digits.
 > 6 Digit diplay implemented.  
 > 3 + 6 digit display option now works.    
 > Next: Test with actual display.
