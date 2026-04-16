@@ -1,5 +1,7 @@
 # Swiss Timing 6 Digit (or 3 + 6 Digit) 7 Segment Display
 
+## Version: 1.0.0
+
 > Nb: Under development  
 > Latest: Null modem cable across 2 INT131 enables sent time to be displayed in 7 seg display, with/without colon and dot between digits.
 > 6 Digit diplay implemented.  
@@ -36,6 +38,7 @@ The capability for receiving messages as sent and displaying the received times 
 - Added [Lap]/[Continue] button that captures race elapsed time whilst clock continues in background. Can continue.
   - Also have lap up and down count options
 - If both persisted COM ports exist autoconnect.
+- Clear timing button added and resolved.
 
 ## Hint
 For testing using one INT31:
