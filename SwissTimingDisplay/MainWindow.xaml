@@ -139,12 +139,11 @@
                               SelectedItem="{Binding SelectedTcpCommand}" />
 
                     <StackPanel Grid.Row="1" Grid.Column="1" Margin="12,0,0,0" Orientation="Horizontal">
-                        <Button x:Name="btnSend" Padding="10,4" Content="Send" Click="Button_Click" />
+                        <Button x:Name="btnSendClear" Padding="10,4" Content="Send Clear" Click="SendClearButton_Click" />
+                        <Button x:Name="btnSend" Margin="8,0,0,0" Padding="10,4" Content="Send" Click="Button_Click" />
                         <Button x:Name="btnRaceTimer" Margin="8,0,0,0" Padding="10,4" Content="Start" Click="RaceTimerButton_Click" />
                         <Button x:Name="btnLapContinue" Margin="8,0,0,0" Padding="10,4" Content="Lap" Click="LapContinueButton_Click" Visibility="Collapsed" />
                     </StackPanel>
-
-                    <Button x:Name="btnSendClear" Grid.Row="1" Grid.Column="1" Margin="12,35,0,0" Padding="10,4" Content="Send Clear" Click="SendClearButton_Click" HorizontalAlignment="Left" />
 
                     <TextBlock Grid.Row="2" Grid.Column="0" Margin="0,12,0,6" Text="Time Out" />
                     <TextBox x:Name="tbTime" Grid.Row="3" Grid.Column="0" MinWidth="220" Text="{Binding TimeInput, UpdateSourceTrigger=PropertyChanged}">

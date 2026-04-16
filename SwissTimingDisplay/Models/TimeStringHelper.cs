@@ -33,7 +33,7 @@ namespace SwissTimingDisplay.Models
         {
             if (string.IsNullOrWhiteSpace(input))
             {
-                throw new FormatException("Time value is empty.");
+                return new ParsedTime(TimeKind.RunningTime, "000000", "00:00.00");
             }
 
             var trimmed = input.Trim();
@@ -191,12 +191,20 @@ namespace SwissTimingDisplay.Models
 
         public static string ToTimeOfDayStandard(string sixDigits)
         {
+            if (string.IsNullOrWhiteSpace(sixDigits))
+            {
+                return "00:00:00";
+            }
             var digits = ToSixDigits(sixDigits);
             return $"{digits[..2]}:{digits.Substring(2, 2)}:{digits.Substring(4, 2)}";
         }
 
         public static string ToRunningTimeStandard(string sixDigits)
         {
+            if (string.IsNullOrWhiteSpace(sixDigits))
+            {
+                return "00:00.00";
+            }
             var digits = ToSixDigits(sixDigits);
             return $"{digits[..2]}:{digits.Substring(2, 2)}.{digits.Substring(4, 2)}";
         }

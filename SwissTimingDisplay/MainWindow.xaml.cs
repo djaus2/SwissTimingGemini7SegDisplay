@@ -653,12 +653,22 @@ namespace SwissTimingDisplay
                     }
                     else
                     {
-                        parsed = TimeStringHelper.ParseTimeInput(_vm.TimeInput);
-                        timeDigits = parsed.SixDigits;
-                        usedTimeStandard = parsed.Standard;
-                        timeKind = parsed.Kind;
+                        if (string.IsNullOrWhiteSpace(_vm.TimeInput))
+                        {
+                            timeDigits = "000000";
+                            usedTimeStandard = "00:00.00";
+                            timeKind = TimeStringHelper.TimeKind.RunningTime;
+                        }
+                        else
+                        {
+                            parsed = TimeStringHelper.ParseTimeInput(_vm.TimeInput);
+                            timeDigits = parsed.SixDigits;
+                            usedTimeStandard = parsed.Standard;
+                            timeKind = parsed.Kind;
+                        }
                     }
                 }
+
                 var bibDigits = BibNoHelper.ToThreeDigits(_vm.BibNo);
 
                 var expandedLiterals = charCommands.SelectMany(c =>
