@@ -36,6 +36,7 @@ The capability for receiving messages as sent and displaying the received times 
 - Added [Lap]/[Continue] button that captures race elapsed time whilst clock continues in background. Can continue.
   - Also have lap up and down count options
 - If both persisted COM ports exist autoconnect.
+
 ## Hint
 For testing using one INT31:
 - Connected INT131 to the PC USB port

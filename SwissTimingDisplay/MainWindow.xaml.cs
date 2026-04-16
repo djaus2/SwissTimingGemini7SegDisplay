@@ -710,18 +710,52 @@ namespace SwissTimingDisplay
                 {
                     var portName = _vm.ConnectedPortName ?? "(unknown)";
                     var send = MessageBoxResult.Yes;
-                    //MessageBox.Show(
-                    //    $"Send {expandedBytes.Length} byte(s) to {portName}?",
-                    //    "Send",
-                    //    MessageBoxButton.YesNo,
-                    //    MessageBoxImage.Question);
 
                     if (send == MessageBoxResult.Yes)
                     {
                         await _vm.SendRawAsync(expandedBytes);
                         _vm.Status = $"Sent {expandedBytes.Length} byte(s) to {portName}.";
+
+                        // Clear TimeOut on send side if this was a Clear command
+                        if (cmd == TcpCommand.RollerTimeModeClear)
+                        {
+                            _vm.TimeInput = string.Empty;
+                        }
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    ex.Message,
+                    "Error",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+            }
+        }
+
+        private async void SendClearButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (!_vm.IsConnected)
+            {
+                MessageBox.Show(
+                    "Send port not connected.",
+                    "Error",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
+                return;
+            }
+
+            try
+            {
+                var clearCommand = TcpCommandDefinitions.GetPayloadBytes(TcpCommand.RollerTimeModeClear).ToArray();
+                var portName = _vm.ConnectedPortName ?? "(unknown)";
+
+                await _vm.SendRawAsync(clearCommand);
+                _vm.Status = $"Sent {clearCommand.Length} byte(s) to {portName}.";
+
+                // Clear TimeOut on send side
+                _vm.TimeInput = string.Empty;
             }
             catch (Exception ex)
             {

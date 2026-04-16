@@ -71,6 +71,7 @@ namespace SwissTimingDisplay.ViewModels
 
         private string? _pendingPersistedSendPortName;
         private string? _pendingPersistedReceivePortName;
+        private bool _sentClearCommand = false;
 
         private readonly CollectionViewSource _sendPortsViewSource = new CollectionViewSource();
         private readonly CollectionViewSource _receivePortsViewSource = new CollectionViewSource();
@@ -253,6 +254,13 @@ namespace SwissTimingDisplay.ViewModels
 
         public Task SendRawAsync(byte[] payload)
         {
+            // Check if this is a clear command (STX + B + EOT/ETX)
+            // The payload contains the full frame including STX and EOT/ETX
+            if (payload.Length == 3 && payload[0] == (byte)CharCommand.STX && payload[1] == (byte)CharCommand.B)
+            {
+                _sentClearCommand = true;
+            }
+
             return _serialPortService.SendAsync(payload);
         }
 
@@ -328,7 +336,7 @@ namespace SwissTimingDisplay.ViewModels
         {
             get
             {
-                var raw = TimeInput ?? string.Empty;
+                var raw = IsReceiveConnected ? (TimeInputIn ?? string.Empty) : (TimeInput ?? string.Empty);
                 var digits = new string(raw.Where(char.IsDigit).ToArray());
 
                 if (!Cosmetic)
@@ -870,6 +878,27 @@ namespace SwissTimingDisplay.ViewModels
 
             if (cmd == CharCommand.B)
             {
+                // Clear command must be exactly 1 byte (B) after STX, before EOT/ETX
+                // Total frame: STX + B + EOT/ETX = 3 bytes, but frameBytes excludes STX and EOT/ETX
+                // So frameBytes should be exactly 1 byte (the command B)
+                if (frameBytes.Length != 1)
+                {
+                    Status = "Error: Clear command must be exactly 3 bytes (STX + B + EOT/ETX)";
+                    return;
+                }
+
+                // Only process clear command on receive side if both ports are connected
+                // and the clear command was sent locally (to prevent external clears)
+                if (IsConnected && IsReceiveConnected)
+                {
+                    if (_sentClearCommand)
+                    {
+                        _sentClearCommand = false;
+                        RollerTimeofDayorRunningTimeClear();
+                    }
+                    return;
+                }
+
                 RollerTimeofDayorRunningTimeClear();
                 return;
             }
