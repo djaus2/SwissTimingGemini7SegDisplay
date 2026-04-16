@@ -26,7 +26,12 @@ namespace SwissTimingDisplay
         private bool _sendWallClockWhileRunning = false;
         private bool _raceHasStartedSinceReset = false;
         private bool _autoSendInProgress = false;
+        private bool _showingLapTime = false;
+        private TimeSpan _lapTime = TimeSpan.Zero;
+        private bool _isClosing = false;
+        private bool _skipNextTimerUpdate = false;
         private static readonly TimeSpan RaceTimerInterval = TimeSpan.FromMilliseconds(200);
+        private readonly DispatcherTimer _lapContinueTimer;
 
         public MainWindow()
         {
@@ -49,14 +54,40 @@ namespace SwissTimingDisplay
                     return;
                 }
 
+                if (_skipNextTimerUpdate)
+                {
+                    _skipNextTimerUpdate = false;
+                    // Skip this tick's TimeInput update, but still send data if connected
+                    if (!_vm.IsConnected)
+                    {
+                        return;
+                    }
+
+                    if (!TcpCommandDefinitions.Commands.TryGetValue(_vm.SelectedTcpCommand, out var skipCharCommands))
+                    {
+                        return;
+                    }
+
+                    var skipPayload = BuildExpandedPayload(_vm.SelectedTcpCommand, skipCharCommands, _sendWallClockWhileRunning);
+                    BeginAutoSend(skipPayload);
+                    return;
+                }
+
                 if (_sendWallClockWhileRunning)
                 {
                     _vm.TimeInput = DateTime.Now.ToString("HH:mm:ss");
                 }
                 else
                 {
-                    _raceElapsed = _raceStopwatch.Elapsed;
-                    UpdateTimeInputFromRaceElapsed();
+                    if (_showingLapTime)
+                    {
+                        // Don't update TimeInput when showing lap time
+                    }
+                    else
+                    {
+                        _raceElapsed = _raceStopwatch.Elapsed;
+                        UpdateTimeInputFromRaceElapsed();
+                    }
                 }
 
                 if (!_vm.IsConnected)
@@ -74,11 +105,26 @@ namespace SwissTimingDisplay
             };
             _raceTimer.Start();
 
+            _lapContinueTimer = new DispatcherTimer
+            {
+                Interval = _vm.LapContinueDelay,
+            };
+            _lapContinueTimer.Tick += (_, _) =>
+            {
+                _lapContinueTimer.Stop();
+                _showingLapTime = false;
+                _raceElapsed = _raceStopwatch.Elapsed;
+                UpdateTimeInputFromRaceElapsed();
+                _vm.Status = "Race timer resumed (auto-continue).";
+                UpdateLapContinueButton();
+            };
+
             UpdateRaceTimerButtonContent();
             UpdateWallClockEnabledState();
             UpdateNumDigitsEnabledState();
             UpdateSendEnabledState();
             UpdateRaceTimerEnabledState();
+            UpdateLapContinueButton();
         }
 
         private void VmOnPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -216,7 +262,9 @@ namespace SwissTimingDisplay
 
         protected override void OnClosed(EventArgs e)
         {
+            _isClosing = true;
             _raceTimer.Stop();
+            _lapContinueTimer.Stop();
             _vm.PropertyChanged -= VmOnPropertyChanged;
             _vm.Dispose();
             base.OnClosed(e);
@@ -228,17 +276,18 @@ namespace SwissTimingDisplay
             {
                 _raceIsRunning = false;
                 _raceStopwatch.Stop();
-                if (!_sendWallClockWhileRunning)
-                {
-                    _raceElapsed = _raceStopwatch.Elapsed;
-                    UpdateTimeInputFromRaceElapsed();
-                }
+                _sendWallClockWhileRunning = false;
+                _showingLapTime = false;
+                _lapTime = TimeSpan.Zero;
+                _lapContinueTimer.Stop();
+                UpdateTimeInputFromRaceElapsed();
                 _vm.Status = "Race timer stopped.";
 
                 UpdateRaceTimerButtonContent();
                 UpdateWallClockEnabledState();
                 UpdateNumDigitsEnabledState();
                 UpdateSendEnabledState();
+                UpdateLapContinueButton();
 
                 return;
             }
@@ -249,6 +298,9 @@ namespace SwissTimingDisplay
                 _raceElapsed = TimeSpan.Zero;
                 _sendWallClockWhileRunning = false;
                 _raceHasStartedSinceReset = false;
+                _showingLapTime = false;
+                _lapTime = TimeSpan.Zero;
+                _lapContinueTimer.Stop();
                 UpdateTimeInputFromRaceElapsed();
                 _vm.Status = "Race timer reset.";
 
@@ -256,6 +308,7 @@ namespace SwissTimingDisplay
                 UpdateWallClockEnabledState();
                 UpdateNumDigitsEnabledState();
                 UpdateSendEnabledState();
+                UpdateLapContinueButton();
 
                 return;
             }
@@ -264,6 +317,15 @@ namespace SwissTimingDisplay
             _raceStopwatch.Start();
             _sendWallClockWhileRunning = _vm.UseWallClockTimeOfDay;
             _raceHasStartedSinceReset = true;
+            _showingLapTime = false;
+            _lapTime = TimeSpan.Zero;
+
+            // Set bib to 0 at start if UpCount mode is active
+            if (_vm.LapCountMode == ViewModels.LapCountMode.UpCount)
+            {
+                _vm.BibNoInt = 0;
+            }
+
             UpdateTimeInputFromRaceElapsed();
             _vm.Status = "Race timer started.";
 
@@ -271,26 +333,93 @@ namespace SwissTimingDisplay
             UpdateWallClockEnabledState();
             UpdateNumDigitsEnabledState();
             UpdateSendEnabledState();
+            UpdateLapContinueButton();
         }
 
-        private void StopRaceTimer()
+        private void UpdateTimeInputFromLapTime()
+        {
+            var hours = (int)_lapTime.TotalHours;
+            var minutes = _lapTime.Minutes;
+            var seconds = _lapTime.Seconds;
+            var tenths = _lapTime.Milliseconds / 100;
+            var hundredths = (_lapTime.Milliseconds / 10) % 100;
+
+            if (hours > 0)
+            {
+                if (hours > 9)
+                {
+                    hours = 9;
+                }
+
+                _vm.TimeInput = $"{hours}:{minutes:00}:{seconds:00}.{tenths}";
+                return;
+            }
+
+            var totalMinutes = (int)_lapTime.TotalMinutes;
+            if (totalMinutes > 99)
+            {
+                totalMinutes = 99;
+            }
+
+            _vm.TimeInput = $"{totalMinutes:00}:{seconds:00}.{hundredths:00}";
+        }
+
+        private void LapContinueButton_Click(object sender, RoutedEventArgs e)
         {
             if (!_raceIsRunning)
             {
                 return;
             }
 
-            _raceIsRunning = false;
-            _raceStopwatch.Stop();
-            if (!_sendWallClockWhileRunning)
+            if (_showingLapTime)
             {
+                // Continue: show live elapsed time
+                _showingLapTime = false;
+                _lapContinueTimer.Stop();
                 _raceElapsed = _raceStopwatch.Elapsed;
                 UpdateTimeInputFromRaceElapsed();
+                _vm.Status = "Race timer resumed.";
             }
+            else
+            {
+                // Lap: freeze current time
+                _showingLapTime = true;
+                _lapTime = _raceStopwatch.Elapsed;
+                UpdateTimeInputFromLapTime();
+
+                // Handle lap counting modes
+                if (_vm.LapCountMode == ViewModels.LapCountMode.UpCount)
+                {
+                    if (_vm.BibNoInt < 999)
+                    {
+                        _vm.BibNoInt++;
+                    }
+                    _vm.Status = $"Lap time captured. Bib: {_vm.BibNoInt}";
+                }
+                else if (_vm.LapCountMode == ViewModels.LapCountMode.DownCount)
+                {
+                    if (_vm.BibNoInt > 0)
+                    {
+                        _vm.BibNoInt--;
+                    }
+                    _vm.Status = $"Lap time captured. Bib: {_vm.BibNoInt}";
+                }
+                else
+                {
+                    _vm.Status = "Lap time captured.";
+                }
+
+                // Start auto-continue timer for counting modes
+                if (_vm.LapCountMode != ViewModels.LapCountMode.None)
+                {
+                    _lapContinueTimer.Stop();
+                    _lapContinueTimer.Start();
+                }
+            }
+
+            ForceUiUpdate();
             UpdateRaceTimerButtonContent();
-            UpdateWallClockEnabledState();
-            UpdateNumDigitsEnabledState();
-            UpdateSendEnabledState();
+            UpdateLapContinueButton();
         }
 
         private void UpdateRaceTimerButtonContent()
@@ -307,6 +436,23 @@ namespace SwissTimingDisplay
             }
 
             btnRaceTimer.Content = _raceHasStartedSinceReset ? "Reset" : "Start";
+        }
+
+        private void UpdateLapContinueButton()
+        {
+            if (btnLapContinue is null)
+            {
+                return;
+            }
+
+            btnLapContinue.Visibility = _raceIsRunning ? Visibility.Visible : Visibility.Collapsed;
+            btnLapContinue.Content = _showingLapTime ? "Continue" : "Lap";
+        }
+
+        private void ForceUiUpdate()
+        {
+            // Force immediate UI rendering with high priority
+            Dispatcher.Invoke(() => { }, DispatcherPriority.Render);
         }
 
         private void UpdateWallClockEnabledState()
@@ -370,17 +516,21 @@ namespace SwissTimingDisplay
             _raceElapsed = TimeSpan.Zero;
             _sendWallClockWhileRunning = false;
             _raceHasStartedSinceReset = false;
+            _showingLapTime = false;
+            _lapTime = TimeSpan.Zero;
+            _lapContinueTimer.Stop();
             UpdateTimeInputFromRaceElapsed();
 
             UpdateRaceTimerButtonContent();
             UpdateWallClockEnabledState();
             UpdateNumDigitsEnabledState();
             UpdateSendEnabledState();
+            UpdateLapContinueButton();
         }
 
         private async void BeginAutoSend(byte[] payload)
         {
-            if (_autoSendInProgress)
+            if (_autoSendInProgress || _isClosing)
             {
                 return;
             }
@@ -388,11 +538,17 @@ namespace SwissTimingDisplay
             _autoSendInProgress = true;
             try
             {
-                await _vm.SendRawAsync(payload);
+                if (!_isClosing)
+                {
+                    await _vm.SendRawAsync(payload);
+                }
             }
             catch (Exception ex)
             {
-                _vm.Status = ex.Message;
+                if (!_isClosing)
+                {
+                    _vm.Status = ex.Message;
+                }
             }
             finally
             {

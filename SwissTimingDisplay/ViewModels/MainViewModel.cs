@@ -22,6 +22,13 @@ namespace SwissTimingDisplay.ViewModels
         HHMMSS,
     }
 
+    public enum LapCountMode
+    {
+        None,
+        UpCount,
+        DownCount,
+    }
+
     public sealed class MainViewModel : INotifyPropertyChanged, IDisposable
     {
         private static readonly string SettingsDirectoryPath = Path.Combine(
@@ -55,6 +62,8 @@ namespace SwissTimingDisplay.ViewModels
         private string? _connectedReceivePortName;
         private bool _isUpdatingPortLists;
         private bool _isSyncingSelectedPorts;
+        private LapCountMode _lapCountMode = LapCountMode.None;
+        private static readonly TimeSpan _lapContinueDelay = TimeSpan.FromSeconds(5);
 
         private SerialPort? _receivePort;
         private CancellationTokenSource? _receiveCts;
@@ -91,6 +100,7 @@ namespace SwissTimingDisplay.ViewModels
 
             LoadPersistedPortNames();
             RefreshPorts();
+            AutoConnectIfNeeded();
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;
@@ -442,6 +452,14 @@ namespace SwissTimingDisplay.ViewModels
 
         public string NumDigitsLabel => $"Digits: {NumDigits}";
 
+        public LapCountMode LapCountMode
+        {
+            get => _lapCountMode;
+            set => Set(ref _lapCountMode, value);
+        }
+
+        public TimeSpan LapContinueDelay => _lapContinueDelay;
+
         public string BibNo
         {
             get => _bibNo;
@@ -589,6 +607,30 @@ namespace SwissTimingDisplay.ViewModels
             catch (Exception ex)
             {
                 Status = ex.Message;
+            }
+        }
+
+        private void AutoConnectIfNeeded()
+        {
+            var sendPortAvailable = !string.IsNullOrWhiteSpace(SelectedSendPortName)
+                && Ports.Any(p => string.Equals(p.PortName, SelectedSendPortName, StringComparison.OrdinalIgnoreCase));
+
+            var receivePortAvailable = !string.IsNullOrWhiteSpace(SelectedReceivePortName)
+                && Ports.Any(p => string.Equals(p.PortName, SelectedReceivePortName, StringComparison.OrdinalIgnoreCase));
+
+            if (sendPortAvailable && receivePortAvailable)
+            {
+                try
+                {
+                    Connect();
+                    ConnectReceive(SelectedReceivePortName);
+                    RaiseCommandStates();
+                    Status = $"Auto-connected to {SelectedSendPortName} (send) and {SelectedReceivePortName} (receive).";
+                }
+                catch (Exception ex)
+                {
+                    Status = $"Auto-connect failed: {ex.Message}";
+                }
             }
         }
 

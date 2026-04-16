@@ -13,6 +13,7 @@
         <converters:StringNotEmptyToVisibilityConverter x:Key="StringNotEmptyToVisibilityConverter" />
         <converters:TimeInputSeparatorVisibilityConverter x:Key="TimeInputSeparatorVisibilityConverter" />
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+        <converters:EnumToBooleanConverter x:Key="EnumToBooleanConverter" />
     </Window.Resources>
     <Grid x:Name="rootGrid" Margin="12">
         <Grid.RowDefinitions>
@@ -123,6 +124,7 @@
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="2*" />
@@ -139,6 +141,7 @@
                     <StackPanel Grid.Row="1" Grid.Column="1" Margin="12,0,0,0" Orientation="Horizontal">
                         <Button x:Name="btnSend" Padding="10,4" Content="Send" Click="Button_Click" />
                         <Button x:Name="btnRaceTimer" Margin="8,0,0,0" Padding="10,4" Content="Start" Click="RaceTimerButton_Click" />
+                        <Button x:Name="btnLapContinue" Margin="8,0,0,0" Padding="10,4" Content="Lap" Click="LapContinueButton_Click" Visibility="Collapsed" />
                     </StackPanel>
 
                     <TextBlock Grid.Row="2" Grid.Column="0" Margin="0,12,0,6" Text="Time Out" />
@@ -167,6 +170,13 @@
                         <Button Margin="12,0,0,0" Padding="8,4" Content="Clear" Command="{Binding BibNoClearCommand}" />
                         <TextBlock Margin="12,0,0,0" VerticalAlignment="Center" Text="Recv:" />
                         <TextBox MinWidth="60" MaxWidth="80" VerticalAlignment="Center" TextAlignment="Center" Text="{Binding RecvBibNoStr}" IsReadOnly="True" FontWeight="SemiBold" FontSize="14" Background="#FFEFEFEF" />
+                    </StackPanel>
+
+                    <TextBlock Grid.Row="8" Grid.Column="0" Margin="0,12,0,6" Text="Lap Count Mode" />
+                    <StackPanel Grid.Row="8" Grid.Column="0" Margin="0,0,0,6" Orientation="Horizontal">
+                        <RadioButton Content="None" IsChecked="{Binding LapCountMode, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=None}" GroupName="LapCountMode" />
+                        <RadioButton Margin="12,0,0,0" Content="UpCount" IsChecked="{Binding LapCountMode, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=UpCount}" GroupName="LapCountMode" />
+                        <RadioButton Margin="12,0,0,0" Content="DownCount" IsChecked="{Binding LapCountMode, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=DownCount}" GroupName="LapCountMode" />
                     </StackPanel>
                 </Grid>
             </GroupBox>

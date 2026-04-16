@@ -33,7 +33,9 @@ The capability for receiving messages as sent and displaying the received times 
 - 3 + 6 Digit display now works.
   - 3 left most digits can display Bib Number, Event No or Lap Count etc. 
   - Note that the 3 digit display is not intended for use with the Gemini 6 Digit Gemini display.
-
+- Added [Lap]/[Continue] button that captures race elapsed time whilst clock continues in background. Can continue.
+  - Also have lap up and down count options
+- If both persisted COM ports exist autoconnect.
 ## Hint
 For testing using one INT31:
 - Connected INT131 to the PC USB port
