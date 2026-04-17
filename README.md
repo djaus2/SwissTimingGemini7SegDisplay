@@ -14,7 +14,7 @@
 > **Status**  
 > - 6 Digit Gemini display (in vitro) works in race mode as well clear function!
 > - Previous
->   - Null modem cable across 2 INT131 enables sent time to be displayed in 7 seg display, with/without colon and dot between digits.
+>   - Null modem cable across  INT131 enables sent time to be displayed in Simulated 7 seg display, with/without colon and dot between digits.
 >   - 6 Simulated Digit diplay implemented.  
 >   - 3 + 6 digit display option now works in Simulator.
 >   - Tuchel Null Modem cable works with InT31 and Simulated Display
