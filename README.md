@@ -1,16 +1,28 @@
 # Swiss Timing 6 Digit (or 3 + 6 Digit) 7 Segment Display
 
-## Version: 1.0.0
+<table style="border-collapse: collapse; border: none;">
+  <tr style="border: none;">
+  <td style="border: none; padding: 0;">
+  <img width="200" alt="PXL_20260417_052157460" src="https://github.com/user-attachments/assets/1b730f14-3dcb-44e5-972a-ce1c5c4894e1" />
+  </td>
+  <td style="border: none; padding: 0;">
+<h2>Version: 1.0.0</h2>
+</td>
+</tr>
+</table>
 
 > **Status**  
-> Latest: Null modem cable across 2 INT131 enables sent time to be displayed in 7 seg display, with/without colon and dot between digits.
-> 6 Digit diplay implemented.  
-> 3 + 6 digit display option now works in simulator.
-> 6 Digit Gemini display (in vitro) works in race mode as well clear.
-> Next: (In situ)Test with actual display in field
+> - 6 Digit Gemini display (in vitro) works in race mode as well clear function!
+> - Null modem cable across 2 INT131 enables sent time to be displayed in 7 seg display, with/without colon and dot between digits.
+> - 6 Digit diplay implemented.  
+> - 3 + 6 digit display option now works in simulator.
+> - Next: (In situ)Test with actual display in field
+
+<img width="670" height="466" alt="image" src="https://github.com/user-attachments/assets/7127c5b8-eca1-4074-b8d7-c89a84dcb5c2" />
 
 
-  <img width="600" alt="PXL_20260417_052157460" src="https://github.com/user-attachments/assets/1b730f14-3dcb-44e5-972a-ce1c5c4894e1" />
+ <img width="800"  alt="image" src="https://media.giphy.com/media/vkdTVE9bwFJqjR9y7t/giphy.gif" />
+
 
 
 ## About
