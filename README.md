@@ -9,6 +9,8 @@
 > 6 Digit Gemini display (in vitro) works in race mode as well clear.
 > Next: (In situ)Test with actual display in field
 
+<img width="670" height="466" alt="image" src="https://github.com/user-attachments/assets/7127c5b8-eca1-4074-b8d7-c89a84dcb5c2" />
+  
 
   <img width="600" alt="PXL_20260417_052157460" src="https://github.com/user-attachments/assets/1b730f14-3dcb-44e5-972a-ce1c5c4894e1" />
 
