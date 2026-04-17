@@ -12,7 +12,7 @@
 </table>
 
 > **Status**  
-> - 6 Digit Gemini display (in vitro) works in race mode as well clear function!
+> - 6 Digit Gemini display (in vitro) works in race mode as well clear function, using Turchel Null Modem cable.
 > - Previous
 >   - Null modem cable across  INT131 enables sent time to be displayed in Simulated 7 seg display, with/without colon and dot between digits.
 >   - 6 Simulated Digit diplay implemented.  
