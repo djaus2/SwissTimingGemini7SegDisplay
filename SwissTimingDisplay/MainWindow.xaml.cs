@@ -601,7 +601,7 @@ namespace SwissTimingDisplay
                 }
             }
 
-            var bibDigits = BibNoHelper.ToThreeDigits(_vm.BibNo);
+            var bibDigits = _vm.BibNoInt < 0 ? "   " : BibNoHelper.ToThreeDigits(_vm.BibNoInt.ToString());
 
             return charCommands.SelectMany((c, idx) =>
             {
@@ -669,7 +669,7 @@ namespace SwissTimingDisplay
                     }
                 }
 
-                var bibDigits = BibNoHelper.ToThreeDigits(_vm.BibNo);
+                var bibDigits = _vm.BibNoInt < 0 ? "   " : BibNoHelper.ToThreeDigits(_vm.BibNoInt.ToString());
 
                 var expandedLiterals = charCommands.SelectMany(c =>
                 {

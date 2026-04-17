@@ -924,6 +924,7 @@ namespace SwissTimingDisplay.ViewModels
             {
                 var bibNoChars = chars.Skip(6).Take(3).ToArray();
                 RecvBibNoStr = new string(bibNoChars);
+                TimeInputIn = new string(chars.Skip(0).Take(6).ToArray());
             }
         }
 
