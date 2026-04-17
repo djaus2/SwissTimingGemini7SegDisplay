@@ -10,7 +10,7 @@
 
  <img width="670" height="466" alt="image" src="https://github.com/user-attachments/assets/97eaf5da-db7e-40c1-b3d6-943201e157c1" />
 
-  <img width="4032" height="2268" alt="PXL_20260417_052157460" src="https://github.com/user-attachments/assets/1b730f14-3dcb-44e5-972a-ce1c5c4894e1" />
+  <img width="1000" alt="PXL_20260417_052157460" src="https://github.com/user-attachments/assets/1b730f14-3dcb-44e5-972a-ce1c5c4894e1" />
 
 
 ## About
