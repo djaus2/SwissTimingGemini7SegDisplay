@@ -59,6 +59,13 @@ The capability for receiving messages as sent and displaying the received times 
   - Also have lap up and down count options
 - If both persisted COM ports exist autoconnect.
 - Clear timing button added and resolved.
+- In 6 Digit Mode can display LLMMSS meaning lap as first 2 digits
+  - Requires not Wallclock, Cosmetic and Downcounter modes
+  - Option **Start at Finish** means if not selected then first [Lap] does not decrement the lap
+    - Eg 5K, 3K and 1500m where start is as 200m or 300m
+  - When [Stop] pressed displays MMSSDD
+  - Now can select how long lap time is displayed for before reverting to elapsed time.
+
 
 ## Hint
 For testing using one INT31:
