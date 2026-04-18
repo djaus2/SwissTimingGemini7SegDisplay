@@ -30,6 +30,7 @@ namespace SwissTimingDisplay
         private TimeSpan _lapTime = TimeSpan.Zero;
         private bool _isClosing = false;
         private bool _skipNextTimerUpdate = false;
+        private bool _firstLapCounted = false;
         private static readonly TimeSpan RaceTimerInterval = TimeSpan.FromMilliseconds(200);
         private readonly DispatcherTimer _lapContinueTimer;
 
@@ -139,6 +140,11 @@ namespace SwissTimingDisplay
             if (e.PropertyName == nameof(MainViewModel.AnchorDisplay))
             {
                 ApplyAnchorLayout();
+            }
+
+            if (e.PropertyName == nameof(MainViewModel.LapContinueDelay))
+            {
+                _lapContinueTimer.Interval = _vm.LapContinueDelay;
             }
         }
 
@@ -270,11 +276,12 @@ namespace SwissTimingDisplay
             base.OnClosed(e);
         }
 
-        private void RaceTimerButton_Click(object sender, RoutedEventArgs e)
+        private async void RaceTimerButton_Click(object sender, RoutedEventArgs e)
         {
             if (_raceIsRunning)
             {
                 _raceIsRunning = false;
+                _vm.IsRaceRunning = false;
                 _raceStopwatch.Stop();
                 _sendWallClockWhileRunning = false;
                 _showingLapTime = false;
@@ -298,9 +305,28 @@ namespace SwissTimingDisplay
                 _raceElapsed = TimeSpan.Zero;
                 _sendWallClockWhileRunning = false;
                 _raceHasStartedSinceReset = false;
+                _vm.RaceHasStartedSinceReset = false;
                 _showingLapTime = false;
                 _lapTime = TimeSpan.Zero;
                 _lapContinueTimer.Stop();
+                _vm.IsRaceRunning = false;
+
+                // Send clear command to display
+                if (_vm.IsConnected)
+                {
+                    try
+                    {
+                        var clearCommand = TcpCommandDefinitions.GetPayloadBytes(TcpCommand.RollerTimeModeClear).ToArray();
+                        await _vm.SendRawAsync(clearCommand);
+                        _vm.Status = $"Sent {clearCommand.Length} byte(s) to {_vm.ConnectedPortName}.";
+                    }
+                    catch (Exception ex)
+                    {
+                        _vm.Status = ex.Message;
+                    }
+                }
+
+                _vm.TimeInput = string.Empty;
                 UpdateTimeInputFromRaceElapsed();
                 _vm.Status = "Race timer reset.";
 
@@ -314,11 +340,14 @@ namespace SwissTimingDisplay
             }
 
             _raceIsRunning = true;
+            _vm.IsRaceRunning = true;
             _raceStopwatch.Start();
             _sendWallClockWhileRunning = _vm.UseWallClockTimeOfDay;
             _raceHasStartedSinceReset = true;
+            _vm.RaceHasStartedSinceReset = true;
             _showingLapTime = false;
             _lapTime = TimeSpan.Zero;
+            _firstLapCounted = false;
 
             // Set bib to 0 at start if UpCount mode is active
             if (_vm.LapCountMode == ViewModels.LapCountMode.UpCount)
@@ -398,10 +427,14 @@ namespace SwissTimingDisplay
                 }
                 else if (_vm.LapCountMode == ViewModels.LapCountMode.DownCount)
                 {
-                    if (_vm.BibNoInt > 0)
+                    if (_vm.StartAtFinish || _firstLapCounted)
                     {
-                        _vm.BibNoInt--;
+                        if (_vm.BibNoInt > 0)
+                        {
+                            _vm.BibNoInt--;
+                        }
                     }
+                    _firstLapCounted = true;
                     _vm.Status = $"Lap time captured. Bib: {_vm.BibNoInt}";
                 }
                 else
@@ -509,16 +542,36 @@ namespace SwissTimingDisplay
             }
         }
 
-        private void ResetRaceTimerState()
+        private async void ResetRaceTimerState()
         {
             _raceIsRunning = false;
+            _vm.IsRaceRunning = false;
             _raceStopwatch.Reset();
             _raceElapsed = TimeSpan.Zero;
             _sendWallClockWhileRunning = false;
             _raceHasStartedSinceReset = false;
+            _vm.RaceHasStartedSinceReset = false;
             _showingLapTime = false;
             _lapTime = TimeSpan.Zero;
             _lapContinueTimer.Stop();
+            _firstLapCounted = false;
+
+            // Send clear command to display
+            if (_vm.IsConnected)
+            {
+                try
+                {
+                    var clearCommand = TcpCommandDefinitions.GetPayloadBytes(TcpCommand.RollerTimeModeClear).ToArray();
+                    await _vm.SendRawAsync(clearCommand);
+                    _vm.Status = $"Sent {clearCommand.Length} byte(s) to {_vm.ConnectedPortName}.";
+                }
+                catch (Exception ex)
+                {
+                    _vm.Status = ex.Message;
+                }
+            }
+
+            _vm.TimeInput = string.Empty;
             UpdateTimeInputFromRaceElapsed();
 
             UpdateRaceTimerButtonContent();

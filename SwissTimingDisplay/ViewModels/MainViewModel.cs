@@ -63,7 +63,10 @@ namespace SwissTimingDisplay.ViewModels
         private bool _isUpdatingPortLists;
         private bool _isSyncingSelectedPorts;
         private LapCountMode _lapCountMode = LapCountMode.None;
-        private static readonly TimeSpan _lapContinueDelay = TimeSpan.FromSeconds(5);
+        private TimeSpan _lapContinueDelay = TimeSpan.FromSeconds(5);
+        private bool _isRaceRunning = false;
+        private bool _raceHasStartedSinceReset = false;
+        private bool _startAtFinish = true;
 
         private SerialPort? _receivePort;
         private CancellationTokenSource? _receiveCts;
@@ -358,6 +361,14 @@ namespace SwissTimingDisplay.ViewModels
 
                 var effectiveDisplayMode = UseWallClockTimeOfDay ? DisplayMode.HHMMSS : DisplayMode;
 
+                // LLMMSS format when lap counting is enabled (not None), 6 digits, not wall clock, and race is running
+                if (LapCountMode != LapCountMode.None && NumDigits == 6 && !UseWallClockTimeOfDay && IsRaceRunning)
+                {
+                    var lapCounter = BibNoInt >= 0 ? BibNoInt.ToString("D2") : "00";
+                    var mmss = effectiveDisplayMode == DisplayMode.HHMMSS ? digits.Substring(2, 4) : digits.Substring(0, 4);
+                    return $"{lapCounter}:{mmss.Substring(0, 2)}:{mmss.Substring(2, 2)}";
+                }
+
                 if (effectiveDisplayMode == DisplayMode.HHMMSS)
                 {
                     return $"{digits.Substring(0, 2)}:{digits.Substring(2, 2)}:{digits.Substring(4, 2)}";
@@ -463,10 +474,50 @@ namespace SwissTimingDisplay.ViewModels
         public LapCountMode LapCountMode
         {
             get => _lapCountMode;
-            set => Set(ref _lapCountMode, value);
+            set
+            {
+                if (Set(ref _lapCountMode, value))
+                {
+                    OnPropertyChanged(nameof(DisplayTime));
+                }
+            }
         }
 
-        public TimeSpan LapContinueDelay => _lapContinueDelay;
+        public TimeSpan LapContinueDelay
+        {
+            get => _lapContinueDelay;
+            set => Set(ref _lapContinueDelay, value);
+        }
+
+        public double LapContinueDelaySeconds
+        {
+            get => _lapContinueDelay.TotalSeconds;
+            set => LapContinueDelay = TimeSpan.FromSeconds(value);
+        }
+
+        public bool IsRaceRunning
+        {
+            get => _isRaceRunning;
+            set
+            {
+                if (Set(ref _isRaceRunning, value))
+                {
+                    OnPropertyChanged(nameof(DisplayTime));
+                }
+            }
+        }
+
+        public bool RaceHasStartedSinceReset
+        {
+            get => _raceHasStartedSinceReset;
+            set => Set(ref _raceHasStartedSinceReset, value);
+        }
+
+        public bool StartAtFinish
+        {
+            get => _startAtFinish;
+            set => Set(ref _startAtFinish, value);
+        }
 
         public string BibNo
         {
@@ -543,6 +594,7 @@ namespace SwissTimingDisplay.ViewModels
                     OnPropertyChanged(nameof(BibNo));
                     OnPropertyChanged(nameof(BibNoDisplay));
                     OnPropertyChanged(nameof(BibNoInputForDisplay));
+                    OnPropertyChanged(nameof(DisplayTime));
                     BibNoDecrementCommand.RaiseCanExecuteChanged();
                     BibNoIncrementCommand.RaiseCanExecuteChanged();
                     BibNoClearCommand.RaiseCanExecuteChanged();

@@ -175,9 +175,12 @@
 
                     <TextBlock Grid.Row="8" Grid.Column="0" Margin="0,12,0,6" Text="Lap Count Mode" />
                     <StackPanel Grid.Row="8" Grid.Column="0" Margin="0,0,0,6" Orientation="Horizontal">
-                        <RadioButton Content="None" IsChecked="{Binding LapCountMode, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=None}" GroupName="LapCountMode" />
-                        <RadioButton Margin="12,0,0,0" Content="UpCount" IsChecked="{Binding LapCountMode, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=UpCount}" GroupName="LapCountMode" />
-                        <RadioButton Margin="12,0,0,0" Content="DownCount" IsChecked="{Binding LapCountMode, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=DownCount}" GroupName="LapCountMode" />
+                        <RadioButton Content="None" IsChecked="{Binding LapCountMode, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=None}" GroupName="LapCountMode" VerticalAlignment="Top" />
+                        <RadioButton Margin="12,0,0,0" Content="UpCount" IsChecked="{Binding LapCountMode, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=UpCount}" GroupName="LapCountMode" VerticalAlignment="Top" />
+                        <RadioButton Margin="12,0,0,0" Content="DownCount" IsChecked="{Binding LapCountMode, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=DownCount}" GroupName="LapCountMode" VerticalAlignment="Top" />
+                        <CheckBox Margin="12,0,0,0" Content="Start At Finish" IsChecked="{Binding StartAtFinish}" VerticalAlignment="Top" />
+                        <TextBlock Margin="12,0,0,0" Text="Show Lap Time (sec)" VerticalAlignment="Top" />
+                        <TextBox Width="60" Margin="8,0,0,0" Text="{Binding LapContinueDelaySeconds, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Top" />
                     </StackPanel>
                 </Grid>
             </GroupBox>
