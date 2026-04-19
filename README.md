@@ -13,7 +13,7 @@
 
 > **Status**  
 > - (In situ)Test with actual display in field **WORKS**!
->   - As per [MVACDisplayandWindGaugeCabling](/docs/MVACDisplayandWindGaugeCabling.pdf) diagram
+>   - As per [MVACDisplayandWindGaugeCabling](/SwissTimingDisplay/docs/MVACDisplayandWindGaugeCabling.pdf) diagram
 > - (in vitro) 6 Digit Gemini display  works in race mode as well clear function
 >   - Using Turchel Null Modem cable.
 >   - INT31 -> Display In Port
