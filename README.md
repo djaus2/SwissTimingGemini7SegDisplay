@@ -12,7 +12,9 @@
 </table>
 
 > **Status**  
-> - 6 Digit Gemini display (in vitro) works in race mode as well clear function
+> - (In situ)Test with actual display in field **WORKS**!
+>   - As per [MVACDisplayandWindGaugeCabling](/docs/MVACDisplayandWindGaugeCabling.pdf) diagram
+> - (in vitro) 6 Digit Gemini display  works in race mode as well clear function
 >   - Using Turchel Null Modem cable.
 >   - INT31 -> Display In Port
 >   - Required mains power.
@@ -21,7 +23,7 @@
 >   - 6 Simulated Digit diplay implemented.  
 >   - 3 + 6 digit display option now works in Simulator.
 >   - Tuchel Null Modem cable works with INT31 and Simulated Display
-> - Next: (In situ)Test with actual display in field
+
 
 <img width="670" height="466" alt="image" src="https://github.com/user-attachments/assets/7127c5b8-eca1-4074-b8d7-c89a84dcb5c2" />
 
@@ -60,6 +62,7 @@ The capability for receiving messages as sent and displaying the received times 
 - If both persisted COM ports exist autoconnect.
 - Clear timing button added and resolved.
 - In 6 Digit Mode can display LLMMSS meaning lap as first 2 digits
+  - ***Nb:*** _(2Do)_ This works in simulator but not in actual dislay
   - Requires not Wallclock, Cosmetic and Downcounter modes
   - Option **Start at Finish** means if not selected then first [Lap] does not decrement the lap
     - Eg 5K, 3K and 1500m where start is as 200m or 300m
