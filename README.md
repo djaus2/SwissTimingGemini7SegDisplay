@@ -32,7 +32,8 @@
 
  <img width="800"  alt="image" src="https://media.giphy.com/media/vkdTVE9bwFJqjR9y7t/giphy.gif" />
 
-
+ ### Also see:
+ [Display running in field at MVAC Track](/docs/insitu.mp4)
 
 ## About
 This is a WPF app that can generate display timing messages for a Gemini 6 Digit 7 segment display, functionimg for example, as a running clock or elapsed race time for Athletics events. Messages are sent via the selected Serial-Send port.
@@ -69,6 +70,10 @@ The capability for receiving messages as sent and displaying the received times 
   02  49 30 39 30 30 30 34 30 30 39 20 20 03  <- Sent/Recvd Bytes
   STX I  09    00    04    009      sp sp ETX <- Interpretation
   ```
+  - 09 and 009 are lap count in 2 and 3 digit format respectively.
+    - 09 format is what is displayed in 6 digit display as LL
+    - 009 would be used by 9 digit display.
+  - 00 04 is  00:04  as MMSS
   - Requires not Wallclock, Cosmetic and Downcounter modes
   - Option **Start at Finish** means if not selected then first [Lap] does not decrement the lap
     - Eg 5K, 3K and 1500m where start is as 200m or 300m
