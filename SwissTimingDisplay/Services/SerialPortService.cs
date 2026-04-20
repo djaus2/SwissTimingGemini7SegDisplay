@@ -14,7 +14,7 @@ namespace SwissTimingDisplay.Services
 
         public void Connect(string portName, int baudRate = 9600)
         {
-            if (IsConnected)
+           if (IsConnected)
             {
                 Disconnect();
             }

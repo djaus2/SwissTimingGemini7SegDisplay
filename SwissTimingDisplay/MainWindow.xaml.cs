@@ -650,7 +650,18 @@ namespace SwissTimingDisplay
                 }
                 else
                 {
-                    timeDigits = TimeStringHelper.GetSixDigitsOnly(_vm.TimeInput);
+                    // Check if we should send LLMMSS format (lap counting mode, 6 digits, not wall clock, race running)
+                    if (_vm.LapCountMode != ViewModels.LapCountMode.None && _vm.NumDigits == 6 && _vm.IsRaceRunning)
+                    {
+                        var lapCounter = _vm.BibNoInt >= 0 ? _vm.BibNoInt.ToString("D2") : "00";
+                        var rawDigits = TimeStringHelper.GetSixDigitsOnly(_vm.TimeInput);
+                        var mmss = rawDigits.Substring(0, 4); // MMSS from MMSSDD format
+                        timeDigits = $"{lapCounter}{mmss}";
+                    }
+                    else
+                    {
+                        timeDigits = TimeStringHelper.GetSixDigitsOnly(_vm.TimeInput);
+                    }
                 }
             }
 
