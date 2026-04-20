@@ -30,10 +30,12 @@
 
 
 
- <img width="800"  alt="image" src="https://media.giphy.com/media/vkdTVE9bwFJqjR9y7t/giphy.gif" />
+  <img width="800"  alt="image" src="https://media.giphy.com/media/vkdTVE9bwFJqjR9y7t/giphy.gif" />
 
- ### Also see:
- [Display running in field at MVAC Track](/docs/insitu.mp4)
+ ### In the field!:
+
+ <img width="600"  alt="image" src="SwissTimingDisplay/docs/giphy.gif" />
+
 
 ## About
 This is a WPF app that can generate display timing messages for a Gemini 6 Digit 7 segment display, functionimg for example, as a running clock or elapsed race time for Athletics events. Messages are sent via the selected Serial-Send port.
