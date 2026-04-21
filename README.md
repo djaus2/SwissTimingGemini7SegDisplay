@@ -66,7 +66,7 @@ The capability for receiving messages as sent and displaying the received times 
 - If both persisted COM ports exist autoconnect.
 - Clear timing button added and resolved.
 - In 6 Digit Mode can display LLMMSS meaning lap as first 2 digits
-  - ***Nb:*** _(2Do)_ This works in simulator `~~but not in actual dislay~~
+  - ***Nb:*** _(2Do)_ This works in simulator ~~but not in actual display~~
   - **Update** This should now work in Gemini display:
   ```
   02  49 30 39 30 30 30 34 30 30 39 20 20 03  <- Sent/Recvd Bytes
