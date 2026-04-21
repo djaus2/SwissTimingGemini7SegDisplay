@@ -29,6 +29,18 @@ namespace SwissTimingDisplay.ViewModels
         DownCount,
     }
 
+    public enum RaceDistance
+    {
+        Distance600m,
+        Distance1K,
+        Distance1500m,
+        Distance2K,
+        Distance3K,
+        Distance5K,
+        Distance10K,
+        Other,
+    }
+
     public sealed class MainViewModel : INotifyPropertyChanged, IDisposable
     {
         private static readonly string SettingsDirectoryPath = Path.Combine(
@@ -36,6 +48,32 @@ namespace SwissTimingDisplay.ViewModels
             "SwissTimingDisplay");
 
         private static readonly string SettingsFilePath = Path.Combine(SettingsDirectoryPath, "settings.json");
+
+        public static int GetDistanceInMetres(RaceDistance distance)
+        {
+            return distance switch
+            {
+                RaceDistance.Distance600m => 600,
+                RaceDistance.Distance1K => 1000,
+                RaceDistance.Distance1500m => 1500,
+                RaceDistance.Distance2K => 2000,
+                RaceDistance.Distance3K => 3000,
+                RaceDistance.Distance5K => 5000,
+                RaceDistance.Distance10K => 10000,
+                RaceDistance.Other => 0,
+                _ => 0,
+            };
+        }
+
+        public static bool IsStartAtFinish(RaceDistance distance)
+        {
+            var metres = GetDistanceInMetres(distance);
+            if (metres == 0)
+            {
+                return false;
+            }
+            return metres % 400 == 0;
+        }
 
         private readonly SerialPortDiscoveryService _discoveryService = new SerialPortDiscoveryService();
         private readonly SerialPortService _serialPortService = new SerialPortService();
@@ -67,6 +105,7 @@ namespace SwissTimingDisplay.ViewModels
         private bool _isRaceRunning = false;
         private bool _raceHasStartedSinceReset = false;
         private bool _startAtFinish = true;
+        private RaceDistance _raceDistance = RaceDistance.Distance600m;
 
         private SerialPort? _receivePort;
         private CancellationTokenSource? _receiveCts;
@@ -479,6 +518,11 @@ namespace SwissTimingDisplay.ViewModels
                 if (Set(ref _lapCountMode, value))
                 {
                     OnPropertyChanged(nameof(DisplayTime));
+                    // If switching to DownCount mode, apply IsStartAtFinish based on current RaceDistance
+                    if (value == LapCountMode.DownCount)
+                    {
+                        StartAtFinish = IsStartAtFinish(RaceDistance);
+                    }
                 }
             }
         }
@@ -517,6 +561,30 @@ namespace SwissTimingDisplay.ViewModels
         {
             get => _startAtFinish;
             set => Set(ref _startAtFinish, value);
+        }
+
+        public RaceDistance RaceDistance
+        {
+            get => _raceDistance;
+            set
+            {
+                if (Set(ref _raceDistance, value))
+                {
+                    SavePersistedPortNames();
+                    // If in DownCount mode, apply IsStartAtFinish to StartAtFinish
+                    if (LapCountMode == LapCountMode.DownCount)
+                    {
+                        StartAtFinish = IsStartAtFinish(value);
+                    }
+                    // Set BibNo to calculated laps when race distance is selected (except Other)
+                    if (value != RaceDistance.Other)
+                    {
+                        var metres = GetDistanceInMetres(value);
+                        var laps = metres / 400;
+                        BibNo = laps.ToString();
+                    }
+                }
+            }
         }
 
         public string BibNo
@@ -1017,6 +1085,7 @@ namespace SwissTimingDisplay.ViewModels
             public bool OnlyProlific { get; set; } = true;
             public bool AnchorDisplay { get; set; }
             public int NumDigits { get; set; } = 6;
+            public RaceDistance RaceDistance { get; set; } = RaceDistance.Distance600m;
         }
 
         private void LoadPersistedPortNames()
@@ -1038,6 +1107,7 @@ namespace SwissTimingDisplay.ViewModels
                 OnlyProlific = settings.OnlyProlific;
                 AnchorDisplay = settings.AnchorDisplay;
                 NumDigits = settings.NumDigits;
+                RaceDistance = settings.RaceDistance;
 
                 if (!string.IsNullOrWhiteSpace(settings.SendPortName))
                 {
@@ -1066,6 +1136,7 @@ namespace SwissTimingDisplay.ViewModels
                     OnlyProlific = OnlyProlific,
                     AnchorDisplay = AnchorDisplay,
                     NumDigits = NumDigits,
+                    RaceDistance = RaceDistance,
                 };
 
                 var json = JsonSerializer.Serialize(settings);

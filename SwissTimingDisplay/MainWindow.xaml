@@ -7,16 +7,81 @@
         xmlns:controls="clr-namespace:SwissTimingDisplay.Controls"
         xmlns:converters="clr-namespace:SwissTimingDisplay.Converters"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="610" Width="834"
+        Background="#E8F5E9">
     <Window.Resources>
         <converters:TimeInputDigitConverter x:Key="TimeInputDigitConverter" />
         <converters:StringNotEmptyToVisibilityConverter x:Key="StringNotEmptyToVisibilityConverter" />
         <converters:TimeInputSeparatorVisibilityConverter x:Key="TimeInputSeparatorVisibilityConverter" />
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
         <converters:EnumToBooleanConverter x:Key="EnumToBooleanConverter" />
+
+        <Style x:Key="SnazzyButtonStyle" TargetType="Button">
+            <Setter Property="Background">
+                <Setter.Value>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                        <GradientStop Color="#4A90E2" Offset="0" />
+                        <GradientStop Color="#357ABD" Offset="1" />
+                    </LinearGradientBrush>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="BorderBrush" Value="#2C5F8C" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Padding" Value="12,6" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="6"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background">
+                                    <Setter.Value>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                            <GradientStop Color="#5BA0F2" Offset="0" />
+                                            <GradientStop Color="#458ACD" Offset="1" />
+                                        </LinearGradientBrush>
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Background">
+                                    <Setter.Value>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                            <GradientStop Color="#3A80D2" Offset="0" />
+                                            <GradientStop Color="#256AAC" Offset="1" />
+                                        </LinearGradientBrush>
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="ComboBoxStyle" TargetType="ComboBox">
+            <Setter Property="Foreground" Value="DarkGreen" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="MinWidth" Value="150" />
+            <Setter Property="HorizontalAlignment" Value="Left" />
+        </Style>
+
+        <Style x:Key="RadioButtonStyle" TargetType="RadioButton">
+            <Setter Property="Foreground" Value="Green" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+        </Style>
     </Window.Resources>
     <Grid x:Name="rootGrid" Margin="12">
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
@@ -25,30 +90,70 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0" FontSize="18" FontWeight="SemiBold" Text="SwissTimingDisplay" />
+        <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Center">
+            <Image Source="pack://application:,,,/docs/SwissTiming.png" Height="40" Stretch="Uniform" VerticalAlignment="Center" />
+            <TextBlock FontSize="21" FontWeight="ExtraBlack"  FontStyle="Italic" Foreground="Black" VerticalAlignment="Center" Margin="8,0,0,0" ><Run Language="en-au" Text="GEMINI "/><Run Text="DISPLAY"/></TextBlock>
+        </StackPanel>
+        <TextBlock Visibility="Collapsed" Grid.Row="1" FontSize="18" FontWeight="SemiBold" Foreground="Red" Text="Swiss Timing Display" />
 
-        <Grid Grid.Row="1" Margin="0,12,0,0">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
+        <GroupBox Grid.Row="2" Margin="0,12,0,0" Background="Beige">
+            <GroupBox.Header>
+                <TextBlock FontWeight="Bold" FontStyle="Italic" Foreground="Blue" Text="Settings" />
+            </GroupBox.Header>
+            <Grid Margin="10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
 
-            <CheckBox Grid.Column="0" VerticalAlignment="Center" Content="Only Prolific (PL*)" IsChecked="{Binding OnlyProlific}" />
-            <Button Grid.Column="1" Margin="12,0,0,0" Padding="10,4" Content="Refresh Ports" Command="{Binding RefreshPortsCommand}" />
-            <CheckBox x:Name="cbUseWallClock" Grid.Column="2" Margin="12,0,0,0" VerticalAlignment="Center" Content="Use wall clock" IsChecked="{Binding UseWallClockTimeOfDay}" Checked="UseWallClock_Checked" Unchecked="UseWallClock_Unchecked" />
-            <CheckBox x:Name="cbAnchorDisplay" Grid.Column="3" Margin="12,0,0,0" VerticalAlignment="Center" Content="Anchor Display" IsChecked="{Binding AnchorDisplay}" />
-            <CheckBox Grid.Column="4" Margin="12,0,0,0" VerticalAlignment="Center" Content="Cosmetic" IsChecked="{Binding Cosmetic}" Visibility="{Binding ShowCosmeticOptions, Converter={StaticResource BooleanToVisibilityConverter}}" />
-            <CheckBox Grid.Column="5" Margin="12,0,0,0" VerticalAlignment="Center" Content="{Binding DisplayModeLabel}" IsChecked="{Binding IsDisplayModeHHMMSS}" IsEnabled="{Binding Cosmetic}" Visibility="{Binding ShowDisplayModeOptions, Converter={StaticResource BooleanToVisibilityConverter}}" />
-            <CheckBox x:Name="cbNumDigits" Grid.Column="6" Margin="12,0,0,0" VerticalAlignment="Center" Content="{Binding NumDigitsLabel}" IsChecked="{Binding IsNumDigits9}" />
-        </Grid>
+                <CheckBox Grid.Column="0" VerticalAlignment="Center" IsChecked="{Binding OnlyProlific}">
+                    <CheckBox.Content>
+                        <TextBlock FontWeight="Bold" FontStyle="Italic" Foreground="Purple" Text="Only Prolific (PL*)" />
+                    </CheckBox.Content>
+                </CheckBox>
+                <Button Grid.Column="1" Margin="12,0,0,0" Padding="10,4" Command="{Binding RefreshPortsCommand}" Style="{StaticResource SnazzyButtonStyle}">
+                    <Button.Content>
+                        <TextBlock FontWeight="Bold" FontStyle="Italic" Text="Refresh Ports" />
+                    </Button.Content>
+                </Button>
+                <CheckBox x:Name="cbUseWallClock" Grid.Column="2" Margin="12,0,0,0" VerticalAlignment="Center" IsChecked="{Binding UseWallClockTimeOfDay}" Checked="UseWallClock_Checked" Unchecked="UseWallClock_Unchecked">
+                    <CheckBox.Content>
+                        <TextBlock FontWeight="Bold" FontStyle="Italic" Foreground="Purple" Text="Use wall clock" />
+                    </CheckBox.Content>
+                </CheckBox>
+                <CheckBox x:Name="cbAnchorDisplay" Grid.Column="3" Margin="12,0,0,0" VerticalAlignment="Center" IsChecked="{Binding AnchorDisplay}">
+                    <CheckBox.Content>
+                        <TextBlock FontWeight="Bold" FontStyle="Italic" Foreground="Purple" Text="Anchor Display" />
+                    </CheckBox.Content>
+                </CheckBox>
+                <CheckBox Grid.Column="4" Margin="12,0,0,0" VerticalAlignment="Center" IsChecked="{Binding Cosmetic}" Visibility="{Binding ShowCosmeticOptions, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <CheckBox.Content>
+                        <TextBlock FontWeight="Bold" FontStyle="Italic" Foreground="Purple" Text="Cosmetic" />
+                    </CheckBox.Content>
+                </CheckBox>
+                <CheckBox Grid.Column="5" Margin="12,0,0,0" VerticalAlignment="Center" IsChecked="{Binding IsDisplayModeHHMMSS}" IsEnabled="{Binding Cosmetic}" Visibility="{Binding ShowDisplayModeOptions, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <CheckBox.Content>
+                        <TextBlock FontWeight="Bold" FontStyle="Italic" Foreground="Purple" Text="{Binding DisplayModeLabel}" />
+                    </CheckBox.Content>
+                </CheckBox>
+                <CheckBox x:Name="cbNumDigits" Grid.Column="6" Margin="12,0,0,0" VerticalAlignment="Center" IsChecked="{Binding IsNumDigits9}">
+                    <CheckBox.Content>
+                        <TextBlock FontWeight="Bold" FontStyle="Italic" Foreground="Purple" Text="{Binding NumDigitsLabel}" />
+                    </CheckBox.Content>
+                </CheckBox>
+            </Grid>
+        </GroupBox>
 
-        <GroupBox Grid.Row="2" Margin="0,12,0,0" Header="Serial">
+        <GroupBox Grid.Row="3" Margin="0,12,0,0" Background="Beige">
+            <GroupBox.Header>
+                <TextBlock FontWeight="Bold" FontStyle="Italic" Foreground="Blue" Text="Serial" />
+            </GroupBox.Header>
             <Grid Margin="10">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
@@ -56,32 +161,32 @@
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="2*" />
+                    <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
-                <TextBlock Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" Text="Send Port" />
+                <TextBlock Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" Text="Send Port" FontWeight="Bold" FontStyle="Italic" Foreground="Purple" />
                 <ComboBox Grid.Row="0" Grid.Column="1"
                           Margin="12,0,0,0"
-                          MinWidth="360"
                           ItemsSource="{Binding SendPortsView}"
                           SelectedValuePath="PortName"
                           SelectedValue="{Binding SelectedSendPortName}"
-                          DisplayMemberPath="DisplayName" />
+                          DisplayMemberPath="DisplayName"
+                          Style="{StaticResource ComboBoxStyle}" />
 
-                <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,8,0,0" VerticalAlignment="Center" Text="Receive Port" />
+                <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,8,0,0" VerticalAlignment="Center" Text="Receive Port" FontWeight="Bold" FontStyle="Italic" Foreground="Purple" />
                 <ComboBox Grid.Row="1" Grid.Column="1"
                           Margin="12,8,0,0"
-                          MinWidth="360"
                           ItemsSource="{Binding ReceivePortsView}"
                           SelectedValuePath="PortName"
                           SelectedValue="{Binding SelectedReceivePortName}"
-                          DisplayMemberPath="DisplayName" />
+                          DisplayMemberPath="DisplayName"
+                          Style="{StaticResource ComboBoxStyle}" />
 
                 <Button Grid.Row="0" Grid.Column="2" Grid.ColumnSpan="2" Margin="12,0,0,0" Padding="10,4" Command="{Binding SendConnectToggleCommand}">
                     <Button.Style>
-                        <Style TargetType="Button">
+                        <Style TargetType="Button" BasedOn="{StaticResource SnazzyButtonStyle}">
                             <Setter Property="Content" Value="Connect" />
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding IsConnected}" Value="True">
@@ -94,7 +199,7 @@
 
                 <Button Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="2" Margin="12,8,0,0" Padding="10,4" Command="{Binding ReceiveConnectToggleCommand}">
                     <Button.Style>
-                        <Style TargetType="Button">
+                        <Style TargetType="Button" BasedOn="{StaticResource SnazzyButtonStyle}">
                             <Setter Property="Content" Value="Connect" />
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding IsReceiveConnected}" Value="True">
@@ -107,14 +212,17 @@
             </Grid>
         </GroupBox>
 
-        <Grid x:Name="commandsHostGrid" Grid.Row="3" Margin="0,12,0,0">
+        <Grid x:Name="commandsHostGrid" Grid.Row="4" Margin="0,12,0,0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition x:Name="commandsColumn" Width="*" />
                 <ColumnDefinition x:Name="rightDisplayColumn" Width="0" />
             </Grid.ColumnDefinitions>
 
-            <GroupBox x:Name="commandsGroupBox" Grid.Column="0" Header="Commands">
-                <Grid Margin="10">
+            <GroupBox x:Name="commandsGroupBox" Grid.Column="0" Background="Beige">
+            <GroupBox.Header>
+                <TextBlock FontWeight="Bold" FontStyle="Italic" Foreground="Blue" Text="Commands" />
+            </GroupBox.Header>
+            <Grid Margin="10" Grid.IsSharedSizeScope="True">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
@@ -127,60 +235,102 @@
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="2*" />
+                        <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
 
-                    <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,0,0,6" Text="TCP Command" />
+                    <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,0,0,6" Text="TCP Command" FontWeight="Bold" FontStyle="Italic" Foreground="Purple" />
 
-                    <ComboBox Grid.Row="1" Grid.Column="0"
-                              MinWidth="360"
-                              ItemsSource="{Binding TcpCommands}"
-                              SelectedItem="{Binding SelectedTcpCommand}" />
-
-                    <StackPanel Grid.Row="1" Grid.Column="1" Margin="12,0,0,0" Orientation="Horizontal">
-                        <Button x:Name="btnSendClear" Padding="10,4" Content="Send Clear" Click="SendClearButton_Click" />
-                        <Button x:Name="btnSend" Margin="8,0,0,0" Padding="10,4" Content="Send" Click="Button_Click" />
-                        <Button x:Name="btnRaceTimer" Margin="8,0,0,0" Padding="10,4" Content="Start" Click="RaceTimerButton_Click" />
-                        <Button x:Name="btnLapContinue" Margin="8,0,0,0" Padding="10,4" Content="Lap" Click="LapContinueButton_Click" Visibility="Collapsed" />
+                    <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal">
+                        <ComboBox Margin="12,0,0,0"
+                                  ItemsSource="{Binding TcpCommands}"
+                                  SelectedItem="{Binding SelectedTcpCommand}"
+                                  Style="{StaticResource ComboBoxStyle}" />
+                        <Button x:Name="btnSendClear" Margin="12,0,0,0" Padding="10,4" Content="Send Clear" Click="SendClearButton_Click" Style="{StaticResource SnazzyButtonStyle}" />
+                        <Button x:Name="btnSend" Margin="8,0,0,0" Padding="10,4" Content="Send" Click="Button_Click" Style="{StaticResource SnazzyButtonStyle}" />
+                        <Button x:Name="btnRaceTimer" Margin="8,0,0,0" Padding="10,4" Content="Start" Click="RaceTimerButton_Click" Style="{StaticResource SnazzyButtonStyle}" />
+                        <Button x:Name="btnLapContinue" Margin="8,0,0,0" Padding="10,4" Content="Lap" Click="LapContinueButton_Click" Visibility="Collapsed" Style="{StaticResource SnazzyButtonStyle}" />
                     </StackPanel>
 
-                    <TextBlock Grid.Row="2" Grid.Column="0" Margin="0,12,0,6" Text="Time Out" />
-                    <TextBox x:Name="tbTime" Grid.Row="3" Grid.Column="0" MinWidth="220" Text="{Binding TimeInput, UpdateSourceTrigger=PropertyChanged}">
-                        <TextBox.Style>
-                            <Style TargetType="TextBox">
-                                <Setter Property="IsEnabled" Value="True" />
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding UseWallClockTimeOfDay}" Value="True">
-                                        <Setter Property="IsEnabled" Value="False" />
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </TextBox.Style>
-                    </TextBox>
+                    <Grid Grid.Row="2" Grid.Column="0" Margin="0,12,0,6">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" SharedSizeGroup="LabelColumn" />
+                            <ColumnDefinition Width="Auto" SharedSizeGroup="TextBoxColumn" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="Time Out:" FontWeight="Bold" FontStyle="Italic" Foreground="Purple" VerticalAlignment="Center" HorizontalAlignment="Right" />
+                        <TextBox x:Name="tbTime" Grid.Column="1" Margin="12,0,0,0" Width="100" Text="{Binding TimeInput, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center">
+                            <TextBox.Style>
+                                <Style TargetType="TextBox">
+                                    <Setter Property="IsEnabled" Value="True" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding UseWallClockTimeOfDay}" Value="True">
+                                            <Setter Property="IsEnabled" Value="False" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBox.Style>
+                        </TextBox>
+                    </Grid>
 
-                    <TextBlock Grid.Row="4" Grid.Column="0" Margin="0,12,0,6" Text="Time In" />
+                    <Grid Grid.Row="3" Grid.Column="0" Margin="0,12,0,6">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" SharedSizeGroup="LabelColumn" />
+                            <ColumnDefinition Width="Auto" SharedSizeGroup="TextBoxColumn" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="Time In:" FontWeight="Bold" FontStyle="Italic" Foreground="Purple" VerticalAlignment="Center" HorizontalAlignment="Right" />
+                        <TextBox x:Name="tbTimeIn" Grid.Column="1" Margin="12,0,0,0" Width="100" Text="{Binding TimeInputIn, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" />
+                    </Grid>
 
-                    <TextBox x:Name="tbTimeIn" Grid.Row="5" Grid.Column="0" MinWidth="220" Text="{Binding TimeInputIn, UpdateSourceTrigger=PropertyChanged}" />
-
-                    <TextBlock Grid.Row="6" Grid.Column="0" Margin="0,12,0,6" Text="Send Bib No/Lap (0-999)            -             Recv Bib No/Lap (0-999) " />
-                    <StackPanel Grid.Row="7" Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Grid.Row="4" Grid.Column="0" Margin="0,12,0,6" Text="Send Bib No/Lap (0-999)            -             Recv Bib No/Lap (0-999) " FontWeight="Bold" FontStyle="Italic" Foreground="Purple" />
+                    <StackPanel Grid.Row="5" Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
                         <RepeatButton Margin="0,0,4,0" Padding="8,4" Content="−" Command="{Binding BibNoDecrementCommand}" />
                         <TextBox MinWidth="60" VerticalAlignment="Center" TextAlignment="Center" Text="{Binding BibNo, UpdateSourceTrigger=PropertyChanged}" FontWeight="SemiBold" FontSize="14" />
                         <RepeatButton Margin="4,0,0,0" Padding="8,4" Content="+" Command="{Binding BibNoIncrementCommand}" />
-                        <Button Margin="12,0,0,0" Padding="8,4" Content="Clear" Command="{Binding BibNoClearCommand}" />
-                        <TextBlock Margin="12,0,0,0" VerticalAlignment="Center" Text="Recv:" />
-                        <TextBox MinWidth="60" MaxWidth="80" VerticalAlignment="Center" TextAlignment="Center" Text="{Binding RecvBibNoStr}" IsReadOnly="True" FontWeight="SemiBold" FontSize="14" Background="#FFEFEFEF" />
+                        <Button Margin="12,0,0,0" Padding="8,4" Content="Clear" Command="{Binding BibNoClearCommand}" Style="{StaticResource SnazzyButtonStyle}" />
+                        <TextBlock Margin="12,0,0,0" VerticalAlignment="Center" Text="Recv:" FontWeight="Bold" FontStyle="Italic" Foreground="Purple" />
+                        <TextBox x:Name="tbRecvBibNo" MinWidth="60" MaxWidth="80" VerticalAlignment="Center" TextAlignment="Center" Text="{Binding RecvBibNoStr}" IsReadOnly="True" FontWeight="SemiBold" FontSize="14" Background="#FFEFEFEF" />
                     </StackPanel>
 
-                    <TextBlock Grid.Row="8" Grid.Column="0" Margin="0,12,0,6" Text="Lap Count Mode" />
-                    <StackPanel Grid.Row="8" Grid.Column="0" Margin="0,0,0,6" Orientation="Horizontal">
-                        <RadioButton Content="None" IsChecked="{Binding LapCountMode, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=None}" GroupName="LapCountMode" VerticalAlignment="Top" />
-                        <RadioButton Margin="12,0,0,0" Content="UpCount" IsChecked="{Binding LapCountMode, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=UpCount}" GroupName="LapCountMode" VerticalAlignment="Top" />
-                        <RadioButton Margin="12,0,0,0" Content="DownCount" IsChecked="{Binding LapCountMode, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=DownCount}" GroupName="LapCountMode" VerticalAlignment="Top" />
-                        <CheckBox Margin="12,0,0,0" Content="Start At Finish" IsChecked="{Binding StartAtFinish}" VerticalAlignment="Top" />
-                        <TextBlock Margin="12,0,0,0" Text="Show Lap Time (sec)" VerticalAlignment="Top" />
+                    <StackPanel Grid.Row="6" Grid.Column="0" Margin="0,12,0,6" Orientation="Horizontal">
+                        <TextBlock Text="Lap Count Mode" FontWeight="Bold" FontStyle="Italic" Foreground="Purple" VerticalAlignment="Top" />
+                        <RadioButton Margin="12,0,0,0" Content="None" IsChecked="{Binding LapCountMode, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=None}" GroupName="LapCountMode" VerticalAlignment="Top" Style="{StaticResource RadioButtonStyle}" />
+                        <RadioButton Margin="12,0,0,0" Content="UpCount" IsChecked="{Binding LapCountMode, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=UpCount}" GroupName="LapCountMode" VerticalAlignment="Top" Style="{StaticResource RadioButtonStyle}" />
+                        <RadioButton Margin="12,0,0,0" Content="DownCount" IsChecked="{Binding LapCountMode, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=DownCount}" GroupName="LapCountMode" VerticalAlignment="Top" Style="{StaticResource RadioButtonStyle}" />
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="7" Grid.Column="0" Margin="0,0,0,6" Orientation="Horizontal">
+                        <TextBlock Text="Lap display" FontWeight="Bold" FontStyle="Italic" Foreground="Purple" VerticalAlignment="Top" />
+                        <CheckBox Margin="12,0,0,0" IsChecked="{Binding StartAtFinish}" VerticalAlignment="Top">
+                            <CheckBox.Content>
+                                <TextBlock FontWeight="SemiBold" Foreground="Green" Text="Start is at Finish" />
+                            </CheckBox.Content>
+                        </CheckBox>
+                        <TextBlock Margin="12,0,0,0" Text="Show Lap Time (sec)" VerticalAlignment="Top" FontWeight="SemiBold" Foreground="Green" />
                         <TextBox Width="60" Margin="8,0,0,0" Text="{Binding LapContinueDelaySeconds, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Top" />
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="8" Grid.Column="0" Margin="0,12,0,6" Orientation="Horizontal">
+                        <StackPanel.Style>
+                            <Style TargetType="StackPanel">
+                                <Setter Property="IsEnabled" Value="False" />
+                                <Setter Property="Visibility" Value="Collapsed" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding LapCountMode}" Value="DownCount">
+                                        <Setter Property="IsEnabled" Value="True" />
+                                        <Setter Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </StackPanel.Style>
+                        <TextBlock Text="Race Distance" FontWeight="Bold" FontStyle="Italic" Foreground="Purple" VerticalAlignment="Top" />
+                        <RadioButton Margin="12,0,0,0" Content="600m" IsChecked="{Binding RaceDistance, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Distance600m}" GroupName="RaceDistance" VerticalAlignment="Top" Style="{StaticResource RadioButtonStyle}" />
+                        <RadioButton Margin="12,0,0,0" Content="1K" IsChecked="{Binding RaceDistance, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Distance1K}" GroupName="RaceDistance" VerticalAlignment="Top" Style="{StaticResource RadioButtonStyle}" />
+                        <RadioButton Margin="12,0,0,0" Content="1500m" IsChecked="{Binding RaceDistance, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Distance1500m}" GroupName="RaceDistance" VerticalAlignment="Top" Style="{StaticResource RadioButtonStyle}" />
+                        <RadioButton Margin="12,0,0,0" Content="2K" IsChecked="{Binding RaceDistance, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Distance2K}" GroupName="RaceDistance" VerticalAlignment="Top" Style="{StaticResource RadioButtonStyle}" />
+                        <RadioButton Margin="12,0,0,0" Content="3K" IsChecked="{Binding RaceDistance, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Distance3K}" GroupName="RaceDistance" VerticalAlignment="Top" Style="{StaticResource RadioButtonStyle}" />
+                        <RadioButton Margin="12,0,0,0" Content="5K" IsChecked="{Binding RaceDistance, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Distance5K}" GroupName="RaceDistance" VerticalAlignment="Top" Style="{StaticResource RadioButtonStyle}" />
+                        <RadioButton Margin="12,0,0,0" Content="10K" IsChecked="{Binding RaceDistance, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Distance10K}" GroupName="RaceDistance" VerticalAlignment="Top" Style="{StaticResource RadioButtonStyle}" />
+                        <RadioButton Margin="12,0,0,0" Content="Other" IsChecked="{Binding RaceDistance, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Other}" GroupName="RaceDistance" VerticalAlignment="Top" Style="{StaticResource RadioButtonStyle}" />
                     </StackPanel>
                 </Grid>
             </GroupBox>
@@ -217,7 +367,7 @@
             </Border>
         </Grid>
 
-        <Border x:Name="bottomSevenSegBorder" Grid.Row="4" Margin="0,12,0,0" BorderBrush="#FFCC0000" BorderThickness="3" CornerRadius="4" Background="Black" Padding="10" HorizontalAlignment="Left" Visibility="Visible">
+        <Border x:Name="bottomSevenSegBorder" Grid.Row="5" Margin="0,12,0,0" BorderBrush="#FFCC0000" BorderThickness="3" CornerRadius="4" Background="Black" Padding="10" HorizontalAlignment="Left" Visibility="Visible">
             <Viewbox x:Name="bottomSevenSegViewbox" Stretch="None" StretchDirection="Both" HorizontalAlignment="Left" VerticalAlignment="Center">
                 <Grid x:Name="bottomSevenSegContent">
                     <controls:SixDigitSevenSegmentDisplay TimeInput="{Binding DisplayTime}">
@@ -248,7 +398,7 @@
             </Viewbox>
         </Border>
 
-        <Border x:Name="statusBorder" Grid.Row="5" Margin="0,12,0,0" Padding="10" Background="#FFEFEFEF" CornerRadius="4">
+        <Border x:Name="statusBorder" Grid.Row="6" Margin="0,12,0,0" Padding="10" Background="#FFEFEFEF" CornerRadius="4">
             <TextBlock Text="{Binding Status}" TextWrapping="Wrap" />
         </Border>
     </Grid>

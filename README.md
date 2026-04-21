@@ -6,7 +6,7 @@
   <img width="200" alt="PXL_20260417_052157460" src="https://github.com/user-attachments/assets/1b730f14-3dcb-44e5-972a-ce1c5c4894e1" />
   </td>
   <td style="border: none; padding: 0;">
-<h2>Version: 1.1.0</h2>
+<h2>Version: 1.2.0</h2>
 </td>
 </tr>
 </table>
@@ -81,6 +81,11 @@ The capability for receiving messages as sent and displaying the received times 
     - Eg 5K, 3K and 1500m where start is as 200m or 300m
   - When [Stop] pressed displays MMSSDD
   - Now can select how long lap time is displayed for before reverting to elapsed time.
+- Spruced up the layout
+  - And added Race distance selection which sets the laps to go for DownCount mode
+  - And added Start at Finish option for DownCount mode which is set or cleared appropriately.
+    - If clear then first lap does not decrement the lap count as per 5K, 3K and 1500m where start is as 200m or 300m 
+    - For example, at start of 1500m is Laps set to 3 laps to go so and only decrements when leader passes start second time.
 
 
 ## Hint
