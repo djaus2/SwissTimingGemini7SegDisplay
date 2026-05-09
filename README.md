@@ -12,7 +12,7 @@
 </table>
 
 > **Status**
-> **WORKING ON MISTRAL WIND GAUAGE PROTOCOL**. _Watch this space.._
+> **WORKING ON MISTRAL WIND GAUAGE PROTOCOL**. _Watch this space.._ Making progress .. Couple of days!
 > - (In situ)Test with actual display in field **WORKS**!
 >   - As per [MVACDisplayandWindGaugeCabling](/SwissTimingDisplay/docs/MVACDisplayandWindGaugeCabling.pdf) diagram
 >   - Nb: Wind Gauge as per this diagram not yet tested and not part of this software _yet_.
