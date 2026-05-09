@@ -1,4 +1,4 @@
-﻿<Window x:Class="SwissTimingDisplay.MainWindow"
+﻿<Window x:Class="SwissTimingDisplay.WindGaugeWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -7,7 +7,7 @@
         xmlns:controls="clr-namespace:SwissTimingDisplay.Controls"
         xmlns:converters="clr-namespace:SwissTimingDisplay.Converters"
         mc:Ignorable="d"
-        Title="MainWindow" Height="610" Width="834"
+        Title="WindGaugeWindow" Height="610" Width="834"
         Background="#E8F5E9">
     <Window.Resources>
         <converters:TimeInputDigitConverter x:Key="TimeInputDigitConverter" />
@@ -92,7 +92,7 @@
 
         <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Center">
             <Image Source="pack://application:,,,/docs/SwissTiming.png" Height="40" Stretch="Uniform" VerticalAlignment="Center" />
-            <TextBlock FontSize="21" FontWeight="ExtraBlack"  FontStyle="Italic" Foreground="Black" VerticalAlignment="Center" Margin="8,0,0,0" ><Run Language="en-au" Text="GEMINI "/><Run Text="DISPLAY"/></TextBlock>
+            <TextBlock FontSize="21" FontWeight="ExtraBlack"  FontStyle="Italic" Foreground="Black" VerticalAlignment="Center" Margin="8,0,0,0" ><Run Language="en-au" Text="MISTRAL "/><Run Text="WIND GAUGE"/></TextBlock>
         </StackPanel>
         <TextBlock Visibility="Collapsed" Grid.Row="1" FontSize="18" FontWeight="SemiBold" Foreground="Red" Text="Swiss Timing Display" />
 
@@ -247,10 +247,10 @@
                                   SelectedItem="{Binding SelectedTcpCommand}"
                                   Style="{StaticResource ComboBoxStyle}" />
                         <Button x:Name="btnSendClear" Margin="12,0,0,0" Padding="10,4" Content="Send Clear" Click="SendClearButton_Click" Style="{StaticResource SnazzyButtonStyle}" />
-                        <Button x:Name="btnSend" Margin="8,0,0,0" Padding="10,4" Content="Send" Click="Button_Click" Style="{StaticResource SnazzyButtonStyle}" />
+                        <Button x:Name="btnSend" Margin="8,0,0,0" Padding="10,4" Content="Send" Click="ButtonSend_Click" Style="{StaticResource SnazzyButtonStyle}" />
                         <Button x:Name="btnRaceTimer" Margin="8,0,0,0" Padding="10,4" Content="Start" Click="RaceTimerButton_Click" Style="{StaticResource SnazzyButtonStyle}" />
                         <Button x:Name="btnLapContinue" Margin="8,0,0,0" Padding="10,4" Content="Lap" Click="LapContinueButton_Click" Visibility="Collapsed" Style="{StaticResource SnazzyButtonStyle}" />
-                        <Button x:Name="btnWindGauge" Margin="8,0,0,0" Padding="10,4" Content="Wind Gauge" Click="WindGaugeButton_Click" Style="{StaticResource SnazzyButtonStyle}" />
+                        <Button x:Name="btnBackToMain" Margin="8,0,0,0" Padding="10,4" Content="Back to Main" Click="BackToMainButton_Click" Style="{StaticResource SnazzyButtonStyle}" RenderTransformOrigin="-1.899,96.447" />
                     </StackPanel>
 
                     <Grid Grid.Row="2" Grid.Column="0" Margin="0,12,0,6">
@@ -273,14 +273,14 @@
                         </TextBox>
                     </Grid>
 
-                    <Grid Grid.Row="3" Grid.Column="0" Margin="0,12,0,6">
+                    <!--<Grid Grid.Row="3" Grid.Column="0" Margin="0,12,0,6">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" SharedSizeGroup="LabelColumn" />
                             <ColumnDefinition Width="Auto" SharedSizeGroup="TextBoxColumn" />
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Column="0" Text="Time In:" FontWeight="Bold" FontStyle="Italic" Foreground="Purple" VerticalAlignment="Center" HorizontalAlignment="Right" />
                         <TextBox x:Name="tbTimeIn" Grid.Column="1" Margin="12,0,0,0" Width="100" Text="{Binding TimeInputIn, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" />
-                    </Grid>
+                    </Grid>-->
 
                     <TextBlock Grid.Row="4" Grid.Column="0" Margin="0,12,0,6" Text="Send Bib No/Lap (0-999)            -             Recv Bib No/Lap (0-999) " FontWeight="Bold" FontStyle="Italic" Foreground="Purple" />
                     <StackPanel Grid.Row="5" Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">

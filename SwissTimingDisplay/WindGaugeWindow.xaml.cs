@@ -13,11 +13,11 @@ using SwissTimingDisplay.ViewModels;
 namespace SwissTimingDisplay
 {
     /// <summary>
-    /// Interaction logic for MainWindow.xaml
+    /// Interaction logic for WindGaugeWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class WindGaugeWindow : Window
     {
-        private static WindGaugeWindow? _windGaugeWindow;
+        private readonly MainWindow? _mainWindow;
         private readonly MainViewModel _vm = new MainViewModel();
 
         private readonly DispatcherTimer _raceTimer;
@@ -35,7 +35,7 @@ namespace SwissTimingDisplay
         private static readonly TimeSpan RaceTimerInterval = TimeSpan.FromMilliseconds(200);
         private readonly DispatcherTimer _lapContinueTimer;
 
-        public MainWindow()
+        public WindGaugeWindow()
         {
             InitializeComponent();
             DataContext = _vm;
@@ -70,7 +70,7 @@ namespace SwissTimingDisplay
                         return;
                     }
 
-                    var skipPayload = BuildExpandedPayload(_vm.SelectedTcpCommand, skipCharCommands, _sendWallClockWhileRunning);
+                    var skipPayload = BuildExpandedPayload("");// _vm.SelectedTcpCommand, skipCharCommands);
                     BeginAutoSend(skipPayload);
                     return;
                 }
@@ -102,7 +102,7 @@ namespace SwissTimingDisplay
                     return;
                 }
 
-                var payload = BuildExpandedPayload(_vm.SelectedTcpCommand, charCommands, _sendWallClockWhileRunning);
+                var payload = BuildExpandedPayload("");// _vm.SelectedTcpCommand, charCommands);
                 BeginAutoSend(payload);
             };
             _raceTimer.Start();
@@ -127,6 +127,11 @@ namespace SwissTimingDisplay
             UpdateSendEnabledState();
             UpdateRaceTimerEnabledState();
             UpdateLapContinueButton();
+        }
+
+        public WindGaugeWindow(MainWindow mainWindow) : this()
+        {
+            _mainWindow = mainWindow;
         }
 
         private void VmOnPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -524,7 +529,7 @@ namespace SwissTimingDisplay
             }
 
             // Disable Send after Start has been pressed until Reset returns to Start state.
-            btnSend.IsEnabled = _vm.IsConnected && !_raceIsRunning && !_raceHasStartedSinceReset;
+            btnSend.IsEnabled = true;// _vm.IsConnected && !_raceIsRunning && !_raceHasStartedSinceReset;
         }
 
         private void UpdateRaceTimerEnabledState()
@@ -638,60 +643,83 @@ namespace SwissTimingDisplay
             _vm.TimeInput = $"{totalMinutes:00}:{seconds:00}.{hundredths:00}";
         }
 
-        private byte[] BuildExpandedPayload(TcpCommand cmd, System.Collections.Generic.IReadOnlyList<CharCommand> charCommands, bool useWallClockTimeOfDay)
+        private byte[] BuildExpandedPayload(string cmd)
         {
-            var needsTime = charCommands.Any(c => c == CharCommand.TIME);
-            string timeDigits = string.Empty;
-
-            if (needsTime)
+            var xx =  cmd.Select(c => (byte)c).ToArray();
+            var x2 = new byte[cmd.Length];
+            int i = 0;
+            foreach (char c in cmd)
             {
-                if (useWallClockTimeOfDay)
-                {
-                    timeDigits = DateTime.Now.ToString("HHmmss");
-                }
-                else
-                {
-                    // Check if we should send LLMMSS format (lap counting mode, 6 digits, not wall clock, race running)
-                    if (_vm.LapCountMode != ViewModels.LapCountMode.None && _vm.NumDigits == 6 && _vm.IsRaceRunning)
-                    {
-                        var lapCounter = _vm.BibNoInt >= 0 ? _vm.BibNoInt.ToString("D2") : "00";
-                        var rawDigits = TimeStringHelper.GetSixDigitsOnly(_vm.TimeInput);
-                        var mmss = rawDigits.Substring(0, 4); // MMSS from MMSSDD format
-                        timeDigits = $"{lapCounter}{mmss}";
-                    }
-                    else
-                    {
-                        timeDigits = TimeStringHelper.GetSixDigitsOnly(_vm.TimeInput);
-                    }
-                }
+                byte b = (byte)c;
+                x2[i++] = b;
+                
             }
 
-            var bibDigits = _vm.BibNoInt < 0 ? "   " : BibNoHelper.ToThreeDigits(_vm.BibNoInt.ToString());
+            return xx;
+            // return new byte[] { 0x00 }; // Placeholder - implement the actual expansion logic here based on charCommands and cmd
+            //var needsTime = charCommands.Any(c => c == CharCommand.TIME);
+            //string timeDigits = string.Empty;
 
-            return charCommands.SelectMany((c, idx) =>
-            {
-                if (cmd == TcpCommand.RollerTimeofDayorRunningTime && idx == 3 && c == CharCommand.NNN)
-                {
-                    return bibDigits.Select(d => (byte)d);
-                }
+            //if (needsTime)
+            //{
 
-                if (c != CharCommand.TIME)
-                {
-                    return new[] { (byte)c };
-                }
+            //    {
+            //        Check if we should send LLMMSS format(lap counting mode, 6 digits, not wall clock, race running)
+            //        if (_vm.LapCountMode != ViewModels.LapCountMode.None && _vm.NumDigits == 6 && _vm.IsRaceRunning)
+            //        {
+            //            var lapCounter = _vm.BibNoInt >= 0 ? _vm.BibNoInt.ToString("D2") : "00";
+            //            var rawDigits = TimeStringHelper.GetSixDigitsOnly(_vm.TimeInput);
+            //            var mmss = rawDigits.Substring(0, 4); // MMSS from MMSSDD format
+            //            timeDigits = $"{lapCounter}{mmss}";
+            //        }
+            //        else
+            //        {
+            //            timeDigits = TimeStringHelper.GetSixDigitsOnly(_vm.TimeInput);
+            //        }
+            //    }
+            //}
 
-                return timeDigits.Select(d => (byte)d);
-            }).ToArray();
+            //var bibDigits = _vm.BibNoInt < 0 ? "   " : BibNoHelper.ToThreeDigits(_vm.BibNoInt.ToString());
+
+            //return charCommands.SelectMany((c, idx) =>
+            //{
+            //    if (cmd == TcpCommand.RollerTimeofDayorRunningTime && idx == 3 && c == CharCommand.NNN)
+            //    {
+            //        return bibDigits.Select(d => (byte)d);
+            //    }
+
+            //    if (c != CharCommand.TIME)
+            //    {
+            //        return new[] { (byte)c };
+            //    }
+
+            //    return timeDigits.Select(d => (byte)d);
+            //}).ToArray();
         }
 
-        private async void Button_Click(object sender, RoutedEventArgs e)
+        private async void ButtonSend_Click(object sender, RoutedEventArgs e)
         {
+            int captureTime = 10;
+
             try
             {
                 var cmd = _vm.SelectedTcpCommand;
-
-                if (!TcpCommandDefinitions.Commands.TryGetValue(cmd, out var charCommands))
+                // Clear TimeOut on send side if this was a Clear command
+                if (cmd == TcpCommand.WindGauge_Reset_CaptureTime)
                 {
+                    _vm.TimeInput = "10";
+                    tbTime.Text = "10";
+                    return;
+                }
+                CharCommand[] cmdx;
+                byte[] cmdbytes = null;
+                if (TcpCommandDefinitions.Commands.TryGetValue(cmd, out var charCommands))
+                {
+                   cmdx = charCommands.ToArray<CharCommand>();
+                   cmdbytes = cmdx.Select(c => (byte)c).ToArray();
+                }
+                else
+                { 
                     MessageBox.Show(
                         $"No definition for '{cmd}'.",
                         "Payload",
@@ -699,87 +727,47 @@ namespace SwissTimingDisplay
                         MessageBoxImage.Warning);
                     return;
                 }
+                
 
-                var originalLiterals = string.Join(", ", charCommands.Select(c => c.ToString()));
+                string originalLiterals = string.Join(", ", charCommands.Select(c => c.ToString()));
 
-                var needsTime = charCommands.Any(c => c == CharCommand.TIME);
-                TimeStringHelper.ParsedTime parsed = default;
-                string timeDigits = string.Empty;
-                string usedTimeStandard = string.Empty;
-                var timeKind = TimeStringHelper.TimeKind.TimeOfDay;
+                var needsTime = charCommands.Any(c => c == CharCommand.TIME);;
 
                 if (needsTime)
                 {
-                    if (_vm.UseWallClockTimeOfDay)
+
+                    if (string.IsNullOrWhiteSpace(_vm.TimeInput))
                     {
-                        timeDigits = DateTime.Now.ToString("HHmmss");
-                        usedTimeStandard = TimeStringHelper.ToTimeOfDayStandard(timeDigits);
-                        timeKind = TimeStringHelper.TimeKind.TimeOfDay;
+                        tbTime.Text = "10";
                     }
-                    else
+
+                    if(int.TryParse(tbTime.Text, out int tim))
                     {
-                        if (string.IsNullOrWhiteSpace(_vm.TimeInput))
+                        if ((tim > 0) && (tim <= 100))
                         {
-                            timeDigits = "000000";
-                            usedTimeStandard = "00:00.00";
-                            timeKind = TimeStringHelper.TimeKind.RunningTime;
+                            captureTime = tim;
+                            string num =captureTime.ToString("D2");
+                            byte[] numByte = new byte[] { ((byte)num[0]) , ((byte)num[1]) };
+
+                            int timeIndex = Array.IndexOf(cmdbytes, (byte)CharCommand.TIME);
+                            if (timeIndex >= 0)
+                            {
+                                var newCmdBytes = new byte[cmdbytes.Length + 1];
+                                Array.Copy(cmdbytes, 0, newCmdBytes, 0, timeIndex);
+                                newCmdBytes[timeIndex] = numByte[0];
+                                newCmdBytes[timeIndex + 1] = numByte[1];
+                                Array.Copy(cmdbytes, timeIndex + 1, newCmdBytes, timeIndex + 2, cmdbytes.Length - timeIndex - 1);
+                                cmdbytes = newCmdBytes;
+                            }
                         }
                         else
                         {
-                            parsed = TimeStringHelper.ParseTimeInput(_vm.TimeInput);
-                            timeDigits = parsed.SixDigits;
-                            usedTimeStandard = parsed.Standard;
-                            timeKind = parsed.Kind;
+                            
                         }
-                    }
+                    }             
                 }
 
-                var bibDigits = _vm.BibNoInt < 0 ? "   " : BibNoHelper.ToThreeDigits(_vm.BibNoInt.ToString());
-
-                var expandedLiterals = charCommands.SelectMany(c =>
-                {
-                    if (c != CharCommand.TIME)
-                    {
-                        return new[] { c.ToString() };
-                    }
-
-                    var label = timeKind == TimeStringHelper.TimeKind.TimeOfDay ? "TIME(HHMMSS)" : "TIME(mmsshh)";
-                    return new[] { $"{label}={timeDigits}" };
-                });
-
-                var expandedBytes = BuildExpandedPayload(cmd, charCommands, _vm.UseWallClockTimeOfDay);
-
-                if (cmd == TcpCommand.RollerTimeofDayorRunningTime
-                    && charCommands.Count > 3
-                    && charCommands[3] == CharCommand.NNN)
-                {
-                    expandedLiterals = charCommands.SelectMany((c, idx) =>
-                    {
-                        if (c == CharCommand.TIME)
-                        {
-                            var label = timeKind == TimeStringHelper.TimeKind.TimeOfDay ? "TIME(HHMMSS)" : "TIME(mmsshh)";
-                            return new[] { $"{label}={timeDigits}" };
-                        }
-
-                        if (idx == 3 && c == CharCommand.NNN)
-                        {
-                            return new[] { $"NNN={bibDigits}" };
-                        }
-
-                        return new[] { c.ToString() };
-                    });
-                }
-
-                var literals = string.Join(", ", expandedLiterals);
-                var hex = BitConverter.ToString(expandedBytes);
-
-                var timeLine = needsTime ? $"Time: {timeDigits} ({usedTimeStandard})\n\n" : string.Empty;
-
-                var previewResult = MessageBox.Show(
-                    $"{cmd}\n\n{timeLine}Original CharCommands:\n{originalLiterals}\n\nExpanded CharCommands:\n{literals}\n\nBytes:\n{hex}",
-                    "Payload",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Information);
+                var hex = BitConverter.ToString(cmdbytes);
 
                 if (_vm.IsConnected)
                 {
@@ -788,14 +776,10 @@ namespace SwissTimingDisplay
 
                     if (send == MessageBoxResult.Yes)
                     {
-                        await _vm.SendRawAsync(expandedBytes);
-                        _vm.Status = $"Sent {expandedBytes.Length} byte(s) to {portName}.";
+                        await _vm.SendRawAsync(cmdbytes);
+                        _vm.Status = $"Sent {cmdbytes.Length} byte(s) to {portName}.";
 
-                        // Clear TimeOut on send side if this was a Clear command
-                        if (cmd == TcpCommand.RollerTimeModeClear)
-                        {
-                            _vm.TimeInput = string.Empty;
-                        }
+
                     }
                 }
             }
@@ -842,13 +826,12 @@ namespace SwissTimingDisplay
             }
         }
 
-        private void WindGaugeButton_Click(object sender, RoutedEventArgs e)
+        private void BackToMainButton_Click(object sender, RoutedEventArgs e)
         {
-            if (_windGaugeWindow == null)
+            if (_mainWindow != null)
             {
-                _windGaugeWindow = new WindGaugeWindow(this);
+                _mainWindow.Show();
             }
-            _windGaugeWindow.Show();
             this.Hide();
         }
     }

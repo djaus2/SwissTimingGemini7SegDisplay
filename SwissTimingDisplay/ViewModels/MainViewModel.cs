@@ -13,6 +13,7 @@ using System.Windows;
 using System.Windows.Data;
 using SwissTimingDisplay.Models;
 using SwissTimingDisplay.Services;
+using System.Diagnostics.Eventing.Reader;
 
 namespace SwissTimingDisplay.ViewModels
 {
@@ -906,107 +907,181 @@ namespace SwissTimingDisplay.ViewModels
             OnPropertyChanged(nameof(DisplayTime));
         }
 
+        public enum OpMode { display,windgauge, unknown}
+
+
+
+        private async Task<Tuple<byte[], OpMode>?> ReadSerialMessageAsync(System.IO.Ports.SerialPort port, CancellationToken cancellationToken)
+        {
+            const byte SOH = 0x01; // Start of Header
+            const byte STX = 0x02; // Start of Text
+            const byte ETX = 0x03; // End of Text
+            const byte EOT = 0x04; // End of Transmission
+            const byte DC3 = 0x13; // Device Control 3
+
+            OpMode mode = OpMode.unknown;
+
+            var buffer = new List<byte>();
+            byte[] singleByte = new byte[1];
+
+            // Read until SOH or STX is found
+            while (!cancellationToken.IsCancellationRequested)
+            {
+                int bytesRead = await port.BaseStream.ReadAsync(singleByte, 0, 1, cancellationToken);
+                if (bytesRead == 0)
+                {
+                    return null; // End of stream
+                }
+
+                if (singleByte[0] == SOH || singleByte[0] == STX)
+                {
+                    buffer.Add(singleByte[0]); // Add the start character
+                    break;
+                }
+            }
+
+            // Read until ETX or EOT is found
+            while (!cancellationToken.IsCancellationRequested)
+            {
+                int bytesRead = await port.BaseStream.ReadAsync(singleByte, 0, 1, cancellationToken);
+                if (bytesRead == 0)
+                {
+                    return null; // Return null if stream ends
+                }
+
+                buffer.Add(singleByte[0]); // Add the character
+
+                // Validate based on start character
+                if (buffer[0] == STX)
+                {
+                    if (buffer.Count > 14)
+                        return null;
+                    if (buffer.Count >= 2 && buffer[1] != 'B' && buffer[1] != 'I')
+                        return null;
+                    if (buffer.Count > 3 && buffer[1] == 'B' )
+                        return null;
+                    if (buffer.Count > 14 && buffer[1] == 'I' )
+                        return null;
+                    mode = OpMode.display;
+                }
+                else if (buffer[0] == SOH)
+                {
+                    if (buffer.Count > 9)
+                        return null;
+                    if (buffer.Count >= 2 && buffer[1] != DC3)
+                        return null;
+                    if (buffer.Count >= 3 && buffer[2] != 'C')
+                        return null;
+                    if (buffer.Count >= 4 && buffer[3] != 'W')
+                        return null;
+                    if (buffer.Count >= 5 && new List<byte> { (byte) 'I',(byte)'S',(byte)'R',(byte)'O'}.Contains(buffer[4]) == false)
+                        return null;
+                    //CWS,CWR and CWO are of length 4
+                    if (buffer.Count >4  && buffer[4] !=(byte)'I')
+                        return null;
+                    if (buffer.Count==8)
+                    {
+                        // Other should be of length 
+                        if (buffer[4] != (byte)'I')
+                            return null;
+                    }
+                    mode = OpMode.windgauge; ;
+                }
+
+                if (singleByte[0] == ETX || singleByte[0] == EOT)
+                {
+                    break; // End of message
+                }
+            }
+
+            return new Tuple<byte[],OpMode>  ( buffer.ToArray(), mode );
+        }
+
+
         private async Task ReceiveLoopAsync(SerialPort port, CancellationToken cancellationToken)
         {
-            var buffer = new byte[256];
-            var frame = new List<byte>(256);
-
-            // We dispatch frames as: [cmd, payload...]
-            // where cmd is 'I' or 'B'. STX and terminator (EOT/ETX) are not included.
-            var inFrame = false;
-            var gotCmd = false;
 
             while (!cancellationToken.IsCancellationRequested)
             {
-                int read;
-                try
-                {
-                    read = await port.BaseStream.ReadAsync(buffer, 0, buffer.Length, cancellationToken);
-                }
-                catch (OperationCanceledException)
-                {
-                    break;
-                }
-                catch
-                {
-                    break;
-                }
+                var buff = await ReadSerialMessageAsync(port, cancellationToken);
+                if (buff == null) continue;
+                byte[] buffer = buff.Item1;
+                OpMode mode = buff.Item2;
+                TcpCommand? tcpCommand = null;
 
-                if (read <= 0)
+                switch (mode)
                 {
-                    continue;
-                }
-
-                for (var i = 0; i < read; i++)
-                {
-                    var b = buffer[i];
-
-                    if (!inFrame)
-                    {
-                        if (b == (byte)CharCommand.STX)
+                    case OpMode.display:
+                        switch (buffer[1])
                         {
-                            frame.Clear();
-                            inFrame = true;
-                            gotCmd = false;
+                            case (byte)'B':
+                                // Handle case for 'B'
+                                tcpCommand = TcpCommand.RollerTimeModeClear;
+                                Application.Current?.Dispatcher?.BeginInvoke(() => ProcessReceivedFrame((TcpCommand)tcpCommand, new List<char>() { }));
+                                break;
+                            case (byte)'I':
+                                // Handle case for 'I'
+                                tcpCommand = TcpCommand.RollerTimeofDayorRunningTime;
+                                var chars = buffer.Skip(2).Select(b => (char)b).ToList();
+                                Application.Current?.Dispatcher?.BeginInvoke(() => ProcessReceivedFrame((TcpCommand)tcpCommand,chars));
+
+                                break;
+                            default:
+                                continue; // Invalid frame, skip
                         }
-
-                        continue;
-                    }
-
-                    // In frame: first byte must be command
-                    if (!gotCmd)
-                    {
-                        if (b == (byte)CharCommand.I || b == (byte)CharCommand.B)
+                        break;
+                    case OpMode.windgauge:
+                        switch (buffer[4])
                         {
-                            frame.Add(b);
-                            gotCmd = true;
-                            continue;
+                            case (byte)'I':
+                                // Handle case for 'I'
+                                tcpCommand = TcpCommand.WindGauge_Acquisition_Duration;
+                                int duration = 10;
+                                int durationTens = buffer[6] - (byte)'0';
+                                int durationUnits = buffer[7] - (byte)'0';
+                                if ((durationTens >= 0) &&
+                                    (durationTens < 10) &&
+                                    (durationUnits >= 0) &&
+                                    (durationTens < 10))
+                                {
+                                    duration = durationTens * 10 + durationUnits;
+                                }
+                                break;
+                            case (byte)'S':
+                                // Handle case for 'S'
+                                tcpCommand = TcpCommand.WindGauge_Start_of_Measurement;
+                                break;
+                            case (byte)'R':
+                                // Handle case for 'R'
+                                tcpCommand = TcpCommand.WindGauge_Resend_Latest;
+                                break;
+                            case (byte)'O':
+                                // Handle case for 'O'
+                                tcpCommand = TcpCommand.WindGauge_Resend_Latest;
+                                break;
+                            default:
+                                continue; // Invalid frame, skip
                         }
-
-                        // Invalid cmd - reset and hunt for next STX
-                        frame.Clear();
-                        inFrame = false;
-                        gotCmd = false;
-                        continue;
-                    }
-
-                    // End-of-frame: accept EOT (per spec) and ETX (current definitions)
-                    if (b == (byte)CharCommand.EOT || b == (byte)CharCommand.ETX)
-                    {
-                        var completed = frame.ToArray();
-                        frame.Clear();
-                        inFrame = false;
-                        gotCmd = false;
-
-                        Application.Current?.Dispatcher?.BeginInvoke(() => ProcessReceivedFrame(completed));
-                        continue;
-                    }
-
-                    frame.Add(b);
+                        break;
+                    default:
+                        continue; // Unknown mode, skip
                 }
+                //Application.Current?.Dispatcher?.BeginInvoke(() => ProcessReceivedFrame(completed));
+                continue;
             }
         }
+        
 
-        private void ProcessReceivedFrame(byte[] frameBytes)
+        private void ProcessReceivedFrame(TcpCommand tcpCommand, List<char> chars )
         {
-            if (frameBytes.Length == 0)
+
+            if (tcpCommand == TcpCommand.RollerTimeofDayorRunningTime)
             {
-                return;
+                
+                RollerTimeofDayorRunningTime(chars);
             }
-
-            var cmd = (CharCommand)frameBytes[0];
-
-            if (cmd == CharCommand.B)
+            else if (tcpCommand == TcpCommand.RollerTimeofDayorRunningTime)
             {
-                // Clear command must be exactly 1 byte (B) after STX, before EOT/ETX
-                // Total frame: STX + B + EOT/ETX = 3 bytes, but frameBytes excludes STX and EOT/ETX
-                // So frameBytes should be exactly 1 byte (the command B)
-                if (frameBytes.Length != 1)
-                {
-                    Status = "Error: Clear command must be exactly 3 bytes (STX + B + EOT/ETX)";
-                    return;
-                }
-
                 // Only process clear command on receive side if both ports are connected
                 // and the clear command was sent locally (to prevent external clears)
                 if (IsConnected && IsReceiveConnected)
@@ -1020,13 +1095,6 @@ namespace SwissTimingDisplay.ViewModels
                 }
 
                 RollerTimeofDayorRunningTimeClear();
-                return;
-            }
-
-            if (cmd == CharCommand.I)
-            {
-                var chars = frameBytes.Skip(1).Select(b => (char)b).ToList();
-                RollerTimeofDayorRunningTime(chars);
             }
         }
 

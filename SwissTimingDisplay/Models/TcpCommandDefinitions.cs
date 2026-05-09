@@ -6,6 +6,7 @@ namespace SwissTimingDisplay.Models
 {
     public static class TcpCommandDefinitions
     {
+
         public static readonly IReadOnlyDictionary<TcpCommand, IReadOnlyList<CharCommand>> Commands =
             new Dictionary<TcpCommand, IReadOnlyList<CharCommand>>
             {
@@ -14,9 +15,39 @@ namespace SwissTimingDisplay.Models
                 // { TcpCommand.RunningTimeDifference, new[] { CharCommand.SOH, CharCommand.DC4, CharCommand.Rxx, CharCommand.STX, CharCommand.HOME,CharCommand.SPC, CharCommand.SPC ,CharCommand.SPC,CharCommand.STX,CharCommand.TTT,CharCommand.EOT } },
                 // { TcpCommand.NumberAndNetTime, new[] {  CharCommand.SOH, CharCommand.DC4, CharCommand.Sxx, CharCommand.STX, CharCommand.HOME, CharCommand.NNN,CharCommand.TTT,CharCommand.EOT }  },
                 { TcpCommand.RollerTimeModeClear, new[] {  CharCommand.STX, CharCommand.B, CharCommand.ETX, } },
-                { TcpCommand.RollerTimeofDayorRunningTime, new[] {  CharCommand.STX, CharCommand.I, CharCommand.TIME, CharCommand.NNN,CharCommand.SPC,CharCommand.SPC, CharCommand.ETX } },
-
-            };//
+                { TcpCommand.RollerTimeofDayorRunningTime, new[] 
+                {  CharCommand.STX, CharCommand.I, CharCommand.TIME, CharCommand.NNN,CharCommand.SPC,CharCommand.SPC, CharCommand.ETX } },
+                
+                //Wind Gauge commands per Swiss Timing documentation: https://www.swisstiming.com/fileadmin/user_upload/Downloads/Swiss_Timing_Wind_Gauge_Protocol.pdf
+                { TcpCommand.WindGauge_Acquisition_Duration, new[]
+                { CharCommand.SOH, CharCommand.DC3,
+                    CharCommand.C,CharCommand.W,CharCommand.I, 
+                    CharCommand.STX, CharCommand.TIME, CharCommand.EOT } },
+                { TcpCommand.WindGauge_Start_of_Measurement, new[]
+                { CharCommand.SOH, CharCommand.DC3,
+                    CharCommand.C,CharCommand.W,CharCommand.S, 
+                    CharCommand.EOT } },
+                { TcpCommand.WindGauge_Reset_Stop_Clear, new[]
+                { CharCommand.SOH, CharCommand.DC3,
+                    CharCommand.C,CharCommand.W,CharCommand.R, 
+                    CharCommand.EOT } },
+                { TcpCommand.WindGauge_Resend_Latest, new[]
+                { CharCommand.SOH, CharCommand.DC3,
+                    CharCommand.C,CharCommand.W,CharCommand.O, 
+                    CharCommand.EOT } },
+                { TcpCommand.WindGauge_Output, new[]
+                { CharCommand.SOH, CharCommand.DC3,CharCommand.G,CharCommand.W, CharCommand.STX, CharCommand.DLE,
+                    CharCommand.Zero,
+                    CharCommand.Zero,
+                    CharCommand.Zero,
+                    CharCommand.One,
+                    CharCommand.Three,
+                    CharCommand.SPEEDSIGN,
+                    CharCommand.SPEEDWHOLE,
+                    CharCommand.SPEEDDOT,
+                    CharCommand.SPEEDTENTHS,
+                    CharCommand.Space, CharCommand.EOT } },
+            };
 
         public static Dictionary<TcpCommand, IReadOnlyList<CharCommand>> CreateDictionaryFromCsvLines(
             IEnumerable<string> lines)
