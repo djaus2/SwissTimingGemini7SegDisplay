@@ -11,7 +11,11 @@
 </tr>
 </table>
 
-> **Status**  
+> **Status**
+> **WORKING ON MISTRAL WIND GAUAGE PROTOCOL**. _Watch this space.._ Making progress .. About a week!  
+Got the app sending the Wind Gauge  Control TP messages  
+Got to implement a simulated Wind Gauge to interpret them and send back a measurement.  
+And for app to intperet that.  :construction_worker: 
 > - (In situ)Test with actual display in field **WORKS**!
 >   - As per [MVACDisplayandWindGaugeCabling](/SwissTimingDisplay/docs/MVACDisplayandWindGaugeCabling.pdf) diagram
 >   - Nb: Wind Gauge as per this diagram not yet tested and not part of this software _yet_.
@@ -38,13 +42,12 @@
 
 
 ## About
-This is a WPF app that can generate display timing messages for a Gemini 6 Digit 7 segment display, functionimg for example, as a running clock or elapsed race time for Athletics events. Messages are sent via the selected Serial-Send port.
+This is a WPF app that can generate display timing messages for a Swiss Timing Gemini 6 Digit 7 segment display, functioning for example, as a running clock or elapsed race time for Athletics events. Messages are sent via the selected Serial-Send port.
 
-Times (wallclcok or race running time) are also displayed in a simulated 6 x 7 Segement display in-app. When the Serial-Receive port is not connected, that display displays the transmitted time.
+Times (wallclock or race running time) are also displayed in a simulated 6 x 7 Segement display in-app. When the Serial-Receive port is not connected, that display displays the transmitted time.
 
-The capability for receiving messages as sent and displaying the received times has also been added but not yet tested. To enable serial reception,the Serial-Receive port is connected and as such the received data is displayed in the 7 segments rather than the transmitted data. In this mode,the app can simulate the physical display.
+The capability for receiving messages as sent and displaying the received times has also been added so that a loopback cable can be used for testing. To enable serial reception,the Serial-Receive and Serial-Send ports are connected and as such the sent then received data is displayed in-app in the 7 segments rather than the transmitted data ditrectly. In this mode,the app can simulate the physical display.
 
-> Note that it is intended that the app can simultaneously send and receive timing messages
 
 ## Latest
 - There is now a **Cosmetic** state variable that if true, the app adds appropiate colon/s and dot between digits in the simulated display for the selected time format. 
