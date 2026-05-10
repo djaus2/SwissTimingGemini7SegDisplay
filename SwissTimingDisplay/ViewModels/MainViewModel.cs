@@ -14,6 +14,7 @@ using System.Windows.Data;
 using SwissTimingDisplay.Models;
 using SwissTimingDisplay.Services;
 using System.Diagnostics.Eventing.Reader;
+using System.Runtime.InteropServices;
 
 namespace SwissTimingDisplay.ViewModels
 {
@@ -976,8 +977,8 @@ namespace SwissTimingDisplay.ViewModels
                         return null;
                     if (buffer.Count >= 5 && new List<byte> { (byte) 'I',(byte)'S',(byte)'R',(byte)'O'}.Contains(buffer[4]) == false)
                         return null;
-                    //CWS,CWR and CWO are of length 4
-                    if (buffer.Count >4  && buffer[4] !=(byte)'I')
+                    //CWS,CWR and CWO are of length 6
+                    if (buffer.Count >6  && buffer[4] !=(byte)'I')
                         return null;
                     if (buffer.Count==8)
                     {
@@ -1046,18 +1047,24 @@ namespace SwissTimingDisplay.ViewModels
                                 {
                                     duration = durationTens * 10 + durationUnits;
                                 }
+                                string durationStr = duration.ToString("D2");
+                                List<char> chars = new List<char>() { durationStr[0], durationStr[1] };
+                                Application.Current?.Dispatcher?.BeginInvoke(() => ProcessReceivedFrame((TcpCommand)tcpCommand, chars));
                                 break;
                             case (byte)'S':
                                 // Handle case for 'S'
                                 tcpCommand = TcpCommand.WindGauge_Start_of_Measurement;
+                                Application.Current?.Dispatcher?.BeginInvoke(() => ProcessReceivedFrame((TcpCommand)tcpCommand, new List<char>() { }));
                                 break;
                             case (byte)'R':
                                 // Handle case for 'R'
-                                tcpCommand = TcpCommand.WindGauge_Resend_Latest;
+                                tcpCommand = TcpCommand.WindGauge_Reset_Stop_Clear;
+                                Application.Current?.Dispatcher?.BeginInvoke(() => ProcessReceivedFrame((TcpCommand)tcpCommand, new List<char>() { }));
                                 break;
                             case (byte)'O':
                                 // Handle case for 'O'
                                 tcpCommand = TcpCommand.WindGauge_Resend_Latest;
+                                Application.Current?.Dispatcher?.BeginInvoke(() => ProcessReceivedFrame((TcpCommand)tcpCommand, new List<char>() { }));
                                 break;
                             default:
                                 continue; // Invalid frame, skip
@@ -1080,7 +1087,7 @@ namespace SwissTimingDisplay.ViewModels
                 
                 RollerTimeofDayorRunningTime(chars);
             }
-            else if (tcpCommand == TcpCommand.RollerTimeofDayorRunningTime)
+            else if (tcpCommand == TcpCommand.RollerTimeModeClear)
             {
                 // Only process clear command on receive side if both ports are connected
                 // and the clear command was sent locally (to prevent external clears)
@@ -1095,6 +1102,25 @@ namespace SwissTimingDisplay.ViewModels
                 }
 
                 RollerTimeofDayorRunningTimeClear();
+            }
+            else
+            {
+                switch (tcpCommand)
+                {
+                    case TcpCommand.WindGauge_Acquisition_Duration:
+                        // CWI Handle acquisition duration update if needed
+                        break;
+                    case TcpCommand.WindGauge_Start_of_Measurement:
+                        // CWS Handle start of measurement if needed
+                            break;
+                    case TcpCommand.WindGauge_Reset_Stop_Clear:
+                        // CWR Handle Reset(stop acquisition, clear the scoreboard)
+                        break;
+                    case  TcpCommand.WindGauge_Resend_Latest:
+                        // CWO Handle resend latest if needed
+                        break;
+
+                }
             }
         }
 
