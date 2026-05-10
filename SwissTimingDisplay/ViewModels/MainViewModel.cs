@@ -43,7 +43,7 @@ namespace SwissTimingDisplay.ViewModels
         Other,
     }
 
-    public sealed class MainViewModel : INotifyPropertyChanged, IDisposable
+    public sealed partial class MainViewModel : INotifyPropertyChanged, IDisposable
     {
         private static readonly string SettingsDirectoryPath = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
@@ -1018,14 +1018,13 @@ namespace SwissTimingDisplay.ViewModels
                             case (byte)'B':
                                 // Handle case for 'B'
                                 tcpCommand = TcpCommand.RollerTimeModeClear;
-                                Application.Current?.Dispatcher?.BeginInvoke(() => ProcessReceivedFrame((TcpCommand)tcpCommand, new List<char>() { }));
+                                Application.Current?.Dispatcher?.BeginInvoke(() => ProcessReceivedDisplayFrame((TcpCommand)tcpCommand, new List<char>() { }));
                                 break;
                             case (byte)'I':
                                 // Handle case for 'I'
                                 tcpCommand = TcpCommand.RollerTimeofDayorRunningTime;
                                 var chars = buffer.Skip(2).Select(b => (char)b).ToList();
-                                Application.Current?.Dispatcher?.BeginInvoke(() => ProcessReceivedFrame((TcpCommand)tcpCommand,chars));
-
+                                Application.Current?.Dispatcher?.BeginInvoke(() => ProcessReceivedDisplayFrame((TcpCommand)tcpCommand,chars));
                                 break;
                             default:
                                 continue; // Invalid frame, skip
@@ -1049,22 +1048,22 @@ namespace SwissTimingDisplay.ViewModels
                                 }
                                 string durationStr = duration.ToString("D2");
                                 List<char> chars = new List<char>() { durationStr[0], durationStr[1] };
-                                Application.Current?.Dispatcher?.BeginInvoke(() => ProcessReceivedFrame((TcpCommand)tcpCommand, chars));
+                                Application.Current?.Dispatcher?.BeginInvoke(() => ProcessReceivedWindGaugeFrame((TcpCommand)tcpCommand, chars));
                                 break;
                             case (byte)'S':
                                 // Handle case for 'S'
                                 tcpCommand = TcpCommand.WindGauge_Start_of_Measurement;
-                                Application.Current?.Dispatcher?.BeginInvoke(() => ProcessReceivedFrame((TcpCommand)tcpCommand, new List<char>() { }));
+                                Application.Current?.Dispatcher?.BeginInvoke(() => ProcessReceivedWindGaugeFrame((TcpCommand)tcpCommand, new List<char>() { }));
                                 break;
                             case (byte)'R':
                                 // Handle case for 'R'
                                 tcpCommand = TcpCommand.WindGauge_Reset_Stop_Clear;
-                                Application.Current?.Dispatcher?.BeginInvoke(() => ProcessReceivedFrame((TcpCommand)tcpCommand, new List<char>() { }));
+                                Application.Current?.Dispatcher?.BeginInvoke(() => ProcessReceivedWindGaugeFrame((TcpCommand)tcpCommand, new List<char>() { }));
                                 break;
                             case (byte)'O':
                                 // Handle case for 'O'
                                 tcpCommand = TcpCommand.WindGauge_Resend_Latest;
-                                Application.Current?.Dispatcher?.BeginInvoke(() => ProcessReceivedFrame((TcpCommand)tcpCommand, new List<char>() { }));
+                                Application.Current?.Dispatcher?.BeginInvoke(() => ProcessReceivedWindGaugeFrame((TcpCommand)tcpCommand, new List<char>() { }));
                                 break;
                             default:
                                 continue; // Invalid frame, skip
@@ -1079,7 +1078,7 @@ namespace SwissTimingDisplay.ViewModels
         }
         
 
-        private void ProcessReceivedFrame(TcpCommand tcpCommand, List<char> chars )
+        private void ProcessReceivedDisplayFrame(TcpCommand tcpCommand, List<char> chars )
         {
 
             if (tcpCommand == TcpCommand.RollerTimeofDayorRunningTime)
@@ -1102,25 +1101,6 @@ namespace SwissTimingDisplay.ViewModels
                 }
 
                 RollerTimeofDayorRunningTimeClear();
-            }
-            else
-            {
-                switch (tcpCommand)
-                {
-                    case TcpCommand.WindGauge_Acquisition_Duration:
-                        // CWI Handle acquisition duration update if needed
-                        break;
-                    case TcpCommand.WindGauge_Start_of_Measurement:
-                        // CWS Handle start of measurement if needed
-                            break;
-                    case TcpCommand.WindGauge_Reset_Stop_Clear:
-                        // CWR Handle Reset(stop acquisition, clear the scoreboard)
-                        break;
-                    case  TcpCommand.WindGauge_Resend_Latest:
-                        // CWO Handle resend latest if needed
-                        break;
-
-                }
             }
         }
 
