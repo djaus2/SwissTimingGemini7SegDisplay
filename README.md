@@ -11,13 +11,15 @@
 </tr>
 </table>
 
-> **Status**
+ **Status**
 > **WORKING ON MISTRAL WIND GAUAGE PROTOCOL**. _Watch this space.._ Making progress .. About a week!  
 Got the app sending the Wind Gauge  Control TP messages  
 Implemented simulated Wind Gauge to interpret them.  
 Runs OK.  
-So simulated WindGauge now available:construction_worker: 
-No serial on sending of Wind Speed 2Do.  
+So simulated WindGauge now available :construction_worker:   
+No serial on sending of Wind Speed 2Do.
+<img width="250" alt="image" src="https://github.com/user-attachments/assets/e5388ae1-73c8-49d8-9fbe-8d0bf32be41e" />
+
 > - (In situ)Test with actual display in field **WORKS**!
 >   - As per [MVACDisplayandWindGaugeCabling](/SwissTimingDisplay/docs/MVACDisplayandWindGaugeCabling.pdf) diagram
 >   - Nb: Wind Gauge as per this diagram not yet tested and not part of this software _yet_.
