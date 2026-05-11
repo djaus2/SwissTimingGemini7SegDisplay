@@ -19,7 +19,8 @@ Runs OK.
 So simulated WindGauge now available :construction_worker:  
 When Wind Speed determined, Mistral data output as array of CommandChar (not static) generated and displayed in Status ready to send.  
 No serial on sending of Wind Speed 2Do.
-<img width="250" alt="image" src="https://github.com/user-attachments/assets/e5388ae1-73c8-49d8-9fbe-8d0bf32be41e" />
+
+<img width="300"  alt="image" src="https://github.com/user-attachments/assets/375c8625-0c2a-4d80-848a-c901f66a5cdf" />
 
 > - (In situ)Test with actual display in field **WORKS**!
 >   - As per [MVACDisplayandWindGaugeCabling](/SwissTimingDisplay/docs/MVACDisplayandWindGaugeCabling.pdf) diagram
