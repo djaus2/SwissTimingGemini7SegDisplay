@@ -12,11 +12,12 @@
 </table>
 
  **Status**
-> **WORKING ON MISTRAL WIND GAUAGE PROTOCOL**. _Watch this space.._ Making progress .. About a week!  
+> **WORKING ON MISTRAL WIND GAUGE PROTOCOL**. _Watch this space.._ Making progress .. About a week!  
 Got the app sending the Wind Gauge  Control TP messages  
 Implemented simulated Wind Gauge to interpret them.  
 Runs OK.  
-So simulated WindGauge now available :construction_worker:   
+So simulated WindGauge now available :construction_worker:  
+When Wind Speed determined, Mistral data output as array of CommandChar (not static) generated and displayed in Status ready to send.  
 No serial on sending of Wind Speed 2Do.
 <img width="250" alt="image" src="https://github.com/user-attachments/assets/e5388ae1-73c8-49d8-9fbe-8d0bf32be41e" />
 
