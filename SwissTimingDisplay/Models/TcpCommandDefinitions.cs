@@ -6,7 +6,23 @@ namespace SwissTimingDisplay.Models
 {
     public static class TcpCommandDefinitions
     {
-
+        public static CharCommand GetCharCmdDigit(int d)
+        {
+            return d switch
+            {
+                0 => CharCommand.d0,
+                1 => CharCommand.d1,
+                2 => CharCommand.d2,
+                3 => CharCommand.d3,
+                4 => CharCommand.d4,
+                5 => CharCommand.d5,
+                6 => CharCommand.d6,
+                7 => CharCommand.d7,
+                8 => CharCommand.d8,
+                9 => CharCommand.d9,
+                _ => throw new ArgumentOutOfRangeException(nameof(d), "Invalid digit")
+            };
+        }
         public static readonly IReadOnlyDictionary<TcpCommand, IReadOnlyList<CharCommand>> Commands =
             new Dictionary<TcpCommand, IReadOnlyList<CharCommand>>
             {
@@ -39,12 +55,12 @@ namespace SwissTimingDisplay.Models
                 { CharCommand.SOH, CharCommand.DC3,CharCommand.G,CharCommand.W, CharCommand.STX, CharCommand.DLE,
                     CharCommand.Zero,
                     CharCommand.Zero,
-                    CharCommand.Zero,
                     CharCommand.One,
                     CharCommand.Three,
                     CharCommand.SPEEDSIGN,
+                    CharCommand.SPEEDTEN,
                     CharCommand.SPEEDWHOLE,
-                    CharCommand.SPEEDDOT,
+                    CharCommand.Dot,
                     CharCommand.SPEEDTENTHS,
                     CharCommand.Space, CharCommand.EOT } },
             };

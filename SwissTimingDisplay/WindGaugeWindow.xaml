@@ -355,7 +355,7 @@
                     </Button.Style>
                 </Button>
 
-                <Button Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="2" Margin="12,8,0,0" Padding="10,4" Command="{Binding ReceiveConnectToggleCommand}">
+                <Button Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="2" Margin="12,8,0,0" Padding="10,4" Command="{Binding ReceiveConnectToggleCommand}" Height="26" VerticalAlignment="Top">
                     <Button.Style>
                         <Style TargetType="Button" BasedOn="{StaticResource SnazzyButtonStyle}">
                             <Setter Property="Content" Value="Connect" />

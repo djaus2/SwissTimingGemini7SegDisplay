@@ -140,8 +140,40 @@ namespace SwissTimingDisplay.ViewModels
         private void SendResult()
         {
             double speed = WindGauge.WindSpeed;
+            var cmd = TcpCommand.WindGauge_Output;
+            var commandWindSeed = TcpCommandDefinitions.Commands[cmd];
+            CharCommand[] command = new CharCommand[commandWindSeed.Count()] ;
+            for (int i = 0; i < (commandWindSeed.Count()); i++) {
+                command[i] = commandWindSeed[i];
+            }            
+
+            CharCommand sign = CharCommand.plus;
+            if (speed < 0)
+            {
+                sign = CharCommand.minus;
+                speed = -speed;
+            }
+            int locationOfS = 10; // Array.IndexOf(command, CharCommand.s);
+            string speedStr = speed.ToString("F1").PadLeft(4, '0');
+            command[locationOfS++] = sign;
+            command[locationOfS++] = TcpCommandDefinitions.GetCharCmdDigit(int.Parse(speedStr.Substring(0, 1)));   // First digit
+            command[locationOfS++] = TcpCommandDefinitions.GetCharCmdDigit(int.Parse(speedStr.Substring(1, 1)));
+            locationOfS++;
+            command[locationOfS++] = TcpCommandDefinitions.GetCharCmdDigit(int.Parse(speedStr.Substring(3, 1)));
             // Got to send that back to the device, but we don't have the code for that yet, so let's just throw for now
             //throw new NotImplementedException();
+            var msg = string.Join(",", command.Select(c => CharCommandToString(c)));
+            Status = $"Command: {msg}";
+        }
+
+        private string CharCommandToString(CharCommand cmd)
+        {
+            char ch = (char)cmd;
+            if (char.IsControl(ch))
+            {
+                return cmd.ToString();
+            }
+            return ch.ToString();
         }
 
         private void UpdateWindGaugeDisplayCount(int count)

@@ -19,9 +19,10 @@ namespace SwissTimingDisplay.Models
         Sxx = 0xF3,
         TIME = 0xF4,
         SPEEDSIGN = 0xE0,
-        SPEEDWHOLE = 0xE1,
-        SPEEDDOT = 0xE2,
-        SPEEDTENTHS = 0xE3,
+        SPEEDTEN = 0xE1,
+        SPEEDWHOLE = 0xE2,
+        SPEEDDOT = 0xE3,
+        SPEEDTENTHS = 0xE4,
         B = (byte)'B',
         I = (byte)'I',
         C = (byte)'C',
@@ -39,7 +40,20 @@ namespace SwissTimingDisplay.Models
         Dot = (byte)'.',
         s = (byte)'s',
         x = (byte)'x',
+        plus = (byte)'+',
+        minus = (byte)'-',
+        d0 = (byte)'0',
+        d1 = (byte)'1',
+        d2 = (byte)'2',
+        d3 = (byte)'3',
+        d4 = (byte)'4',
+        d5 = (byte)'5',
+        d6 = (byte)'6',
+        d7 = (byte)'7',
+        d8 = (byte)'8',
+        d9 = (byte)'9'
 
 
     }
+
 }
