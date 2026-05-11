@@ -14,7 +14,7 @@
  **Status**
 > **WORKING ON MISTRAL WIND GAUGE PROTOCOL**. _Watch this space.._ Making progress .. About a week!  
 Got the app sending the Wind Gauge  Control TP messages  
-Implemented simulated Wind Gauge to interpret them.  
+Implemented simulated Wind Gauge to interpret them using Loopback cable across Swiss Timing  INT131  
 Runs OK.  
 So simulated WindGauge now available :construction_worker:  
 When Wind Speed determined, Mistral data output as array of CommandChar (not static) generated and displayed in Status ready to send.  
