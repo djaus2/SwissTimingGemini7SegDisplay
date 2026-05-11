@@ -15,18 +15,28 @@ namespace SwissTimingDisplay.Converters
                 return -1;
             }
 
-            var digits = s.Where(char.IsDigit).ToArray();
             if (!int.TryParse(parameter?.ToString(), out var index))
             {
                 return -1;
             }
 
-            if (index < 0 || index >= digits.Length)
+            if (index < 0 || index >= s.Length)
             {
                 return -1;
             }
 
-            return digits[index] - '0';
+            var c = s[index];
+            if (c == '-')
+            {
+                return 10; // Minus sign
+            }
+
+            if (char.IsDigit(c))
+            {
+                return c - '0';
+            }
+
+            return -1;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

@@ -14,8 +14,8 @@ namespace SwissTimingDisplay.Models
                 // { TcpCommand.TimeOfDayOrRunningTime, new[] { CharCommand.SOH, CharCommand.STX, CharCommand.SPC, CharCommand.ETX, CharCommand.EOT } },
                 // { TcpCommand.RunningTimeDifference, new[] { CharCommand.SOH, CharCommand.DC4, CharCommand.Rxx, CharCommand.STX, CharCommand.HOME,CharCommand.SPC, CharCommand.SPC ,CharCommand.SPC,CharCommand.STX,CharCommand.TTT,CharCommand.EOT } },
                 // { TcpCommand.NumberAndNetTime, new[] {  CharCommand.SOH, CharCommand.DC4, CharCommand.Sxx, CharCommand.STX, CharCommand.HOME, CharCommand.NNN,CharCommand.TTT,CharCommand.EOT }  },
-                { TcpCommand.RollerTimeModeClear, new[] {  CharCommand.STX, CharCommand.B, CharCommand.ETX, } },
-                { TcpCommand.RollerTimeofDayorRunningTime, new[] 
+                { TcpCommand.Roller_Time_Mode_Clear, new[] {  CharCommand.STX, CharCommand.B, CharCommand.ETX, } },
+                { TcpCommand.Roller_Time_of_Day_or_Running_Time_, new[] 
                 {  CharCommand.STX, CharCommand.I, CharCommand.TIME, CharCommand.NNN,CharCommand.SPC,CharCommand.SPC, CharCommand.ETX } },
                 
                 //Wind Gauge commands per Swiss Timing documentation: https://www.swisstiming.com/fileadmin/user_upload/Downloads/Swiss_Timing_Wind_Gauge_Protocol.pdf
@@ -137,7 +137,7 @@ namespace SwissTimingDisplay.Models
                 return false;
             }
 
-            if (tcpCommand == TcpCommand.RollerTimeofDayorRunningTime)
+            if (tcpCommand == TcpCommand.Roller_Time_of_Day_or_Running_Time_)
             {
                 // Per requirement: replace the 3rd byte (index 2) when it is TIME with HHMMSS ASCII digits.
                 if (charCommands.Count > 2 && charCommands[2] == CharCommand.TIME)

@@ -135,7 +135,11 @@ namespace SwissTimingDisplay.ViewModels
             BibNoClearCommand = new RelayCommand(() => BibNo = string.Empty, () => BibNoInt >= 0);
 
             TcpCommands = new ObservableCollection<TcpCommand>(Enum.GetValues<TcpCommand>());
-            SelectedTcpCommand = TcpCommands.FirstOrDefault();
+
+            RollerTcpCommands = new ObservableCollection<TcpCommand>(Enum.GetValues<TcpCommand>()
+                .Where(c => c.ToString().StartsWith("Roller")));
+            WindGaugeTcpCommands = new ObservableCollection<TcpCommand>(Enum.GetValues<TcpCommand>()
+                .Where(c => c.ToString().StartsWith("WindGauge")));
 
             _sendPortsViewSource.Source = Ports;
             _sendPortsViewSource.Filter += SendPortsViewSourceOnFilter;
@@ -161,6 +165,10 @@ namespace SwissTimingDisplay.ViewModels
         public ICollectionView ReceivePortsView => _receivePortsViewSource.View;
 
         public ObservableCollection<TcpCommand> TcpCommands { get; }
+
+        public ObservableCollection<TcpCommand> RollerTcpCommands { get; }
+
+        public ObservableCollection<TcpCommand> WindGaugeTcpCommands { get; }
 
         public SerialPortInfo? SelectedPort
         {
@@ -868,7 +876,7 @@ namespace SwissTimingDisplay.ViewModels
             _receiveTask = Task.Run(() => ReceiveLoopAsync(port, _receiveCts.Token));
         }
 
-        private void DisconnectReceive()
+        public void DisconnectReceive()
         {
             var cts = _receiveCts;
             _receiveCts = null;
@@ -1017,12 +1025,12 @@ namespace SwissTimingDisplay.ViewModels
                         {
                             case (byte)'B':
                                 // Handle case for 'B'
-                                tcpCommand = TcpCommand.RollerTimeModeClear;
+                                tcpCommand = TcpCommand.Roller_Time_Mode_Clear;
                                 Application.Current?.Dispatcher?.BeginInvoke(() => ProcessReceivedDisplayFrame((TcpCommand)tcpCommand, new List<char>() { }));
                                 break;
                             case (byte)'I':
                                 // Handle case for 'I'
-                                tcpCommand = TcpCommand.RollerTimeofDayorRunningTime;
+                                tcpCommand = TcpCommand.Roller_Time_of_Day_or_Running_Time_;
                                 var chars = buffer.Skip(2).Select(b => (char)b).ToList();
                                 Application.Current?.Dispatcher?.BeginInvoke(() => ProcessReceivedDisplayFrame((TcpCommand)tcpCommand,chars));
                                 break;
@@ -1081,12 +1089,12 @@ namespace SwissTimingDisplay.ViewModels
         private void ProcessReceivedDisplayFrame(TcpCommand tcpCommand, List<char> chars )
         {
 
-            if (tcpCommand == TcpCommand.RollerTimeofDayorRunningTime)
+            if (tcpCommand == TcpCommand.Roller_Time_of_Day_or_Running_Time_)
             {
                 
                 RollerTimeofDayorRunningTime(chars);
             }
-            else if (tcpCommand == TcpCommand.RollerTimeModeClear)
+            else if (tcpCommand == TcpCommand.Roller_Time_Mode_Clear)
             {
                 // Only process clear command on receive side if both ports are connected
                 // and the clear command was sent locally (to prevent external clears)

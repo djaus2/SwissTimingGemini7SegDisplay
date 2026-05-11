@@ -15,6 +15,7 @@
         <converters:TimeInputSeparatorVisibilityConverter x:Key="TimeInputSeparatorVisibilityConverter" />
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
         <converters:EnumToBooleanConverter x:Key="EnumToBooleanConverter" />
+        <converters:UnderscoreToSpaceConverter x:Key="UnderscoreToSpaceConverter" />
 
         <Style x:Key="SnazzyButtonStyle" TargetType="Button">
             <Setter Property="Background">
@@ -57,6 +58,159 @@
                                         <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
                                             <GradientStop Color="#3A80D2" Offset="0" />
                                             <GradientStop Color="#256AAC" Offset="1" />
+                                        </LinearGradientBrush>
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="SnazzyButtonStyleRed" TargetType="Button">
+            <Setter Property="Background">
+                <Setter.Value>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                        <GradientStop Color="#E74C3C" Offset="0" />
+                        <GradientStop Color="#C0392B" Offset="1" />
+                    </LinearGradientBrush>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="BorderBrush" Value="#922B21" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Padding" Value="12,6" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="6"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background">
+                                    <Setter.Value>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                            <GradientStop Color="#F05E4D" Offset="0" />
+                                            <GradientStop Color="#D04A3B" Offset="1" />
+                                        </LinearGradientBrush>
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Background">
+                                    <Setter.Value>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                            <GradientStop Color="#D03A2C" Offset="0" />
+                                            <GradientStop Color="#A0281C" Offset="1" />
+                                        </LinearGradientBrush>
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="SnazzyButtonStyleGreen" TargetType="Button">
+            <Setter Property="Background">
+                <Setter.Value>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                        <GradientStop Color="#2ECC71" Offset="0" />
+                        <GradientStop Color="#27AE60" Offset="1" />
+                    </LinearGradientBrush>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="BorderBrush" Value="#1E8449" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Padding" Value="12,6" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="6"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background">
+                                    <Setter.Value>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                            <GradientStop Color="#3EDC81" Offset="0" />
+                                            <GradientStop Color="#37BE70" Offset="1" />
+                                        </LinearGradientBrush>
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Background">
+                                    <Setter.Value>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                            <GradientStop Color="#2EC261" Offset="0" />
+                                            <GradientStop Color="#1D9E50" Offset="1" />
+                                        </LinearGradientBrush>
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="SnazzyButtonStylePurple" TargetType="Button">
+            <Setter Property="Background">
+                <Setter.Value>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                        <GradientStop Color="#9B59B6" Offset="0" />
+                        <GradientStop Color="#8E44AD" Offset="1" />
+                    </LinearGradientBrush>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="BorderBrush" Value="#6C3483" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Padding" Value="12,6" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="6"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background">
+                                    <Setter.Value>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                            <GradientStop Color="#AB69C6" Offset="0" />
+                                            <GradientStop Color="#9E54BD" Offset="1" />
+                                        </LinearGradientBrush>
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Background">
+                                    <Setter.Value>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                            <GradientStop Color="#8B49A6" Offset="0" />
+                                            <GradientStop Color="#7E349D" Offset="1" />
                                         </LinearGradientBrush>
                                     </Setter.Value>
                                 </Setter>
@@ -110,6 +264,7 @@
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
                 <CheckBox Grid.Column="0" VerticalAlignment="Center" IsChecked="{Binding OnlyProlific}">
@@ -147,6 +302,10 @@
                         <TextBlock FontWeight="Bold" FontStyle="Italic" Foreground="Purple" Text="{Binding NumDigitsLabel}" />
                     </CheckBox.Content>
                 </CheckBox>
+                <StackPanel Grid.Column="7" Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button x:Name="btnWindGauge" Margin="0,0,0,0" Padding="10,4" Content="Wind Gauge" Click="WindGaugeButton_Click" Style="{StaticResource SnazzyButtonStylePurple}" />
+                    <Button x:Name="btnExit" Margin="12,0,0,0" Padding="10,4" Content="Exit" Click="ExitButton_Click" Style="{StaticResource SnazzyButtonStyleRed}" />
+                </StackPanel>
             </Grid>
         </GroupBox>
 
@@ -243,14 +402,19 @@
 
                     <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal">
                         <ComboBox Margin="12,0,0,0"
-                                  ItemsSource="{Binding TcpCommands}"
+                                  ItemsSource="{Binding RollerTcpCommands}"
                                   SelectedItem="{Binding SelectedTcpCommand}"
-                                  Style="{StaticResource ComboBoxStyle}" />
+                                  Style="{StaticResource ComboBoxStyle}">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Converter={StaticResource UnderscoreToSpaceConverter}}" />
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
                         <Button x:Name="btnSendClear" Margin="12,0,0,0" Padding="10,4" Content="Send Clear" Click="SendClearButton_Click" Style="{StaticResource SnazzyButtonStyle}" />
                         <Button x:Name="btnSend" Margin="8,0,0,0" Padding="10,4" Content="Send" Click="Button_Click" Style="{StaticResource SnazzyButtonStyle}" />
                         <Button x:Name="btnRaceTimer" Margin="8,0,0,0" Padding="10,4" Content="Start" Click="RaceTimerButton_Click" Style="{StaticResource SnazzyButtonStyle}" />
                         <Button x:Name="btnLapContinue" Margin="8,0,0,0" Padding="10,4" Content="Lap" Click="LapContinueButton_Click" Visibility="Collapsed" Style="{StaticResource SnazzyButtonStyle}" />
-                        <Button x:Name="btnWindGauge" Margin="8,0,0,0" Padding="10,4" Content="Wind Gauge" Click="WindGaugeButton_Click" Style="{StaticResource SnazzyButtonStyle}" />
                     </StackPanel>
 
                     <Grid Grid.Row="2" Grid.Column="0" Margin="0,12,0,6">

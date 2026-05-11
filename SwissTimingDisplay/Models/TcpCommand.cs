@@ -6,8 +6,8 @@ namespace SwissTimingDisplay.Models
         // TimeOfDayOrRunningTime,
         // RunningTimeDifference,
         // NumberAndNetTime,
-        RollerTimeModeClear,
-        RollerTimeofDayorRunningTime,
+        Roller_Time_Mode_Clear,
+        Roller_Time_of_Day_or_Running_Time_,
         //Mistral Wind Gauge TCP Commands:
         WindGauge_Acquisition_Duration,
         WindGauge_Start_of_Measurement,

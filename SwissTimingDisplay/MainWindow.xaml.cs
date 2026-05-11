@@ -317,7 +317,7 @@ namespace SwissTimingDisplay
                 {
                     try
                     {
-                        var clearCommand = TcpCommandDefinitions.GetPayloadBytes(TcpCommand.RollerTimeModeClear).ToArray();
+                        var clearCommand = TcpCommandDefinitions.GetPayloadBytes(TcpCommand.Roller_Time_Mode_Clear).ToArray();
                         await _vm.SendRawAsync(clearCommand);
                         _vm.Status = $"Sent {clearCommand.Length} byte(s) to {_vm.ConnectedPortName}.";
                     }
@@ -534,7 +534,7 @@ namespace SwissTimingDisplay
                 return;
             }
 
-            var enabled = _vm.IsConnected && _vm.SelectedTcpCommand == TcpCommand.RollerTimeofDayorRunningTime;
+            var enabled = _vm.IsConnected && _vm.SelectedTcpCommand == TcpCommand.Roller_Time_of_Day_or_Running_Time_;
             btnRaceTimer.IsEnabled = enabled;
 
             if (!enabled && (_raceIsRunning || _raceHasStartedSinceReset))
@@ -562,7 +562,7 @@ namespace SwissTimingDisplay
             {
                 try
                 {
-                    var clearCommand = TcpCommandDefinitions.GetPayloadBytes(TcpCommand.RollerTimeModeClear).ToArray();
+                    var clearCommand = TcpCommandDefinitions.GetPayloadBytes(TcpCommand.Roller_Time_Mode_Clear).ToArray();
                     await _vm.SendRawAsync(clearCommand);
                     _vm.Status = $"Sent {clearCommand.Length} byte(s) to {_vm.ConnectedPortName}.";
                 }
@@ -670,7 +670,7 @@ namespace SwissTimingDisplay
 
             return charCommands.SelectMany((c, idx) =>
             {
-                if (cmd == TcpCommand.RollerTimeofDayorRunningTime && idx == 3 && c == CharCommand.NNN)
+                if (cmd == TcpCommand.Roller_Time_of_Day_or_Running_Time_ && idx == 3 && c == CharCommand.NNN)
                 {
                     return bibDigits.Select(d => (byte)d);
                 }
@@ -749,7 +749,7 @@ namespace SwissTimingDisplay
 
                 var expandedBytes = BuildExpandedPayload(cmd, charCommands, _vm.UseWallClockTimeOfDay);
 
-                if (cmd == TcpCommand.RollerTimeofDayorRunningTime
+                if (cmd == TcpCommand.Roller_Time_of_Day_or_Running_Time_
                     && charCommands.Count > 3
                     && charCommands[3] == CharCommand.NNN)
                 {
@@ -792,7 +792,7 @@ namespace SwissTimingDisplay
                         _vm.Status = $"Sent {expandedBytes.Length} byte(s) to {portName}.";
 
                         // Clear TimeOut on send side if this was a Clear command
-                        if (cmd == TcpCommand.RollerTimeModeClear)
+                        if (cmd == TcpCommand.Roller_Time_Mode_Clear)
                         {
                             _vm.TimeInput = string.Empty;
                         }
@@ -823,7 +823,7 @@ namespace SwissTimingDisplay
 
             try
             {
-                var clearCommand = TcpCommandDefinitions.GetPayloadBytes(TcpCommand.RollerTimeModeClear).ToArray();
+                var clearCommand = TcpCommandDefinitions.GetPayloadBytes(TcpCommand.Roller_Time_Mode_Clear).ToArray();
                 var portName = _vm.ConnectedPortName ?? "(unknown)";
 
                 await _vm.SendRawAsync(clearCommand);
@@ -844,12 +844,22 @@ namespace SwissTimingDisplay
 
         private void WindGaugeButton_Click(object sender, RoutedEventArgs e)
         {
+            _vm.Disconnect();
+            _vm.DisconnectReceive();
+            
             if (_windGaugeWindow == null)
             {
                 _windGaugeWindow = new WindGaugeWindow(this);
             }
             _windGaugeWindow.Show();
             this.Hide();
+        }
+
+        private void ExitButton_Click(object sender, RoutedEventArgs e)
+        {
+            _vm.Disconnect();
+            _vm.DisconnectReceive();
+            Application.Current.Shutdown();
         }
     }
 }

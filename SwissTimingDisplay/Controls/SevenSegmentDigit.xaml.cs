@@ -35,6 +35,19 @@ namespace SwissTimingDisplay.Controls
             var on = (Brush)Resources["SegmentOnBrush"];
             var off = (Brush)Resources["SegmentOffBrush"];
 
+            // 10 represents minus sign (only middle segment G)
+            if (digit == 10)
+            {
+                SegA.Fill = off;
+                SegB.Fill = off;
+                SegC.Fill = off;
+                SegD.Fill = off;
+                SegE.Fill = off;
+                SegF.Fill = off;
+                SegG.Fill = on;
+                return;
+            }
+
             if (digit < 0 || digit > 9)
             {
                 SegA.Fill = off;
