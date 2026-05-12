@@ -18,7 +18,7 @@ Implemented simulated Wind Gauge to interpret them using Loopback cable across S
 Runs OK.  
 So simulated WindGauge now available :construction_worker:  
 When Wind Speed determined, Mistral data output as array of CommandChar (not static) generated and displayed in Status ready to send.  
-No serial send back of Wind Speed data though. 2Do.
+Serial send back of Wind Speed data: See below
 
 <img width="300"  alt="image" src="https://github.com/user-attachments/assets/375c8625-0c2a-4d80-848a-c901f66a5cdf" />
 
@@ -95,6 +95,14 @@ The capability for receiving messages as sent and displaying the received times 
   - And added Start at Finish option for DownCount mode which is set or cleared appropriately.
     - If clear then first lap does not decrement the lap count as per 5K, 3K and 1500m where start is as 200m or 300m 
     - For example, at start of 1500m is Laps set to 3 laps to go so and only decrements when leader passes start second time.
+  - Wind Gauge
+    - V1.4.1 Kill either Window by clicking on the Window X top right completely kills the app.
+    - V1.4.2 Write back of speed from simulator works.
+      - Various Selections persisted
+        - Eg Can hide simulator, display simulator speed directly or only once "returned".
+      - Connection state persisted issues to resolve
+      - Need to check with display that these changes haven't caused issues. 2Do
+      - Not tested with actual Wind Gauge yet, simulator only. 2Do
 
 
 ## Hint
