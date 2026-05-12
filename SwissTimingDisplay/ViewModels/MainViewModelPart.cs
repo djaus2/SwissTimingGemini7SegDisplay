@@ -15,10 +15,32 @@ namespace SwissTimingDisplay.ViewModels
     public sealed partial class MainViewModel : INotifyPropertyChanged, IDisposable
     {
         private string _windGaugeDisplay = string.Empty;
+        private string _windGaugeCaptureCountdown = "10";
         public string WindGaugeDisplay
         {
             get => _windGaugeDisplay;
             set => Set(ref _windGaugeDisplay, value);
+        }
+
+        public string WindGaugeCaptureCountdown
+        {
+            get => _windGaugeCaptureCountdown;
+            set
+            {
+                if (Set(ref _windGaugeCaptureCountdown, value))
+                {
+                    // Update the static WindGauge.duration when the property changes
+                    if (int.TryParse(value, out int duration))
+                    {
+                        WindGauge.duration = duration;
+                    }
+                    // Save the setting only if not loading
+                    if (!_isLoadingSettings)
+                    {
+                        SavePersistedPortNames();
+                    }
+                }
+            }
         }
 
         private bool _showDecimalDot = false;
@@ -51,7 +73,7 @@ namespace SwissTimingDisplay.ViewModels
                 {
                     if (_countdown > 0)
                     {
-                        viewModel.UpdateWindGaugeDisplayCount(_countdown);
+                        viewModel.UpdateSimulatedWindGaugeDisplayCount(_countdown);
                         _countdown--;
                     }
                     else
@@ -59,7 +81,7 @@ namespace SwissTimingDisplay.ViewModels
                         _timer?.Stop();
                         WindSpeed = new Random().Next(-100, 100); // Simulate wind speed measurement
                         WindSpeed /= 10.0;
-                        viewModel.UpdateWindGaugeDisplaySpeed();
+                        viewModel.UpdateSimulatedWindGaugeDisplaySpeed();
                     }
                 };
                 _timer.Start();
@@ -123,7 +145,7 @@ namespace SwissTimingDisplay.ViewModels
 
         private void WindGaugeResendLatest()
         {
-            UpdateWindGaugeDisplaySpeed();
+            UpdateSimulatedWindGaugeDisplaySpeed();
         }
 
         private void WindGaugeResetStopClear()
@@ -160,10 +182,13 @@ namespace SwissTimingDisplay.ViewModels
             command[locationOfS++] = TcpCommandDefinitions.GetCharCmdDigit(int.Parse(speedStr.Substring(1, 1)));
             locationOfS++;
             command[locationOfS++] = TcpCommandDefinitions.GetCharCmdDigit(int.Parse(speedStr.Substring(3, 1)));
-            // Got to send that back to the device, but we don't have the code for that yet, so let's just throw for now
-            //throw new NotImplementedException();
+
             var msg = string.Join(",", command.Select(c => CharCommandToString(c)));
             Status = $"Command: {msg}";
+
+            // Send via receive port
+            byte[] payload = command.Select(c => (byte)c).ToArray();
+            SendRawAsyncReceive(payload);
         }
 
         private string CharCommandToString(CharCommand cmd)
@@ -176,28 +201,36 @@ namespace SwissTimingDisplay.ViewModels
             return ch.ToString();
         }
 
-        private void UpdateWindGaugeDisplayCount(int count)
+        private void UpdateSimulatedWindGaugeDisplayCount(int count)
         {
-            ShowDecimalDot = false;
-            WindGaugeDisplay = count.ToString().PadLeft(4, ' ');
+            // Only update display if DisplaySimulatorSpeed is true
+            if (DisplaySimulatorSpeed)
+            {
+                ShowDecimalDot = false;
+                WindGaugeDisplay = count.ToString().PadLeft(4, ' ');
+            }
             string msg = $"Acquisition Duration: {count} seconds remaining";
             Status = msg;
         }
 
-        private void UpdateWindGaugeDisplaySpeed()
+        private void UpdateSimulatedWindGaugeDisplaySpeed()
         {
-            ShowDecimalDot = true;
-            // Format without decimal point in the string (separator dot will be shown separately)
-            int wholePart = (int)Math.Abs(WindGauge.WindSpeed);
-            int decimalPart = (int)(Math.Abs(WindGauge.WindSpeed * 10) % 10);
-            string sign = WindGauge.WindSpeed < 0 ? "-" : " ";
-            
-            // Format as "XXX" with leading space for sign (no decimal point in string)
-            WindGaugeDisplay = $"{sign}{wholePart:00}{decimalPart}";
-            
+            // Only update display if DisplaySimulatorSpeed is true
+            if (DisplaySimulatorSpeed)
+            {
+                ShowDecimalDot = true;
+                // Format without decimal point in the string (separator dot will be shown separately)
+                int wholePart = (int)Math.Abs(WindGauge.WindSpeed);
+                int decimalPart = (int)(Math.Abs(WindGauge.WindSpeed * 10) % 10);
+                string sign = WindGauge.WindSpeed < 0 ? "-" : " ";
+
+                // Format as "XXX" with leading space for sign (no decimal point in string)
+                WindGaugeDisplay = $"{sign}{wholePart:00}{decimalPart}";
+            }
+
             Status = $"Wind Speed: {WindGauge.WindSpeed}";
             SendResult();
-            
+
             // Notify that measurement is complete
             WindGaugeMeasurementComplete?.Invoke(this, EventArgs.Empty);
         }

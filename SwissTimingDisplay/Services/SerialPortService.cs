@@ -8,6 +8,10 @@ namespace SwissTimingDisplay.Services
     public sealed class SerialPortService : IDisposable
     {
         private SerialPort? _port;
+        private CancellationTokenSource? _receiveCts;
+        private Task? _receiveTask;
+
+        public event Action<byte[]>? DataReceived;
 
         public bool IsConnected => _port?.IsOpen == true;
         public string? ConnectedPortName => _port?.PortName;
@@ -31,12 +35,33 @@ namespace SwissTimingDisplay.Services
 
             port.Open();
             _port = port;
+
+            // Start receive loop
+            _receiveCts = new CancellationTokenSource();
+            _receiveTask = Task.Run(() => ReceiveLoopAsync(port, _receiveCts.Token));
         }
 
         public void Disconnect()
         {
             var port = _port;
             _port = null;
+
+            // Stop receive loop
+            var cts = _receiveCts;
+            _receiveCts = null;
+            if (cts is not null)
+            {
+                cts.Cancel();
+                try
+                {
+                    _receiveTask?.Wait(1000);
+                }
+                catch (AggregateException)
+                {
+                    // Task was cancelled
+                }
+                _receiveTask = null;
+            }
 
             if (port is null)
             {
@@ -69,6 +94,35 @@ namespace SwissTimingDisplay.Services
                 cancellationToken.ThrowIfCancellationRequested();
                 try { port.Write(payload, 0, payload.Length); } catch (Exception ex) { }
             }, cancellationToken);
+        }
+
+        private async Task ReceiveLoopAsync(SerialPort port, CancellationToken cancellationToken)
+        {
+            var buffer = new byte[1024];
+
+            while (!cancellationToken.IsCancellationRequested)
+            {
+                try
+                {
+                    int bytesRead = await port.BaseStream.ReadAsync(buffer, 0, buffer.Length, cancellationToken);
+                    if (bytesRead > 0)
+                    {
+                        var receivedData = new byte[bytesRead];
+                        Array.Copy(buffer, 0, receivedData, 0, bytesRead);
+                        DataReceived?.Invoke(receivedData);
+                    }
+                }
+                catch (OperationCanceledException)
+                {
+                    // Normal cancellation
+                    break;
+                }
+                catch (Exception)
+                {
+                    // Ignore other errors and continue
+                    await Task.Delay(100, cancellationToken);
+                }
+            }
         }
 
         public void Dispose()

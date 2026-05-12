@@ -42,7 +42,30 @@ namespace SwissTimingDisplay
 
             _vm.PropertyChanged += VmOnPropertyChanged;
 
-            Loaded += (_, _) => ApplyAnchorLayout();
+            Loaded += (_, _) =>
+            {
+                ApplyAnchorLayout();
+
+                // Check if we should show WindGaugeWindow on startup
+                if (_vm.ShowWindGaugeWindow)
+                {
+                    // Disconnect any auto-connected ports before switching
+                    _vm.SetIsLoadingSettings(true);
+                    _vm.Disconnect();
+                    _vm.DisconnectReceive();
+                    _vm.SetIsLoadingSettings(false);
+
+                    if (_windGaugeWindow == null)
+                    {
+                        _windGaugeWindow = new WindGaugeWindow(this);
+                    }
+                    _windGaugeWindow.Show();
+                    this.Hide();
+
+                    // Auto-connect WindGauge ports based on persisted state
+                    _vm.AutoConnectIfNeeded();
+                }
+            };
             SizeChanged += (_, _) => ApplyAnchorLayout();
 
             _raceTimer = new DispatcherTimer
@@ -851,12 +874,14 @@ namespace SwissTimingDisplay
             {
                 _windGaugeWindow = new WindGaugeWindow(this);
             }
+            _vm.ShowWindGaugeWindow = true;
             _windGaugeWindow.Show();
             this.Hide();
         }
 
         private void ExitButton_Click(object sender, RoutedEventArgs e)
         {
+            _vm.ShowWindGaugeWindow = false;
             _vm.Disconnect();
             _vm.DisconnectReceive();
             Application.Current.Shutdown();
@@ -864,6 +889,7 @@ namespace SwissTimingDisplay
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
+            _vm.ShowWindGaugeWindow = false;
             _vm.Disconnect();
             _vm.DisconnectReceive();
             Application.Current.Shutdown();

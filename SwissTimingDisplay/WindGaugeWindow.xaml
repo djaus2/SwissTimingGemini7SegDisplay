@@ -276,6 +276,11 @@
                         <TextBlock FontWeight="Bold" FontStyle="Italic" Text="Refresh Ports" />
                     </Button.Content>
                 </Button>
+                <CheckBox Grid.Column="2" Margin="12,0,0,0" VerticalAlignment="Center" IsChecked="{Binding HideSimulator}">
+                    <CheckBox.Content>
+                        <TextBlock FontWeight="Bold" FontStyle="Italic" Foreground="Purple" Text="Hide Simulator" />
+                    </CheckBox.Content>
+                </CheckBox>
                 <StackPanel Grid.Column="7" Orientation="Horizontal" HorizontalAlignment="Right">
                     <Button x:Name="btnBackToMain" Margin="0,0,0,0" Padding="10,4" Content="Back to Main" Click="BackToMainButton_Click" Style="{StaticResource SnazzyButtonStyle}" />
                     <Button x:Name="btnExit" Margin="12,0,0,0" Padding="10,4" Content="Exit" Click="ExitButton_Click" Style="{StaticResource SnazzyButtonStyleRed}" />
@@ -333,14 +338,35 @@
                           DisplayMemberPath="DisplayName"
                           Style="{StaticResource ComboBoxStyle}" />
 
-                <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,8,0,0" VerticalAlignment="Center" Text="Receive Port" FontWeight="Bold" FontStyle="Italic" Foreground="Purple" />
+                <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,8,0,0" VerticalAlignment="Center" Text="Simulator Port" FontWeight="Bold" FontStyle="Italic" Foreground="Purple">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Visibility" Value="Visible" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding HideSimulator}" Value="True">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
                 <ComboBox Grid.Row="1" Grid.Column="1"
                           Margin="12,8,0,0"
                           ItemsSource="{Binding ReceivePortsView}"
                           SelectedValuePath="PortName"
                           SelectedValue="{Binding SelectedReceivePortName}"
-                          DisplayMemberPath="DisplayName"
-                          Style="{StaticResource ComboBoxStyle}" />
+                          DisplayMemberPath="DisplayName">
+                    <ComboBox.Style>
+                        <Style TargetType="ComboBox" BasedOn="{StaticResource ComboBoxStyle}">
+                            <Setter Property="Visibility" Value="Visible" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding HideSimulator}" Value="True">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ComboBox.Style>
+                </ComboBox>
 
                 <Button Grid.Row="0" Grid.Column="2" Grid.ColumnSpan="2" Margin="12,0,0,0" Padding="10,4" Command="{Binding SendConnectToggleCommand}">
                     <Button.Style>
@@ -359,9 +385,13 @@
                     <Button.Style>
                         <Style TargetType="Button" BasedOn="{StaticResource SnazzyButtonStyle}">
                             <Setter Property="Content" Value="Connect" />
+                            <Setter Property="Visibility" Value="Visible" />
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding IsReceiveConnected}" Value="True">
                                     <Setter Property="Content" Value="Disconnect" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding HideSimulator}" Value="True">
+                                    <Setter Property="Visibility" Value="Collapsed" />
                                 </DataTrigger>
                             </Style.Triggers>
                         </Style>
@@ -378,8 +408,18 @@
 
             <GroupBox x:Name="commandsGroupBox" Grid.Column="0" Background="Beige">
             <GroupBox.Header>
-                <TextBlock FontWeight="Bold" FontStyle="Italic" Foreground="Blue" Text="Commands" />
+                <TextBlock FontWeight="Bold" FontStyle="Italic" Foreground="Blue" Text="Wind Gauge Commands" />
             </GroupBox.Header>
+            <GroupBox.Style>
+                <Style TargetType="GroupBox">
+                    <Setter Property="Visibility" Value="Visible" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding HideSimulator}" Value="True">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </GroupBox.Style>
             <Grid Margin="10" Grid.IsSharedSizeScope="True">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
@@ -404,6 +444,11 @@
                         <Button x:Name="btnWindGaugeStart" Margin="8,0,0,0" Padding="10,4" Content="      Start      " Click="WindGauge_StartButton" Style="{StaticResource SnazzyButtonStyleGreen}" />
                         <Button x:Name="btnSendClear" Margin="12,0,0,0" Padding="10,4" Content="Send Stop and Clear" Click="SendClearButton_Click" Style="{StaticResource SnazzyButtonStyleRed}" />
                         <Button x:Name="btnResendLast" Margin="8,0,0,0" Padding="10,4" Content="Resend Last" Click="ResendLastButton_Click"  Style="{StaticResource SnazzyButtonStylePurple}" />
+                        <CheckBox x:Name="cbDisplaySimulatorSpeed" Margin="12,0,0,0" VerticalAlignment="Center" IsChecked="{Binding DisplaySimulatorSpeed}">
+                            <CheckBox.Content>
+                                <TextBlock FontWeight="Bold" FontStyle="Italic" Foreground="Purple" Text="Display Simulator Speed" />
+                            </CheckBox.Content>
+                        </CheckBox>
                     </StackPanel>
 
                     <StackPanel Grid.Row="2" Grid.Column="0" Orientation="Horizontal">
@@ -426,7 +471,7 @@
                             <ColumnDefinition Width="Auto" SharedSizeGroup="TextBoxColumn" />
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Column="0" Text="Capture Count Down Period (sec):" FontWeight="Bold" FontStyle="Italic" Foreground="Purple" VerticalAlignment="Center" HorizontalAlignment="Right" />
-                        <TextBox x:Name="tbTime" Grid.Column="1" Margin="12,0,0,0" Width="100" Text="{Binding TimeInput, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center">
+                        <TextBox x:Name="tbTime" Grid.Column="1" Margin="12,0,0,0" Width="100" Text="{Binding WindGaugeCaptureCountdown, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center">
                             <TextBox.Style>
                                 <Style TargetType="TextBox">
                                     <Setter Property="IsEnabled" Value="True" />

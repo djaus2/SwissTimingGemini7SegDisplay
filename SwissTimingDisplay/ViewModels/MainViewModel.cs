@@ -113,6 +113,12 @@ namespace SwissTimingDisplay.ViewModels
         private CancellationTokenSource? _receiveCts;
         private Task? _receiveTask;
 
+        private List<byte> _sendPortReceiveBuffer = new List<byte>();
+        private bool _displaySimulatorSpeed = false;
+        private bool _hideSimulator = false;
+        private bool _isLoadingSettings = false;
+        private bool _showWindGaugeWindow = false;
+
         private string? _pendingPersistedSendPortName;
         private string? _pendingPersistedReceivePortName;
         private bool _sentClearCommand = false;
@@ -146,6 +152,8 @@ namespace SwissTimingDisplay.ViewModels
 
             _receivePortsViewSource.Source = Ports;
             _receivePortsViewSource.Filter += ReceivePortsViewSourceOnFilter;
+
+            _serialPortService.DataReceived += OnSendPortDataReceived;
 
             LoadPersistedPortNames();
             RefreshPorts();
@@ -308,12 +316,25 @@ namespace SwissTimingDisplay.ViewModels
         {
             // Check if this is a clear command (STX + B + EOT/ETX)
             // The payload contains the full frame including STX and EOT/ETX
-            if (payload.Length == 3 && payload[0] == (byte)CharCommand.STX && payload[1] == (byte)CharCommand.B)
+            if (payload.Length >= 3 && payload[0] == 0x02 && payload[1] == 0x42)
             {
                 _sentClearCommand = true;
             }
 
             return _serialPortService.SendAsync(payload);
+        }
+
+        public Task SendRawAsyncReceive(byte[] payload)
+        {
+            if (_receivePort is null || !_receivePort.IsOpen)
+            {
+                return Task.CompletedTask;
+            }
+
+            return Task.Run(() =>
+            {
+                _receivePort.Write(payload, 0, payload.Length);
+            });
         }
 
         public TcpCommand SelectedTcpCommand
@@ -358,6 +379,65 @@ namespace SwissTimingDisplay.ViewModels
         {
             get => _connectedReceivePortName;
             private set => Set(ref _connectedReceivePortName, value);
+        }
+
+        public bool DisplaySimulatorSpeed
+        {
+            get => _hideSimulator ? false : _displaySimulatorSpeed;
+            set
+            {
+                if (_displaySimulatorSpeed != value)
+                {
+                    _displaySimulatorSpeed = value;
+                    OnPropertyChanged(nameof(DisplaySimulatorSpeed));
+                    if (!_isLoadingSettings)
+                    {
+                        SavePersistedPortNames();
+                    }
+                }
+            }
+        }
+
+        public bool HideSimulator
+        {
+            get => _hideSimulator;
+            set
+            {
+                if (Set(ref _hideSimulator, value))
+                {
+                    if (value)
+                    {
+                        // Disconnect receive port when hiding simulator
+                        DisconnectReceive();
+                    }
+                    OnPropertyChanged(nameof(HideSimulator));
+                    OnPropertyChanged(nameof(DisplaySimulatorSpeed));
+                    if (!_isLoadingSettings)
+                    {
+                        SavePersistedPortNames();
+                    }
+                }
+            }
+        }
+
+        public bool ShowWindGaugeWindow
+        {
+            get => _showWindGaugeWindow;
+            set
+            {
+                if (Set(ref _showWindGaugeWindow, value))
+                {
+                    if (!_isLoadingSettings)
+                    {
+                        // Save current ports before switching
+                        SavePersistedPortNames();
+                        // Switch to the new window's ports
+                        SwitchToWindowPorts(value);
+                        // Save again to persist the new ports
+                        SavePersistedPortNames();
+                    }
+                }
+            }
         }
 
         public string TimeInput
@@ -748,7 +828,7 @@ namespace SwissTimingDisplay.ViewModels
             }
         }
 
-        private void AutoConnectIfNeeded()
+        public void AutoConnectIfNeeded()
         {
             var sendPortAvailable = !string.IsNullOrWhiteSpace(SelectedSendPortName)
                 && Ports.Any(p => string.Equals(p.PortName, SelectedSendPortName, StringComparison.OrdinalIgnoreCase));
@@ -756,18 +836,71 @@ namespace SwissTimingDisplay.ViewModels
             var receivePortAvailable = !string.IsNullOrWhiteSpace(SelectedReceivePortName)
                 && Ports.Any(p => string.Equals(p.PortName, SelectedReceivePortName, StringComparison.OrdinalIgnoreCase));
 
-            if (sendPortAvailable && receivePortAvailable)
+            // Load persisted connection state for WindGauge receive port
+            bool windGaugeReceiveWasConnected = false;
+            if (ShowWindGaugeWindow && File.Exists(SettingsFilePath))
             {
                 try
                 {
-                    Connect();
-                    ConnectReceive(SelectedReceivePortName);
-                    RaiseCommandStates();
-                    Status = $"Auto-connected to {SelectedSendPortName} (send) and {SelectedReceivePortName} (receive).";
+                    var json = File.ReadAllText(SettingsFilePath);
+                    var settings = JsonSerializer.Deserialize<PersistedSettings>(json);
+                    if (settings != null)
+                    {
+                        windGaugeReceiveWasConnected = settings.WindGaugeReceiveConnected;
+                    }
                 }
-                catch (Exception ex)
+                catch
                 {
-                    Status = $"Auto-connect failed: {ex.Message}";
+                    // Ignore errors, default to not connected
+                }
+            }
+
+            if (ShowWindGaugeWindow)
+            {
+                // Auto-connect WindGauge ports (send and receive if it was connected)
+                if (sendPortAvailable)
+                {
+                    try
+                    {
+                        Connect();
+                        RaiseCommandStates();
+                        Status = $"Auto-connected to {SelectedSendPortName} (send).";
+                    }
+                    catch (Exception ex)
+                    {
+                        Status = $"Auto-connect failed: {ex.Message}";
+                    }
+                }
+
+                if (receivePortAvailable && windGaugeReceiveWasConnected)
+                {
+                    try
+                    {
+                        ConnectReceive(SelectedReceivePortName);
+                        RaiseCommandStates();
+                        Status = $"Auto-connected to {SelectedSendPortName} (send) and {SelectedReceivePortName} (receive).";
+                    }
+                    catch (Exception ex)
+                    {
+                        Status = $"Auto-connect receive failed: {ex.Message}";
+                    }
+                }
+            }
+            else
+            {
+                // Auto-connect MainWindow ports (send only)
+                if (sendPortAvailable)
+                {
+                    try
+                    {
+                        Connect();
+                        RaiseCommandStates();
+                        Status = $"Auto-connected to {SelectedSendPortName} (send).";
+                    }
+                    catch (Exception ex)
+                    {
+                        Status = $"Auto-connect failed: {ex.Message}";
+                    }
                 }
             }
         }
@@ -874,6 +1007,12 @@ namespace SwissTimingDisplay.ViewModels
 
             _receiveCts = new CancellationTokenSource();
             _receiveTask = Task.Run(() => ReceiveLoopAsync(port, _receiveCts.Token));
+
+            // Save connection state
+            if (!_isLoadingSettings)
+            {
+                SavePersistedPortNames();
+            }
         }
 
         public void DisconnectReceive()
@@ -914,6 +1053,12 @@ namespace SwissTimingDisplay.ViewModels
             IsReceiveConnected = false;
             ConnectedReceivePortName = null;
             OnPropertyChanged(nameof(DisplayTime));
+
+            // Save connection state
+            if (!_isLoadingSettings)
+            {
+                SavePersistedPortNames();
+            }
         }
 
         public enum OpMode { display,windgauge, unknown}
@@ -1086,6 +1231,121 @@ namespace SwissTimingDisplay.ViewModels
         }
         
 
+        private void OnSendPortDataReceived(byte[] data)
+        {
+            foreach (byte b in data)
+            {
+                _sendPortReceiveBuffer.Add(b);
+
+                // Check if buffer exceeds expected size for WindGauge_Output
+                var windGaugeOutputCmd = TcpCommandDefinitions.Commands[TcpCommand.WindGauge_Output];
+                if (_sendPortReceiveBuffer.Count > windGaugeOutputCmd.Count())
+                {
+                    _sendPortReceiveBuffer.Clear();
+                    continue;
+                }
+
+                // Check if we have a complete frame (starts with SOH and ends with EOT)
+                if (_sendPortReceiveBuffer.Count >= 1)
+                {
+                    if (_sendPortReceiveBuffer[0] != 0x01) // SOH
+                    {
+                        _sendPortReceiveBuffer.Clear();
+                        continue;
+                    }
+                    if (_sendPortReceiveBuffer.Count == windGaugeOutputCmd.Count())
+                    {
+                        string csv = string.Join(",", _sendPortReceiveBuffer.Select(b => CharCommandToString((CharCommand)b)));
+                        Status += $"  Received: {csv}";
+                        byte lastByte = _sendPortReceiveBuffer[_sendPortReceiveBuffer.Count - 1];
+                        if (lastByte == 0x04) // EOT only
+                        {
+                            // Complete frame received, process it
+                            ProcessSendPortFrame(_sendPortReceiveBuffer.ToArray());
+                            _sendPortReceiveBuffer.Clear();
+                        }
+                        else
+                        {
+                            _sendPortReceiveBuffer.Clear();
+                            continue;
+                        }
+                    }
+                }
+            }
+        }
+
+        private void ProcessSendPortFrame(byte[] frame)
+        {
+            // Check if this is a WindGauge_Output command (starts with SOH, then 'W')
+            if (frame.Length >= 3 && frame[0] == 0x01 && frame[3] == (byte)'W')
+            {
+
+                // Validate against expected structure
+                var expectedCmd = TcpCommandDefinitions.Commands[TcpCommand.WindGauge_Output];
+                if (frame.Length != expectedCmd.Count())
+                {
+                    // Length mismatch, ignore
+                    return;
+                }
+                //Check here
+                // Validate each byte against expected command, except speed data positions
+                // Speed data is at positions 10 (sign), 11 (digit1), 12 (digit2), 14 (digit3)
+                for (int i = 0; i < frame.Length; i++)
+                {
+                    if (i == 10 || i == 11 || i == 12 || i == 14)
+                    {
+                        // Skip speed data positions
+                        continue;
+                    }
+                    if (frame[i] != (byte)expectedCmd.ElementAt(i))
+                    {
+                        // Byte mismatch, ignore frame
+                        return;
+                    }
+                }
+
+                // Extract speed data from the command
+                // Format: STX, W, ..., sign, digit1, digit2, ., digit3, ..., EOT/ETX
+                // The speed is at positions based on the WindGauge_Output command definition
+                // According to SendResult, the speed data starts at index 10
+                if (frame.Length > 14)
+                {
+                    char signChar = (char)frame[10];
+                    char digit1 = (char)frame[11];
+                    char digit2 = (char)frame[12];
+                    char digit3 = (char)frame[14]; // Skip the dot at index 13
+
+                    // Validate that these are digit characters
+                    if (char.IsDigit(digit1) && char.IsDigit(digit2) && char.IsDigit(digit3))
+                    {
+                        double speed = (digit1 - '0') * 10 + (digit2 - '0') + (digit3 - '0') / 10.0;
+                        if (signChar == '-')
+                        {
+                            speed = -speed;
+                        }
+
+                        // Update the wind gauge display with the received speed only if not displaying simulator speed
+                        if (!DisplaySimulatorSpeed)
+                        {
+                            UpdateInAppWindGaugeDisplayFromReceivedData(speed);
+                        }
+                    }
+                }
+            }
+        }
+
+        private void UpdateInAppWindGaugeDisplayFromReceivedData(double speed)
+        {
+            ShowDecimalDot = true;
+            int wholePart = (int)Math.Abs(speed);
+            int decimalPart = (int)(Math.Abs(speed * 10) % 10);
+            string sign = speed < 0 ? "-" : " ";
+
+            WindGaugeDisplay = $"{sign}{wholePart:00}{decimalPart}";
+            Status = $"Received Wind Speed: {speed}";
+        }
+
+
         private void ProcessReceivedDisplayFrame(TcpCommand tcpCommand, List<char> chars )
         {
 
@@ -1157,6 +1417,7 @@ namespace SwissTimingDisplay.ViewModels
         {
             SavePersistedPortNames();
             DisconnectReceive();
+            _serialPortService.DataReceived -= OnSendPortDataReceived;
             _serialPortService.Dispose();
         }
 
@@ -1164,10 +1425,18 @@ namespace SwissTimingDisplay.ViewModels
         {
             public string? SendPortName { get; set; }
             public string? ReceivePortName { get; set; }
+            public string? MainSendPortName { get; set; }
+            public string? WindGaugeSendPortName { get; set; }
+            public string? WindGaugeReceivePortName { get; set; }
+            public bool WindGaugeReceiveConnected { get; set; } = false;
             public bool OnlyProlific { get; set; } = true;
             public bool AnchorDisplay { get; set; }
             public int NumDigits { get; set; } = 6;
             public RaceDistance RaceDistance { get; set; } = RaceDistance.Distance600m;
+            public bool DisplaySimulatorSpeed { get; set; } = false;
+            public bool HideSimulator { get; set; } = false;
+            public string? WindGaugeCaptureCountdown { get; set; }
+            public bool ShowWindGaugeWindow { get; set; } = false;
         }
 
         private void LoadPersistedPortNames()
@@ -1186,27 +1455,62 @@ namespace SwissTimingDisplay.ViewModels
                     return;
                 }
 
+                _isLoadingSettings = true;
+
                 OnlyProlific = settings.OnlyProlific;
                 AnchorDisplay = settings.AnchorDisplay;
                 NumDigits = settings.NumDigits;
                 RaceDistance = settings.RaceDistance;
+                DisplaySimulatorSpeed = settings.DisplaySimulatorSpeed;
+                HideSimulator = settings.HideSimulator;
+                WindGaugeCaptureCountdown = settings.WindGaugeCaptureCountdown ?? "10";
+                ShowWindGaugeWindow = settings.ShowWindGaugeWindow;
 
-                if (!string.IsNullOrWhiteSpace(settings.SendPortName))
+                // Migrate old settings to new window-specific settings
+                if (string.IsNullOrWhiteSpace(settings.MainSendPortName) && !string.IsNullOrWhiteSpace(settings.SendPortName))
                 {
-                    _pendingPersistedSendPortName = settings.SendPortName;
+                    settings.MainSendPortName = settings.SendPortName;
+                }
+                if (string.IsNullOrWhiteSpace(settings.WindGaugeSendPortName) && !string.IsNullOrWhiteSpace(settings.SendPortName))
+                {
+                    settings.WindGaugeSendPortName = settings.SendPortName;
+                }
+                if (string.IsNullOrWhiteSpace(settings.WindGaugeReceivePortName) && !string.IsNullOrWhiteSpace(settings.ReceivePortName))
+                {
+                    settings.WindGaugeReceivePortName = settings.ReceivePortName;
                 }
 
-                if (!string.IsNullOrWhiteSpace(settings.ReceivePortName))
+                // Load the appropriate ports based on which window should be shown
+                if (ShowWindGaugeWindow)
                 {
-                    _pendingPersistedReceivePortName = settings.ReceivePortName;
+                    // Load WindGauge ports
+                    if (!string.IsNullOrWhiteSpace(settings.WindGaugeSendPortName))
+                    {
+                        _pendingPersistedSendPortName = settings.WindGaugeSendPortName;
+                    }
+                    if (!string.IsNullOrWhiteSpace(settings.WindGaugeReceivePortName))
+                    {
+                        _pendingPersistedReceivePortName = settings.WindGaugeReceivePortName;
+                    }
                 }
+                else
+                {
+                    // Load MainWindow ports
+                    if (!string.IsNullOrWhiteSpace(settings.MainSendPortName))
+                    {
+                        _pendingPersistedSendPortName = settings.MainSendPortName;
+                    }
+                }
+
+                _isLoadingSettings = false;
             }
             catch
             {
+                _isLoadingSettings = false;
             }
         }
 
-        private void SavePersistedPortNames()
+        public void SavePersistedPortNames()
         {
             try
             {
@@ -1219,13 +1523,86 @@ namespace SwissTimingDisplay.ViewModels
                     AnchorDisplay = AnchorDisplay,
                     NumDigits = NumDigits,
                     RaceDistance = RaceDistance,
+                    DisplaySimulatorSpeed = _displaySimulatorSpeed,
+                    HideSimulator = _hideSimulator,
+                    WindGaugeCaptureCountdown = WindGaugeCaptureCountdown,
+                    ShowWindGaugeWindow = _showWindGaugeWindow,
                 };
+
+                // Save to window-specific properties based on current window
+                if (ShowWindGaugeWindow)
+                {
+                    settings.WindGaugeSendPortName = SelectedSendPortName;
+                    settings.WindGaugeReceivePortName = SelectedReceivePortName;
+                    settings.WindGaugeReceiveConnected = IsReceiveConnected;
+                    // Also update the old SendPortName for backward compatibility
+                    settings.SendPortName = SelectedSendPortName;
+                    settings.ReceivePortName = SelectedReceivePortName;
+                }
+                else
+                {
+                    settings.MainSendPortName = SelectedSendPortName;
+                    // Also update the old SendPortName for backward compatibility
+                    settings.SendPortName = SelectedSendPortName;
+                }
 
                 var json = JsonSerializer.Serialize(settings);
                 File.WriteAllText(SettingsFilePath, json);
             }
             catch
             {
+            }
+        }
+
+        public void SetIsLoadingSettings(bool value)
+        {
+            _isLoadingSettings = value;
+        }
+
+        private void SwitchToWindowPorts(bool showWindGaugeWindow)
+        {
+            // Disconnect current ports before switching
+            Disconnect();
+            DisconnectReceive();
+
+            // Load current settings to get the window-specific ports
+            try
+            {
+                if (!File.Exists(SettingsFilePath))
+                {
+                    return;
+                }
+
+                var json = File.ReadAllText(SettingsFilePath);
+                var settings = JsonSerializer.Deserialize<PersistedSettings>(json);
+                if (settings is null)
+                {
+                    return;
+                }
+
+                _isLoadingSettings = true;
+
+                if (showWindGaugeWindow)
+                {
+                    // Switch to WindGauge ports
+                    SelectedSendPortName = settings.WindGaugeSendPortName;
+                    SelectedReceivePortName = settings.WindGaugeReceivePortName;
+                }
+                else
+                {
+                    // Switch to MainWindow ports
+                    SelectedSendPortName = settings.MainSendPortName;
+                    SelectedReceivePortName = null; // MainWindow doesn't use receive port
+                }
+
+                _isLoadingSettings = false;
+
+                // Auto-connect based on the new ports
+                AutoConnectIfNeeded();
+            }
+            catch
+            {
+                _isLoadingSettings = false;
             }
         }
 

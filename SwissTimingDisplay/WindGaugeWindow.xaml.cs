@@ -728,8 +728,7 @@ namespace SwissTimingDisplay
                 // Clear TimeOut on send side if this was a Clear command
                 if (cmd == TcpCommand.WindGauge_Reset_CaptureTime)
                 {
-                    _vm.TimeInput = "10";
-                    tbTime.Text = "10";
+                    _vm.WindGaugeCaptureCountdown = "10";
                     return;
                 }
                 CharCommand[] cmdx;
@@ -740,7 +739,7 @@ namespace SwissTimingDisplay
                    cmdbytes = cmdx.Select(c => (byte)c).ToArray();
                 }
                 else
-                { 
+                {
                     MessageBox.Show(
                         $"No definition for '{cmd}'.",
                         "Payload",
@@ -748,7 +747,7 @@ namespace SwissTimingDisplay
                         MessageBoxImage.Warning);
                     return;
                 }
-                
+
 
                 string originalLiterals = string.Join(", ", charCommands.Select(c => c.ToString()));
 
@@ -757,12 +756,12 @@ namespace SwissTimingDisplay
                 if (needsTime)
                 {
 
-                    if (string.IsNullOrWhiteSpace(_vm.TimeInput))
+                    if (string.IsNullOrWhiteSpace(_vm.WindGaugeCaptureCountdown))
                     {
-                        tbTime.Text = "10";
+                        _vm.WindGaugeCaptureCountdown = "10";
                     }
 
-                    if(int.TryParse(tbTime.Text, out int tim))
+                    if(int.TryParse(_vm.WindGaugeCaptureCountdown, out int tim))
                     {
                         if ((tim > 0) && (tim <= 100))
                         {
@@ -838,7 +837,8 @@ namespace SwissTimingDisplay
         {
             _vm.Disconnect();
             _vm.DisconnectReceive();
-            
+            _vm.ShowWindGaugeWindow = false;
+
             if (_mainWindow != null)
             {
                 _mainWindow.Show();
@@ -848,15 +848,14 @@ namespace SwissTimingDisplay
 
         private void ExitButton_Click(object sender, RoutedEventArgs e)
         {
-            _vm.Disconnect();
-            _vm.DisconnectReceive();
+            // Save the connection state
+            _vm.SavePersistedPortNames();
             Application.Current.Shutdown();
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            _vm.Disconnect();
-            _vm.DisconnectReceive();
+            _vm.SavePersistedPortNames();
             Application.Current.Shutdown();
         }
 
