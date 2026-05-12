@@ -853,6 +853,13 @@ namespace SwissTimingDisplay
             Application.Current.Shutdown();
         }
 
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            _vm.Disconnect();
+            _vm.DisconnectReceive();
+            Application.Current.Shutdown();
+        }
+
         private void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
 

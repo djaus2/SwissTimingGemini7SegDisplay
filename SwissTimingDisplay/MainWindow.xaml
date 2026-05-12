@@ -7,7 +7,7 @@
         xmlns:controls="clr-namespace:SwissTimingDisplay.Controls"
         xmlns:converters="clr-namespace:SwissTimingDisplay.Converters"
         mc:Ignorable="d"
-        Title="MainWindow" Height="610" Width="834"
+        Title="Swiss Timing Display" Height="610" Width="834" Closing="Window_Closing"
         Background="#E8F5E9">
     <Window.Resources>
         <converters:TimeInputDigitConverter x:Key="TimeInputDigitConverter" />
