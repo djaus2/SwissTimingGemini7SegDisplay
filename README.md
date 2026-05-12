@@ -6,19 +6,21 @@
   <img width="200" alt="PXL_20260417_052157460" src="https://github.com/user-attachments/assets/1b730f14-3dcb-44e5-972a-ce1c5c4894e1" />
   </td>
   <td style="border: none; padding: 0;">
-<h2>Version: 1.2.0</h2>
+<h2>Version: 1.4.0</h2>
 </td>
 </tr>
 </table>
 
  **Status**
-> **WORKING ON MISTRAL WIND GAUAGE PROTOCOL**. _Watch this space.._ Making progress .. About a week!  
+> **WORKING ON MISTRAL WIND GAUGE PROTOCOL**. _Watch this space.._ Making progress .. About a week!  
 Got the app sending the Wind Gauge  Control TP messages  
-Implemented simulated Wind Gauge to interpret them.  
+Implemented simulated Wind Gauge to interpret them using Loopback cable across Swiss Timing  INT131  
 Runs OK.  
-So simulated WindGauge now available :construction_worker:   
-No serial on sending of Wind Speed 2Do.
-<img width="250" alt="image" src="https://github.com/user-attachments/assets/e5388ae1-73c8-49d8-9fbe-8d0bf32be41e" />
+So simulated WindGauge now available :construction_worker:  
+When Wind Speed determined, Mistral data output as array of CommandChar (not static) generated and displayed in Status ready to send.  
+No serial send back of Wind Speed data though. 2Do.
+
+<img width="300"  alt="image" src="https://github.com/user-attachments/assets/375c8625-0c2a-4d80-848a-c901f66a5cdf" />
 
 > - (In situ)Test with actual display in field **WORKS**!
 >   - As per [MVACDisplayandWindGaugeCabling](/SwissTimingDisplay/docs/MVACDisplayandWindGaugeCabling.pdf) diagram
