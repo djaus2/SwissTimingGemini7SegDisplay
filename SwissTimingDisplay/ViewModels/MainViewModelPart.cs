@@ -12,14 +12,14 @@ using SwissTimingDisplay.ViewModels;
 
 namespace SwissTimingDisplay.ViewModels
 {
-    public sealed partial class MainViewModel : INotifyPropertyChanged, IDisposable
+    public sealed partial class MainViewModel
     {
         private string _windGaugeDisplay = string.Empty;
         private string _windGaugeCaptureCountdown = "10";
         public string WindGaugeDisplay
         {
             get => _windGaugeDisplay;
-            set => Set(ref _windGaugeDisplay, value);
+            set => SetProperty(ref _windGaugeDisplay, value);
         }
 
         public string WindGaugeCaptureCountdown
@@ -27,17 +27,12 @@ namespace SwissTimingDisplay.ViewModels
             get => _windGaugeCaptureCountdown;
             set
             {
-                if (Set(ref _windGaugeCaptureCountdown, value))
+                if (SetProperty(ref _windGaugeCaptureCountdown, value))
                 {
                     // Update the static WindGauge.duration when the property changes
                     if (int.TryParse(value, out int duration))
                     {
                         WindGauge.duration = duration;
-                    }
-                    // Save the setting only if not loading
-                    if (!_isLoadingSettings)
-                    {
-                        SavePersistedPortNames();
                     }
                 }
             }
@@ -47,7 +42,7 @@ namespace SwissTimingDisplay.ViewModels
         public bool ShowDecimalDot
         {
             get => _showDecimalDot;
-            set => Set(ref _showDecimalDot, value);
+            set => SetProperty(ref _showDecimalDot, value);
         }
 
         private static class WindGauge

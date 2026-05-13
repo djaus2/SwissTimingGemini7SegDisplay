@@ -20,8 +20,8 @@ namespace SwissTimingDisplay
     /// </summary>
     public partial class WindGaugeWindow : Window
     {
-        private readonly MainWindow? _mainWindow;
-        private readonly MainViewModel _vm = new MainViewModel();
+        private MainWindow? _mainWindow;
+        private readonly MainViewModel _vm;
 
         private readonly DispatcherTimer _raceTimer;
         private readonly Stopwatch _raceStopwatch = new Stopwatch();
@@ -38,8 +38,14 @@ namespace SwissTimingDisplay
         private static readonly TimeSpan RaceTimerInterval = TimeSpan.FromMilliseconds(200);
         private readonly DispatcherTimer _lapContinueTimer;
 
-        public WindGaugeWindow()
+        public WindGaugeWindow() : this(MainViewModel.SharedInstance, null)
         {
+        }
+
+        public WindGaugeWindow(MainViewModel vm, MainWindow mainWindow = null)
+        {
+            _vm = vm;
+            _mainWindow = mainWindow;
             InitializeComponent();
             DataContext = _vm;
 
@@ -131,11 +137,6 @@ namespace SwissTimingDisplay
             UpdateSendEnabledState();
             UpdateRaceTimerEnabledState();
             UpdateLapContinueButton();
-        }
-
-        public WindGaugeWindow(MainWindow mainWindow) : this()
-        {
-            _mainWindow = mainWindow;
         }
 
         private void VmOnPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -303,7 +304,7 @@ namespace SwissTimingDisplay
             _lapContinueTimer.Stop();
             _vm.PropertyChanged -= VmOnPropertyChanged;
             _vm.WindGaugeMeasurementComplete -= VmOnWindGaugeMeasurementComplete;
-            _vm.Dispose();
+            // Don't dispose _vm since it's shared
             base.OnClosed(e);
         }
 
@@ -835,12 +836,17 @@ namespace SwissTimingDisplay
 
         private void BackToMainButton_Click(object sender, RoutedEventArgs e)
         {
-            _vm.Disconnect();
-            _vm.DisconnectReceive();
+            // Set current window and save state
+            _vm.CurrentWindow = MainViewModel.ActiveWindow.Display;
             _vm.ShowWindGaugeWindow = false;
 
             if (_mainWindow != null)
             {
+                _mainWindow.Show();
+            }
+            else
+            {
+                _mainWindow = new MainWindow(_vm);
                 _mainWindow.Show();
             }
             this.Hide();
@@ -848,14 +854,13 @@ namespace SwissTimingDisplay
 
         private void ExitButton_Click(object sender, RoutedEventArgs e)
         {
-            // Save the connection state
-            _vm.SavePersistedPortNames();
+            _vm.BeginShutdown();
             Application.Current.Shutdown();
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            _vm.SavePersistedPortNames();
+            _vm.BeginShutdown();
             Application.Current.Shutdown();
         }
 

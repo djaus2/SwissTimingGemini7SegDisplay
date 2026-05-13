@@ -1,0 +1,52 @@
+<Window x:Class="SwissTimingDisplay.SplashWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Swiss Timing Display" 
+        Height="300" 
+        Width="450"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="NoResize"
+        WindowStyle="None"
+        Background="#2C3E50">
+    <Grid>
+        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+            <TextBlock Text="Swiss Timing Display" 
+                       FontSize="28" 
+                       FontWeight="Bold"
+                       Foreground="White"
+                       HorizontalAlignment="Center"
+                       Margin="0,0,0,40"/>
+            
+            <TextBlock Text="Select Mode:" 
+                       FontSize="16" 
+                       Foreground="#BDC3C7"
+                       HorizontalAlignment="Center"
+                       Margin="0,0,0,20"/>
+            
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <Button Name="DisplayButton"
+                        Content="Display"
+                        Width="120"
+                        Height="45"
+                        FontSize="16"
+                        Margin="0,0,20,0"
+                        Background="#3498DB"
+                        Foreground="White"
+                        BorderThickness="0"
+                        Cursor="Hand"
+                        Click="DisplayButton_Click"/>
+                
+                <Button Name="WindGaugeButton"
+                        Content="Wind Gauge"
+                        Width="120"
+                        Height="45"
+                        FontSize="16"
+                        Background="#E74C3C"
+                        Foreground="White"
+                        BorderThickness="0"
+                        Cursor="Hand"
+                        Click="WindGaugeButton_Click"/>
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</Window>

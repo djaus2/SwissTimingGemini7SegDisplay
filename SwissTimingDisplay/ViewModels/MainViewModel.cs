@@ -1,20 +1,21 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.IO.Ports;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Threading;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Data;
+using System.Diagnostics.Eventing.Reader;
+using CommunityToolkit.Mvvm.ComponentModel;
 using SwissTimingDisplay.Models;
 using SwissTimingDisplay.Services;
-using System.Diagnostics.Eventing.Reader;
-using System.Runtime.InteropServices;
 
 namespace SwissTimingDisplay.ViewModels
 {
@@ -43,13 +44,35 @@ namespace SwissTimingDisplay.ViewModels
         Other,
     }
 
-    public sealed partial class MainViewModel : INotifyPropertyChanged, IDisposable
+    public sealed partial class MainViewModel : ObservableObject, IDisposable
     {
+        private static MainViewModel? _sharedInstance;
         private static readonly string SettingsDirectoryPath = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
             "SwissTimingDisplay");
 
         private static readonly string SettingsFilePath = Path.Combine(SettingsDirectoryPath, "settings.json");
+
+        public static MainViewModel SharedInstance
+        {
+            get
+            {
+                if (_sharedInstance == null)
+                {
+                    _sharedInstance = new MainViewModel();
+                }
+                return _sharedInstance;
+            }
+        }
+
+        public enum ActiveWindow
+        {
+            None,
+            Display,
+            WindGauge
+        }
+
+        private ActiveWindow _activeWindow = ActiveWindow.None;
 
         public static int GetDistanceInMetres(RaceDistance distance)
         {
@@ -108,6 +131,10 @@ namespace SwissTimingDisplay.ViewModels
         private bool _raceHasStartedSinceReset = false;
         private bool _startAtFinish = true;
         private RaceDistance _raceDistance = RaceDistance.Distance600m;
+        private bool _showWindGaugeWindow = false;
+        private bool _isLoadingSettings = false;
+        private bool _isShuttingDown = false;
+        private bool _isSwitchingWindows = false;
 
         private SerialPort? _receivePort;
         private CancellationTokenSource? _receiveCts;
@@ -116,11 +143,13 @@ namespace SwissTimingDisplay.ViewModels
         private List<byte> _sendPortReceiveBuffer = new List<byte>();
         private bool _displaySimulatorSpeed = false;
         private bool _hideSimulator = false;
-        private bool _isLoadingSettings = false;
-        private bool _showWindGaugeWindow = false;
 
         private string? _pendingPersistedSendPortName;
         private string? _pendingPersistedReceivePortName;
+        private bool _pendingPersistedSendPortConnected = false;
+        private bool _pendingPersistedReceivePortConnected = false;
+        private bool _pendingPersistedWindGaugeSendPortConnected = false;
+        private bool _pendingPersistedWindGaugeReceiveConnected = false;
         private bool _sentClearCommand = false;
 
         private readonly CollectionViewSource _sendPortsViewSource = new CollectionViewSource();
@@ -155,12 +184,31 @@ namespace SwissTimingDisplay.ViewModels
 
             _serialPortService.DataReceived += OnSendPortDataReceived;
 
+            _isLoadingSettings = true;
             LoadPersistedPortNames();
             RefreshPorts();
             AutoConnectIfNeeded();
+            _isLoadingSettings = false;
+            
+            // Save once after initialization to persist connection state
+            SavePersistedPortNames();
         }
 
-        public event PropertyChangedEventHandler? PropertyChanged;
+        protected override void OnPropertyChanged(PropertyChangedEventArgs e)
+        {
+            base.OnPropertyChanged(e);
+            
+            // Auto-save settings when any property changes (except during loading, shutdown, or window switching)
+            if (!_isLoadingSettings && !_isShuttingDown && !_isSwitchingWindows)
+            {
+                SavePersistedPortNames();
+            }
+        }
+
+        public void BeginShutdown()
+        {
+            _isShuttingDown = true;
+        }
 
         public ObservableCollection<SerialPortInfo> Ports { get; } = new ObservableCollection<SerialPortInfo>();
 
@@ -195,7 +243,7 @@ namespace SwissTimingDisplay.ViewModels
                     return;
                 }
 
-                if (Set(ref _selectedPort, value))
+                if (SetProperty(ref _selectedPort, value))
                 {
                     if (value is not null)
                     {
@@ -228,7 +276,7 @@ namespace SwissTimingDisplay.ViewModels
                     return;
                 }
 
-                if (Set(ref _selectedReceivePort, value))
+                if (SetProperty(ref _selectedReceivePort, value))
                 {
                     if (value is not null)
                     {
@@ -256,9 +304,8 @@ namespace SwissTimingDisplay.ViewModels
                     value = null;
                 }
 
-                if (Set(ref _selectedSendPortName, value))
+                if (SetProperty(ref _selectedSendPortName, value))
                 {
-                    SavePersistedPortNames();
                     RefreshPortViews();
 
                     if (!string.IsNullOrWhiteSpace(value))
@@ -290,9 +337,8 @@ namespace SwissTimingDisplay.ViewModels
                     value = null;
                 }
 
-                if (Set(ref _selectedReceivePortName, value))
+                if (SetProperty(ref _selectedReceivePortName, value))
                 {
-                    SavePersistedPortNames();
                     RefreshPortViews();
 
                     if (!string.IsNullOrWhiteSpace(value))
@@ -340,7 +386,7 @@ namespace SwissTimingDisplay.ViewModels
         public TcpCommand SelectedTcpCommand
         {
             get => _selectedTcpCommand;
-            set => Set(ref _selectedTcpCommand, value);
+            set => SetProperty(ref _selectedTcpCommand, value);
         }
 
         public bool OnlyProlific
@@ -348,9 +394,8 @@ namespace SwissTimingDisplay.ViewModels
             get => _onlyProlific;
             set
             {
-                if (Set(ref _onlyProlific, value))
+                if (SetProperty(ref _onlyProlific, value))
                 {
-                    SavePersistedPortNames();
                     RefreshPorts();
                 }
             }
@@ -365,7 +410,7 @@ namespace SwissTimingDisplay.ViewModels
             get => _isReceiveConnected;
             private set
             {
-                if (Set(ref _isReceiveConnected, value))
+                if (SetProperty(ref _isReceiveConnected, value))
                 {
                     OnPropertyChanged(nameof(ShowCosmeticOptions));
                     OnPropertyChanged(nameof(ShowDisplayModeOptions));
@@ -378,7 +423,7 @@ namespace SwissTimingDisplay.ViewModels
         public string? ConnectedReceivePortName
         {
             get => _connectedReceivePortName;
-            private set => Set(ref _connectedReceivePortName, value);
+            private set => SetProperty(ref _connectedReceivePortName, value);
         }
 
         public bool DisplaySimulatorSpeed
@@ -390,10 +435,6 @@ namespace SwissTimingDisplay.ViewModels
                 {
                     _displaySimulatorSpeed = value;
                     OnPropertyChanged(nameof(DisplaySimulatorSpeed));
-                    if (!_isLoadingSettings)
-                    {
-                        SavePersistedPortNames();
-                    }
                 }
             }
         }
@@ -403,7 +444,7 @@ namespace SwissTimingDisplay.ViewModels
             get => _hideSimulator;
             set
             {
-                if (Set(ref _hideSimulator, value))
+                if (SetProperty(ref _hideSimulator, value))
                 {
                     if (value)
                     {
@@ -412,10 +453,6 @@ namespace SwissTimingDisplay.ViewModels
                     }
                     OnPropertyChanged(nameof(HideSimulator));
                     OnPropertyChanged(nameof(DisplaySimulatorSpeed));
-                    if (!_isLoadingSettings)
-                    {
-                        SavePersistedPortNames();
-                    }
                 }
             }
         }
@@ -425,16 +462,26 @@ namespace SwissTimingDisplay.ViewModels
             get => _showWindGaugeWindow;
             set
             {
-                if (Set(ref _showWindGaugeWindow, value))
+                // Only proceed if value is actually changing
+                if (_showWindGaugeWindow == value)
+                {
+                    return;
+                }
+
+                if (SetProperty(ref _showWindGaugeWindow, value))
                 {
                     if (!_isLoadingSettings)
                     {
-                        // Save current ports before switching
-                        SavePersistedPortNames();
-                        // Switch to the new window's ports
-                        SwitchToWindowPorts(value);
-                        // Save again to persist the new ports
-                        SavePersistedPortNames();
+                        _isSwitchingWindows = true;
+                        try
+                        {
+                            // Switch to the new window's ports
+                            SwitchToWindowPorts(value);
+                        }
+                        finally
+                        {
+                            _isSwitchingWindows = false;
+                        }
                     }
                 }
             }
@@ -445,7 +492,7 @@ namespace SwissTimingDisplay.ViewModels
             get => _timeInput;
             set
             {
-                if (Set(ref _timeInput, value))
+                if (SetProperty(ref _timeInput, value))
                 {
                     OnPropertyChanged(nameof(DisplayTime));
                 }
@@ -457,7 +504,7 @@ namespace SwissTimingDisplay.ViewModels
             get => _timeInputIn;
             set
             {
-                if (Set(ref _timeInputIn, value))
+                if (SetProperty(ref _timeInputIn, value))
                 {
                     OnPropertyChanged(nameof(DisplayTime));
                 }
@@ -512,7 +559,7 @@ namespace SwissTimingDisplay.ViewModels
             get => _cosmetic;
             set
             {
-                if (Set(ref _cosmetic, value))
+                if (SetProperty(ref _cosmetic, value))
                 {
                     OnPropertyChanged(nameof(ShowDisplayModeOptions));
                     OnPropertyChanged(nameof(DisplayTime));
@@ -529,7 +576,7 @@ namespace SwissTimingDisplay.ViewModels
             get => _displayMode;
             set
             {
-                if (Set(ref _displayMode, value))
+                if (SetProperty(ref _displayMode, value))
                 {
                     OnPropertyChanged(nameof(IsDisplayModeHHMMSS));
                     OnPropertyChanged(nameof(DisplayModeLabel));
@@ -551,7 +598,7 @@ namespace SwissTimingDisplay.ViewModels
             get => _useWallClockTimeOfDay;
             set
             {
-                if (Set(ref _useWallClockTimeOfDay, value))
+                if (SetProperty(ref _useWallClockTimeOfDay, value))
                 {
                     if (value)
                     {
@@ -570,9 +617,8 @@ namespace SwissTimingDisplay.ViewModels
             get => _anchorDisplay;
             set
             {
-                if (Set(ref _anchorDisplay, value))
+                if (SetProperty(ref _anchorDisplay, value))
                 {
-                    SavePersistedPortNames();
                 }
             }
         }
@@ -583,11 +629,10 @@ namespace SwissTimingDisplay.ViewModels
             set
             {
                 var normalized = value == 9 ? 9 : 6;
-                if (Set(ref _numDigits, normalized))
+                if (SetProperty(ref _numDigits, normalized))
                 {
                     OnPropertyChanged(nameof(IsNumDigits9));
                     OnPropertyChanged(nameof(NumDigitsLabel));
-                    SavePersistedPortNames();
                 }
             }
         }
@@ -605,7 +650,7 @@ namespace SwissTimingDisplay.ViewModels
             get => _lapCountMode;
             set
             {
-                if (Set(ref _lapCountMode, value))
+                if (SetProperty(ref _lapCountMode, value))
                 {
                     OnPropertyChanged(nameof(DisplayTime));
                     // If switching to DownCount mode, apply IsStartAtFinish based on current RaceDistance
@@ -620,7 +665,7 @@ namespace SwissTimingDisplay.ViewModels
         public TimeSpan LapContinueDelay
         {
             get => _lapContinueDelay;
-            set => Set(ref _lapContinueDelay, value);
+            set => SetProperty(ref _lapContinueDelay, value);
         }
 
         public double LapContinueDelaySeconds
@@ -634,7 +679,7 @@ namespace SwissTimingDisplay.ViewModels
             get => _isRaceRunning;
             set
             {
-                if (Set(ref _isRaceRunning, value))
+                if (SetProperty(ref _isRaceRunning, value))
                 {
                     OnPropertyChanged(nameof(DisplayTime));
                 }
@@ -644,13 +689,33 @@ namespace SwissTimingDisplay.ViewModels
         public bool RaceHasStartedSinceReset
         {
             get => _raceHasStartedSinceReset;
-            set => Set(ref _raceHasStartedSinceReset, value);
+            set => SetProperty(ref _raceHasStartedSinceReset, value);
+        }
+
+        public ActiveWindow CurrentWindow
+        {
+            get => _activeWindow;
+            set
+            {
+                if (SetProperty(ref _activeWindow, value))
+                {
+                    // Disconnect ports when switching windows
+                    if (value == ActiveWindow.Display)
+                    {
+                        // Ensure only Display ports can be connected
+                    }
+                    else if (value == ActiveWindow.WindGauge)
+                    {
+                        // Ensure only WindGauge ports can be connected
+                    }
+                }
+            }
         }
 
         public bool StartAtFinish
         {
             get => _startAtFinish;
-            set => Set(ref _startAtFinish, value);
+            set => SetProperty(ref _startAtFinish, value);
         }
 
         public RaceDistance RaceDistance
@@ -658,9 +723,8 @@ namespace SwissTimingDisplay.ViewModels
             get => _raceDistance;
             set
             {
-                if (Set(ref _raceDistance, value))
+                if (SetProperty(ref _raceDistance, value))
                 {
-                    SavePersistedPortNames();
                     // If in DownCount mode, apply IsStartAtFinish to StartAtFinish
                     if (LapCountMode == LapCountMode.DownCount)
                     {
@@ -682,15 +746,15 @@ namespace SwissTimingDisplay.ViewModels
             get => _bibNo;
             set
             {
-                if (Set(ref _bibNo, value))
+                if (SetProperty(ref _bibNo, value))
                 {
                     if (string.IsNullOrWhiteSpace(value))
                     {
-                        Set(ref _bibNoInt, -1, nameof(BibNoInt));
+                        SetProperty(ref _bibNoInt, -1, nameof(BibNoInt));
                     }
                     else if (int.TryParse(value, out var n) && n >= 0 && n <= 999)
                     {
-                        Set(ref _bibNoInt, n, nameof(BibNoInt));
+                        SetProperty(ref _bibNoInt, n, nameof(BibNoInt));
                     }
 
                     OnPropertyChanged(nameof(BibNoDisplay));
@@ -717,7 +781,7 @@ namespace SwissTimingDisplay.ViewModels
             get => _recvBibNoStr;
             set
             {
-                if (Set(ref _recvBibNoStr, value))
+                if (SetProperty(ref _recvBibNoStr, value))
                 {
                     if (string.IsNullOrWhiteSpace(value) || value.Trim().Length == 0)
                     {
@@ -746,7 +810,7 @@ namespace SwissTimingDisplay.ViewModels
             set
             {
                 var clamped = value < -1 ? -1 : (value > 999 ? 999 : value);
-                if (Set(ref _bibNoInt, clamped, nameof(BibNoInt)))
+                if (SetProperty(ref _bibNoInt, clamped, nameof(BibNoInt)))
                 {
                     _bibNo = clamped == -1 ? string.Empty : clamped.ToString();
                     OnPropertyChanged(nameof(BibNo));
@@ -763,7 +827,7 @@ namespace SwissTimingDisplay.ViewModels
         public string Status
         {
             get => _status;
-            set => Set(ref _status, value);
+            set => SetProperty(ref _status, value);
         }
 
         public RelayCommand RefreshPortsCommand { get; }
@@ -836,29 +900,10 @@ namespace SwissTimingDisplay.ViewModels
             var receivePortAvailable = !string.IsNullOrWhiteSpace(SelectedReceivePortName)
                 && Ports.Any(p => string.Equals(p.PortName, SelectedReceivePortName, StringComparison.OrdinalIgnoreCase));
 
-            // Load persisted connection state for WindGauge receive port
-            bool windGaugeReceiveWasConnected = false;
-            if (ShowWindGaugeWindow && File.Exists(SettingsFilePath))
-            {
-                try
-                {
-                    var json = File.ReadAllText(SettingsFilePath);
-                    var settings = JsonSerializer.Deserialize<PersistedSettings>(json);
-                    if (settings != null)
-                    {
-                        windGaugeReceiveWasConnected = settings.WindGaugeReceiveConnected;
-                    }
-                }
-                catch
-                {
-                    // Ignore errors, default to not connected
-                }
-            }
-
             if (ShowWindGaugeWindow)
             {
                 // Auto-connect WindGauge ports (send and receive if it was connected)
-                if (sendPortAvailable)
+                if (sendPortAvailable && _pendingPersistedWindGaugeSendPortConnected)
                 {
                     try
                     {
@@ -872,7 +917,7 @@ namespace SwissTimingDisplay.ViewModels
                     }
                 }
 
-                if (receivePortAvailable && windGaugeReceiveWasConnected)
+                if (receivePortAvailable && _pendingPersistedWindGaugeReceiveConnected)
                 {
                     try
                     {
@@ -888,8 +933,8 @@ namespace SwissTimingDisplay.ViewModels
             }
             else
             {
-                // Auto-connect MainWindow ports (send only)
-                if (sendPortAvailable)
+                // Auto-connect MainWindow ports (send and receive if it was connected)
+                if (sendPortAvailable && _pendingPersistedSendPortConnected)
                 {
                     try
                     {
@@ -902,7 +947,27 @@ namespace SwissTimingDisplay.ViewModels
                         Status = $"Auto-connect failed: {ex.Message}";
                     }
                 }
+
+                if (receivePortAvailable && _pendingPersistedReceivePortConnected)
+                {
+                    try
+                    {
+                        ConnectReceive(SelectedReceivePortName);
+                        RaiseCommandStates();
+                        Status = $"Auto-connected to {SelectedSendPortName} (send) and {SelectedReceivePortName} (receive).";
+                    }
+                    catch (Exception ex)
+                    {
+                        Status = $"Auto-connect receive failed: {ex.Message}";
+                    }
+                }
             }
+
+            // Clear pending connection states after use
+            _pendingPersistedSendPortConnected = false;
+            _pendingPersistedReceivePortConnected = false;
+            _pendingPersistedWindGaugeSendPortConnected = false;
+            _pendingPersistedWindGaugeReceiveConnected = false;
         }
 
         public void Connect()
@@ -1007,12 +1072,6 @@ namespace SwissTimingDisplay.ViewModels
 
             _receiveCts = new CancellationTokenSource();
             _receiveTask = Task.Run(() => ReceiveLoopAsync(port, _receiveCts.Token));
-
-            // Save connection state
-            if (!_isLoadingSettings)
-            {
-                SavePersistedPortNames();
-            }
         }
 
         public void DisconnectReceive()
@@ -1053,12 +1112,6 @@ namespace SwissTimingDisplay.ViewModels
             IsReceiveConnected = false;
             ConnectedReceivePortName = null;
             OnPropertyChanged(nameof(DisplayTime));
-
-            // Save connection state
-            if (!_isLoadingSettings)
-            {
-                SavePersistedPortNames();
-            }
         }
 
         public enum OpMode { display,windgauge, unknown}
@@ -1415,28 +1468,29 @@ namespace SwissTimingDisplay.ViewModels
 
         public void Dispose()
         {
-            SavePersistedPortNames();
             DisconnectReceive();
             _serialPortService.DataReceived -= OnSendPortDataReceived;
             _serialPortService.Dispose();
         }
 
-        private sealed class PersistedSettings
+        private sealed partial class PersistedSettings : ObservableObject
         {
-            public string? SendPortName { get; set; }
-            public string? ReceivePortName { get; set; }
-            public string? MainSendPortName { get; set; }
-            public string? WindGaugeSendPortName { get; set; }
-            public string? WindGaugeReceivePortName { get; set; }
-            public bool WindGaugeReceiveConnected { get; set; } = false;
-            public bool OnlyProlific { get; set; } = true;
-            public bool AnchorDisplay { get; set; }
-            public int NumDigits { get; set; } = 6;
-            public RaceDistance RaceDistance { get; set; } = RaceDistance.Distance600m;
-            public bool DisplaySimulatorSpeed { get; set; } = false;
-            public bool HideSimulator { get; set; } = false;
-            public string? WindGaugeCaptureCountdown { get; set; }
-            public bool ShowWindGaugeWindow { get; set; } = false;
+            [ObservableProperty] private string? _displaySendPortName;
+            [ObservableProperty] private bool _displaySendPortConnected = false;
+            [ObservableProperty] private string? _displayReceivePortName;
+            [ObservableProperty] private bool _displayReceivePortConnected = false;
+            [ObservableProperty] private string? _windGaugeSendPortName;
+            [ObservableProperty] private bool _windGaugeSendPortConnected = false;
+            [ObservableProperty] private string? _windGaugeReceivePortName;
+            [ObservableProperty] private bool _windGaugeReceiveConnected = false;
+            [ObservableProperty] private bool _onlyProlific = true;
+            [ObservableProperty] private bool _anchorDisplay;
+            [ObservableProperty] private int _numDigits = 6;
+            [ObservableProperty] private RaceDistance _raceDistance = RaceDistance.Distance600m;
+            [ObservableProperty] private bool _displaySimulatorSpeed = false;
+            [ObservableProperty] private bool _hideSimulator = false;
+            [ObservableProperty] private string? _windGaugeCaptureCountdown;
+            [ObservableProperty] private bool _showWindGaugeWindow = false;
         }
 
         private void LoadPersistedPortNames()
@@ -1455,8 +1509,6 @@ namespace SwissTimingDisplay.ViewModels
                     return;
                 }
 
-                _isLoadingSettings = true;
-
                 OnlyProlific = settings.OnlyProlific;
                 AnchorDisplay = settings.AnchorDisplay;
                 NumDigits = settings.NumDigits;
@@ -1465,20 +1517,6 @@ namespace SwissTimingDisplay.ViewModels
                 HideSimulator = settings.HideSimulator;
                 WindGaugeCaptureCountdown = settings.WindGaugeCaptureCountdown ?? "10";
                 ShowWindGaugeWindow = settings.ShowWindGaugeWindow;
-
-                // Migrate old settings to new window-specific settings
-                if (string.IsNullOrWhiteSpace(settings.MainSendPortName) && !string.IsNullOrWhiteSpace(settings.SendPortName))
-                {
-                    settings.MainSendPortName = settings.SendPortName;
-                }
-                if (string.IsNullOrWhiteSpace(settings.WindGaugeSendPortName) && !string.IsNullOrWhiteSpace(settings.SendPortName))
-                {
-                    settings.WindGaugeSendPortName = settings.SendPortName;
-                }
-                if (string.IsNullOrWhiteSpace(settings.WindGaugeReceivePortName) && !string.IsNullOrWhiteSpace(settings.ReceivePortName))
-                {
-                    settings.WindGaugeReceivePortName = settings.ReceivePortName;
-                }
 
                 // Load the appropriate ports based on which window should be shown
                 if (ShowWindGaugeWindow)
@@ -1492,21 +1530,26 @@ namespace SwissTimingDisplay.ViewModels
                     {
                         _pendingPersistedReceivePortName = settings.WindGaugeReceivePortName;
                     }
+                    _pendingPersistedWindGaugeSendPortConnected = settings.WindGaugeSendPortConnected;
+                    _pendingPersistedWindGaugeReceiveConnected = settings.WindGaugeReceiveConnected;
                 }
                 else
                 {
                     // Load MainWindow ports
-                    if (!string.IsNullOrWhiteSpace(settings.MainSendPortName))
+                    if (!string.IsNullOrWhiteSpace(settings.DisplaySendPortName))
                     {
-                        _pendingPersistedSendPortName = settings.MainSendPortName;
+                        _pendingPersistedSendPortName = settings.DisplaySendPortName;
                     }
+                    if (!string.IsNullOrWhiteSpace(settings.DisplayReceivePortName))
+                    {
+                        _pendingPersistedReceivePortName = settings.DisplayReceivePortName;
+                    }
+                    _pendingPersistedSendPortConnected = settings.DisplaySendPortConnected;
+                    _pendingPersistedReceivePortConnected = settings.DisplayReceivePortConnected;
                 }
-
-                _isLoadingSettings = false;
             }
             catch
             {
-                _isLoadingSettings = false;
             }
         }
 
@@ -1517,8 +1560,8 @@ namespace SwissTimingDisplay.ViewModels
                 Directory.CreateDirectory(SettingsDirectoryPath);
                 var settings = new PersistedSettings
                 {
-                    SendPortName = SelectedSendPortName,
-                    ReceivePortName = SelectedReceivePortName,
+                    DisplaySendPortName = SelectedSendPortName,
+                    DisplayReceivePortName = SelectedReceivePortName,
                     OnlyProlific = OnlyProlific,
                     AnchorDisplay = AnchorDisplay,
                     NumDigits = NumDigits,
@@ -1533,21 +1576,23 @@ namespace SwissTimingDisplay.ViewModels
                 if (ShowWindGaugeWindow)
                 {
                     settings.WindGaugeSendPortName = SelectedSendPortName;
+                    settings.WindGaugeSendPortConnected = IsConnected;
                     settings.WindGaugeReceivePortName = SelectedReceivePortName;
                     settings.WindGaugeReceiveConnected = IsReceiveConnected;
-                    // Also update the old SendPortName for backward compatibility
-                    settings.SendPortName = SelectedSendPortName;
-                    settings.ReceivePortName = SelectedReceivePortName;
                 }
                 else
                 {
-                    settings.MainSendPortName = SelectedSendPortName;
-                    // Also update the old SendPortName for backward compatibility
-                    settings.SendPortName = SelectedSendPortName;
+                    settings.DisplaySendPortName = SelectedSendPortName;
+                    settings.DisplaySendPortConnected = IsConnected;
+                    settings.DisplayReceivePortName = SelectedReceivePortName;
+                    settings.DisplayReceivePortConnected = IsReceiveConnected;
                 }
 
                 var json = JsonSerializer.Serialize(settings);
                 File.WriteAllText(SettingsFilePath, json);
+                
+                // Copy settings file path to clipboard
+                Clipboard.SetText(SettingsFilePath);
             }
             catch
             {
@@ -1591,7 +1636,7 @@ namespace SwissTimingDisplay.ViewModels
                 else
                 {
                     // Switch to MainWindow ports
-                    SelectedSendPortName = settings.MainSendPortName;
+                    SelectedSendPortName = settings.DisplaySendPortName;
                     SelectedReceivePortName = null; // MainWindow doesn't use receive port
                 }
 
@@ -1698,20 +1743,5 @@ namespace SwissTimingDisplay.ViewModels
 
             _isUpdatingPortLists = false;
         }
-
-        private bool Set<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
-        {
-            if (Equals(field, value))
-            {
-                return false;
-            }
-
-            field = value;
-            OnPropertyChanged(propertyName);
-            return true;
-        }
-
-        private void OnPropertyChanged([CallerMemberName] string? propertyName = null) =>
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 }
