@@ -103,6 +103,8 @@ The capability for receiving messages as sent and displaying the received times 
     - Connection state persisted issues to resolve
     - Need to check with display that these changes haven't caused issues. 2Do
     - Not tested with actual Wind Gauge yet, simulator only. 2Do
+    - 1.9.8: Preview of version 2.0.0 Splash sceen at app start and various settings are persisted including serial connections.
+    - Next to test on actual Wind Gauge, next week.
 
 
 ## Hint
