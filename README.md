@@ -130,6 +130,11 @@ For testing using one INT31:
 ## RollerMode Commands
 <img width="1584" height="918" alt="image" src="https://github.com/user-attachments/assets/283229b8-4c18-467b-b261-169f04f8c451" />
 
+## Mistral Wind Gauge Commands
+
+<img width="1288" height="1286" alt="image" src="https://github.com/user-attachments/assets/aafbd4c7-fda9-4aa0-8a3b-3df035255282" />
+
+
 
 Also see [Models/CharCommand.cs](SwissTimingDisplay/Models/CharCommand.cs)
 
