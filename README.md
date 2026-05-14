@@ -6,7 +6,7 @@
   <img width="200" alt="PXL_20260417_052157460" src="https://github.com/user-attachments/assets/1b730f14-3dcb-44e5-972a-ce1c5c4894e1" />
   </td>
   <td style="border: none; padding: 0;">
-<h2>Version: 1.4.0</h2>
+<h2>Version: 1.9.8</h2>
 </td>
 </tr>
 </table>
@@ -103,6 +103,8 @@ The capability for receiving messages as sent and displaying the received times 
     - Connection state persisted issues to resolve
     - Need to check with display that these changes haven't caused issues. 2Do
     - Not tested with actual Wind Gauge yet, simulator only. 2Do
+    - 1.9.8: Preview of version 2.0.0 Splash sceen at app start and various settings are persisted including serial connections.
+    - Next to test on actual Wind Gauge, next week.
 
 
 ## Hint
@@ -114,6 +116,7 @@ For testing using one INT31:
 - [INT31 Manual](SwissTimingDisplay/docs/INT131.pdf)
 - [Gemini 6 Digit  7 Segment Display Manual](SwissTimingDisplay/docs/SwissTimingGeminiDisplay.pdf)
 - [MVAC Track Setup](SwissTimingDisplay/docs/MVACDisplayandWindGaugeCabling.pdf)
+- https://www.bing.com/ck/a?!&&p=18738483fa8bc16a5674ad98a81ca7869038f5c7a439802884d300383460bbe4JmltdHM9MTc3ODYzMDQwMA&ptn=3&ver=2&hsh=4&fclid=0fc81bd6-70a0-63df-0bfe-0cc571af6250&psq=IAAF+Photo+Finish+Guidelines&u=a1aHR0cHM6Ly93b3JsZGF0aGxldGljcy5vcmcvZG93bmxvYWQvZG93bmxvYWQ_ZmlsZW5hbWU9ODlkMzVkZjQtYjFhOC00OWNmLTg4MTktNDQ1NzQxMGVmYmI3LnBkZiZ1cmxzbHVnPVJFR1VMQVRJT05TJTIwQU5EJTIwR1VJREVMSU5FUyUyMC0lMjBJQUFGJTIwUGhvdG8lMjBGaW5pc2glMjBHdWlkZWxpbmVzJTIwLSUyMGluJTIwRU4lMkMlMjBGUiUyQyUyMFNQ
 
 ## The App
 
