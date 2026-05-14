@@ -297,7 +297,9 @@ namespace SwissTimingDisplay.ViewModels
             get => _selectedSendPortName;
             set
             {
-                if (!string.IsNullOrWhiteSpace(value)
+                // Only enforce mutual exclusion for Display window (not Wind Gauge)
+                if (!ShowWindGaugeWindow
+                    && !string.IsNullOrWhiteSpace(value)
                     && !string.IsNullOrWhiteSpace(SelectedReceivePortName)
                     && string.Equals(value, SelectedReceivePortName, StringComparison.OrdinalIgnoreCase))
                 {
@@ -330,7 +332,9 @@ namespace SwissTimingDisplay.ViewModels
             get => _selectedReceivePortName;
             set
             {
-                if (!string.IsNullOrWhiteSpace(value)
+                // Only enforce mutual exclusion for Display window (not Wind Gauge)
+                if (!ShowWindGaugeWindow
+                    && !string.IsNullOrWhiteSpace(value)
                     && !string.IsNullOrWhiteSpace(SelectedSendPortName)
                     && string.Equals(value, SelectedSendPortName, StringComparison.OrdinalIgnoreCase))
                 {
@@ -1727,7 +1731,9 @@ namespace SwissTimingDisplay.ViewModels
                     SelectedReceivePort = null;
                 }
 
-                if (!string.IsNullOrWhiteSpace(SelectedSendPortName)
+                // Only enforce mutual exclusion for Display window (not Wind Gauge)
+                if (!ShowWindGaugeWindow
+                    && !string.IsNullOrWhiteSpace(SelectedSendPortName)
                     && !string.IsNullOrWhiteSpace(SelectedReceivePortName)
                     && string.Equals(SelectedSendPortName, SelectedReceivePortName, StringComparison.OrdinalIgnoreCase))
                 {

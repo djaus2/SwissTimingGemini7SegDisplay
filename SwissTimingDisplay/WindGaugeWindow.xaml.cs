@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
@@ -33,8 +33,6 @@ namespace SwissTimingDisplay
         private bool _showingLapTime = false;
         private TimeSpan _lapTime = TimeSpan.Zero;
         private bool _isClosing = false;
-        private bool _skipNextTimerUpdate = false;
-        private bool _firstLapCounted = false;
         private static readonly TimeSpan RaceTimerInterval = TimeSpan.FromMilliseconds(200);
         private readonly DispatcherTimer _lapContinueTimer;
 
@@ -66,24 +64,6 @@ namespace SwissTimingDisplay
                     return;
                 }
 
-                if (_skipNextTimerUpdate)
-                {
-                    _skipNextTimerUpdate = false;
-                    // Skip this tick's TimeInput update, but still send data if connected
-                    if (!_vm.IsConnected)
-                    {
-                        return;
-                    }
-
-                    if (!TcpCommandDefinitions.Commands.TryGetValue(_vm.SelectedTcpCommand, out var skipCharCommands))
-                    {
-                        return;
-                    }
-
-                    var skipPayload = BuildExpandedPayload("");// _vm.SelectedTcpCommand, skipCharCommands);
-                    BeginAutoSend(skipPayload);
-                    return;
-                }
 
                 if (_sendWallClockWhileRunning)
                 {
@@ -381,7 +361,6 @@ namespace SwissTimingDisplay
             _vm.RaceHasStartedSinceReset = true;
             _showingLapTime = false;
             _lapTime = TimeSpan.Zero;
-            _firstLapCounted = false;
 
 
 
@@ -395,33 +374,6 @@ namespace SwissTimingDisplay
             UpdateLapContinueButton();
         }
 
-        private void UpdateTimeInputFromLapTime()
-        {
-            var hours = (int)_lapTime.TotalHours;
-            var minutes = _lapTime.Minutes;
-            var seconds = _lapTime.Seconds;
-            var tenths = _lapTime.Milliseconds / 100;
-            var hundredths = (_lapTime.Milliseconds / 10) % 100;
-
-            if (hours > 0)
-            {
-                if (hours > 9)
-                {
-                    hours = 9;
-                }
-
-                _vm.TimeInput = $"{hours}:{minutes:00}:{seconds:00}.{tenths}";
-                return;
-            }
-
-            var totalMinutes = (int)_lapTime.TotalMinutes;
-            if (totalMinutes > 99)
-            {
-                totalMinutes = 99;
-            }
-
-            _vm.TimeInput = $"{totalMinutes:00}:{seconds:00}.{hundredths:00}";
-        }
 
         private void ResendLastButton_Click(object sender, RoutedEventArgs e)
         {
@@ -530,7 +482,6 @@ namespace SwissTimingDisplay
             _showingLapTime = false;
             _lapTime = TimeSpan.Zero;
             _lapContinueTimer.Stop();
-            _firstLapCounted = false;
 
             // Send clear command to display
             if (_vm.IsConnected)
@@ -862,11 +813,6 @@ namespace SwissTimingDisplay
         {
             _vm.BeginShutdown();
             Application.Current.Shutdown();
-        }
-
-        private void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-
         }
     }
 }

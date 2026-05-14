@@ -10,18 +10,49 @@
         Background="#2C3E50">
     <Grid>
         <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-            <TextBlock Text="Swiss Timing Display" 
-                       FontSize="28" 
-                       FontWeight="Bold"
-                       Foreground="White"
-                       HorizontalAlignment="Center"
-                       Margin="0,0,0,40"/>
-            
+
+
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Image Source="pack://application:,,,/docs/SwissTiming.png" 
+                       Height="40" Stretch="Uniform" 
+                       VerticalAlignment="Center" Margin="0,10,0,10" 
+                       Grid.Row="0" Grid.Column="1"/>
+
+
+                <!-- Left image -->
+                <Image Source="pack://application:,,,/docs/gemini6display.png"
+           Height="100"
+           Stretch="Uniform"
+           VerticalAlignment="Center"
+           HorizontalAlignment="Left"
+           Grid.Column="0" Grid.Row="1"/>
+
+                <!-- Right image -->
+                <Image Source="pack://application:,,,/docs/mistralwindgauge.png"
+           Height="120"
+           Stretch="Uniform"
+           VerticalAlignment="Bottom"
+           HorizontalAlignment="Right"
+                       Grid.Row="0"
+                       Grid.RowSpan="2"
+           Grid.Column="2"/>
+            </Grid>
+
+
             <TextBlock Text="Select Mode:" 
                        FontSize="16" 
                        Foreground="#BDC3C7"
                        HorizontalAlignment="Center"
-                       Margin="0,0,0,20"/>
+                       Margin="0,0,0,10"/>
             
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                 <Button Name="DisplayButton"
@@ -29,7 +60,7 @@
                         Width="120"
                         Height="45"
                         FontSize="16"
-                        Margin="0,0,20,0"
+                        Margin="0,0,10,0"
                         Background="#3498DB"
                         Foreground="White"
                         BorderThickness="0"
@@ -41,12 +72,44 @@
                         Width="120"
                         Height="45"
                         FontSize="16"
-                        Background="#E74C3C"
+                        Margin="0,0,20,0"
+                        Background="Green"
                         Foreground="White"
                         BorderThickness="0"
                         Cursor="Hand"
                         Click="WindGaugeButton_Click"/>
+                <Button Name="ExitButton"
+                        Content="Exit"
+                        Width="60"
+                        Height="30"
+                        FontSize="16"
+                        FontStyle="Italic"
+                        Background="#E74C3C"
+                        Foreground="White"
+                        BorderThickness="0"
+                        Cursor="Hand"
+                        Click="ExitButton_Click"/>
             </StackPanel>
+
+            <TextBlock Text="Disclaimer: This software is for demostration and testing purposes only and is not provided by Swiss Timing.&#x0A;Swiss Timing Display and Wind Gauge Transmission Protocols as referenced are used though."
+           FontSize="12"
+           FontStyle="Italic"
+           Foreground="#BDC3C7"
+           TextWrapping="Wrap"
+                       TextAlignment="Justify"
+           HorizontalAlignment="Center"
+           Margin="0,10,0,20" Width="414" RenderTransformOrigin="0.5,0.5">
+                <TextBlock.RenderTransform>
+                    <TransformGroup>
+                        <ScaleTransform/>
+                        <SkewTransform AngleX="-1.315"/>
+                        <RotateTransform/>
+                        <TranslateTransform X="-0.977"/>
+                    </TransformGroup>
+                </TextBlock.RenderTransform>
+            </TextBlock>
+
         </StackPanel>
+        
     </Grid>
 </Window>

@@ -455,7 +455,7 @@
                         <ComboBox Margin="12,0,0,0"
                                   ItemsSource="{Binding WindGaugeTcpCommands}"
                                   SelectedItem="{Binding SelectedTcpCommand}"
-                                  Style="{StaticResource ComboBoxStyle}" SelectionChanged="ComboBox_SelectionChanged">
+                                  Style="{StaticResource ComboBoxStyle}">
                         <ComboBox.ItemTemplate>
                             <DataTemplate>
                                 <TextBlock Text="{Binding Converter={StaticResource UnderscoreToSpaceConverter}}" />
@@ -485,68 +485,6 @@
                         </TextBox>
                     </Grid>
 
-                    <!--<Grid Grid.Row="4" Grid.Column="0" Margin="0,12,0,6">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto" SharedSizeGroup="LabelColumn" />
-                            <ColumnDefinition Width="Auto" SharedSizeGroup="TextBoxColumn" />
-                        </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Column="0" Text="Time In:" FontWeight="Bold" FontStyle="Italic" Foreground="Purple" VerticalAlignment="Center" HorizontalAlignment="Right" />
-                        <TextBox x:Name="tbTimeIn" Grid.Column="1" Margin="12,0,0,0" Width="100" Text="{Binding TimeInputIn, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" />
-                    </Grid>-->
-
-                    <!--
-                    <TextBlock Grid.Row="5" Grid.Column="0" Margin="0,12,0,6" Text="Send Bib No/Lap (0-999)            -             Recv Bib No/Lap (0-999) " FontWeight="Bold" FontStyle="Italic" Foreground="Purple" />
-                    <StackPanel Grid.Row="6" Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                        <RepeatButton Margin="0,0,4,0" Padding="8,4" Content="−" Command="{Binding BibNoDecrementCommand}" />
-                        <TextBox MinWidth="60" VerticalAlignment="Center" TextAlignment="Center" Text="{Binding BibNo, UpdateSourceTrigger=PropertyChanged}" FontWeight="SemiBold" FontSize="14" />
-                        <RepeatButton Margin="4,0,0,0" Padding="8,4" Content="+" Command="{Binding BibNoIncrementCommand}" />
-                        <Button Margin="12,0,0,0" Padding="8,4" Content="Clear" Command="{Binding BibNoClearCommand}" Style="{StaticResource SnazzyButtonStyle}" />
-                        <TextBlock Margin="12,0,0,0" VerticalAlignment="Center" Text="Recv:" FontWeight="Bold" FontStyle="Italic" Foreground="Purple" />
-                        <TextBox x:Name="tbRecvBibNo" MinWidth="60" MaxWidth="80" VerticalAlignment="Center" TextAlignment="Center" Text="{Binding RecvBibNoStr}" IsReadOnly="True" FontWeight="SemiBold" FontSize="14" Background="#FFEFEFEF" />
-                    </StackPanel>
-
-                    <StackPanel Grid.Row="7" Grid.Column="0" Margin="0,12,0,6" Orientation="Horizontal">
-                        <TextBlock Text="Lap Count Mode" FontWeight="Bold" FontStyle="Italic" Foreground="Purple" VerticalAlignment="Top" />
-                        <RadioButton Margin="12,0,0,0" Content="None" IsChecked="{Binding LapCountMode, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=None}" GroupName="LapCountMode" VerticalAlignment="Top" Style="{StaticResource RadioButtonStyle}" />
-                        <RadioButton Margin="12,0,0,0" Content="UpCount" IsChecked="{Binding LapCountMode, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=UpCount}" GroupName="LapCountMode" VerticalAlignment="Top" Style="{StaticResource RadioButtonStyle}" />
-                        <RadioButton Margin="12,0,0,0" Content="DownCount" IsChecked="{Binding LapCountMode, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=DownCount}" GroupName="LapCountMode" VerticalAlignment="Top" Style="{StaticResource RadioButtonStyle}" />
-                    </StackPanel>
-
-                    <StackPanel Grid.Row="8" Grid.Column="0" Margin="0,0,0,6" Orientation="Horizontal">
-                        <TextBlock Text="Lap display" FontWeight="Bold" FontStyle="Italic" Foreground="Purple" VerticalAlignment="Top" />
-                        <CheckBox Margin="12,0,0,0" IsChecked="{Binding StartAtFinish}" VerticalAlignment="Top">
-                            <CheckBox.Content>
-                                <TextBlock FontWeight="SemiBold" Foreground="Green" Text="Start is at Finish" />
-                            </CheckBox.Content>
-                        </CheckBox>
-                        <TextBlock Margin="12,0,0,0" Text="Show Lap Time (sec)" VerticalAlignment="Top" FontWeight="SemiBold" Foreground="Green" />
-                        <TextBox Width="60" Margin="8,0,0,0" Text="{Binding LapContinueDelaySeconds, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Top" />
-                    </StackPanel>
-
-                    <StackPanel Grid.Row="9" Grid.Column="0" Margin="0,12,0,6" Orientation="Horizontal">
-                        <StackPanel.Style>
-                            <Style TargetType="StackPanel">
-                                <Setter Property="IsEnabled" Value="False" />
-                                <Setter Property="Visibility" Value="Collapsed" />
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding LapCountMode}" Value="DownCount">
-                                        <Setter Property="IsEnabled" Value="True" />
-                                        <Setter Property="Visibility" Value="Visible" />
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </StackPanel.Style>
-                        <TextBlock Text="Race Distance" FontWeight="Bold" FontStyle="Italic" Foreground="Purple" VerticalAlignment="Top" />
-                        <RadioButton Margin="12,0,0,0" Content="600m" IsChecked="{Binding RaceDistance, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Distance600m}" GroupName="RaceDistance" VerticalAlignment="Top" Style="{StaticResource RadioButtonStyle}" />
-                        <RadioButton Margin="12,0,0,0" Content="1K" IsChecked="{Binding RaceDistance, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Distance1K}" GroupName="RaceDistance" VerticalAlignment="Top" Style="{StaticResource RadioButtonStyle}" />
-                        <RadioButton Margin="12,0,0,0" Content="1500m" IsChecked="{Binding RaceDistance, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Distance1500m}" GroupName="RaceDistance" VerticalAlignment="Top" Style="{StaticResource RadioButtonStyle}" />
-                        <RadioButton Margin="12,0,0,0" Content="2K" IsChecked="{Binding RaceDistance, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Distance2K}" GroupName="RaceDistance" VerticalAlignment="Top" Style="{StaticResource RadioButtonStyle}" />
-                        <RadioButton Margin="12,0,0,0" Content="3K" IsChecked="{Binding RaceDistance, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Distance3K}" GroupName="RaceDistance" VerticalAlignment="Top" Style="{StaticResource RadioButtonStyle}" />
-                        <RadioButton Margin="12,0,0,0" Content="5K" IsChecked="{Binding RaceDistance, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Distance5K}" GroupName="RaceDistance" VerticalAlignment="Top" Style="{StaticResource RadioButtonStyle}" />
-                        <RadioButton Margin="12,0,0,0" Content="10K" IsChecked="{Binding RaceDistance, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Distance10K}" GroupName="RaceDistance" VerticalAlignment="Top" Style="{StaticResource RadioButtonStyle}" />
-                        <RadioButton Margin="12,0,0,0" Content="Other" IsChecked="{Binding RaceDistance, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Other}" GroupName="RaceDistance" VerticalAlignment="Top" Style="{StaticResource RadioButtonStyle}" />
-                    </StackPanel>
-                -->
                 </Grid>
             </GroupBox>
 
