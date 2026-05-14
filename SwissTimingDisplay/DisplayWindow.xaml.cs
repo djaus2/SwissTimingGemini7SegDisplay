@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
@@ -30,7 +30,6 @@ namespace SwissTimingDisplay
         private bool _showingLapTime = false;
         private TimeSpan _lapTime = TimeSpan.Zero;
         private bool _isClosing = false;
-        private bool _skipNextTimerUpdate = false;
         private bool _firstLapCounted = false;
         private static readonly TimeSpan RaceTimerInterval = TimeSpan.FromMilliseconds(200);
         private readonly DispatcherTimer _lapContinueTimer;
@@ -64,24 +63,6 @@ namespace SwissTimingDisplay
                     return;
                 }
 
-                if (_skipNextTimerUpdate)
-                {
-                    _skipNextTimerUpdate = false;
-                    // Skip this tick's TimeInput update, but still send data if connected
-                    if (!_vm.IsConnected)
-                    {
-                        return;
-                    }
-
-                    if (!TcpCommandDefinitions.Commands.TryGetValue(_vm.SelectedTcpCommand, out var skipCharCommands))
-                    {
-                        return;
-                    }
-
-                    var skipPayload = BuildExpandedPayload(_vm.SelectedTcpCommand, skipCharCommands, _sendWallClockWhileRunning);
-                    BeginAutoSend(skipPayload);
-                    return;
-                }
 
                 if (_sendWallClockWhileRunning)
                 {
@@ -783,27 +764,15 @@ namespace SwissTimingDisplay
 
                 var timeLine = needsTime ? $"Time: {timeDigits} ({usedTimeStandard})\n\n" : string.Empty;
 
-                var previewResult = MessageBox.Show(
-                    $"{cmd}\n\n{timeLine}Original CharCommands:\n{originalLiterals}\n\nExpanded CharCommands:\n{literals}\n\nBytes:\n{hex}",
-                    "Payload",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Information);
-
                 if (_vm.IsConnected)
                 {
                     var portName = _vm.ConnectedPortName ?? "(unknown)";
-                    var send = MessageBoxResult.Yes;
-
-                    if (send == MessageBoxResult.Yes)
+                    await _vm.SendRawAsync(expandedBytes);
+                    _vm.Status = $"Sent {expandedBytes.Length} byte(s) to {portName}.";
+                    // Clear TimeOut on send side if this was a Clear command
+                    if (cmd == TcpCommand.Roller_Time_Mode_Clear)
                     {
-                        await _vm.SendRawAsync(expandedBytes);
-                        _vm.Status = $"Sent {expandedBytes.Length} byte(s) to {portName}.";
-
-                        // Clear TimeOut on send side if this was a Clear command
-                        if (cmd == TcpCommand.Roller_Time_Mode_Clear)
-                        {
-                            _vm.TimeInput = string.Empty;
-                        }
+                        _vm.TimeInput = string.Empty;
                     }
                 }
             }
