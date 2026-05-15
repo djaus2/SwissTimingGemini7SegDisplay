@@ -11,7 +11,8 @@
 </tr>
 </table>
 
-> **Disclaimer:** _This software is for demostration and testing purposes only and is not provided by Swiss Timing.&#x0A;Swiss Timing Display and Wind Gauge Transmission Protocols as referenced are used though._
+> **Disclaimer:** _This software is for demostration and testing purposes only and is not provided by Swiss Timing._  
+> _Swiss Timing Display and Wind Gauge Transmission Protocols as referenced are used though._
 
 
  **Status**
