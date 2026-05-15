@@ -6,7 +6,7 @@
   <img width="200" alt="PXL_20260417_052157460" src="https://github.com/user-attachments/assets/1b730f14-3dcb-44e5-972a-ce1c5c4894e1" />
   </td>
   <td style="border: none; padding: 0;">
-<h2>Version: 1.9.8.3</h2>
+<h2>Version: 1.9.8.4</h2>
 </td>
 </tr>
 </table>
@@ -14,7 +14,7 @@
 > **Disclaimer:** _This software is for demostration and testing purposes only and is not provided by Swiss Timing._  
 > _Swiss Timing Display and Wind Gauge Transmission Protocols as referenced are used though._
 
-
+**Bug:** _(Working on it)_ Cosmetic Mode and Up/Down Lap Count Display time doesn't work. None works.  
  **Status**
 > **WORKING ON MISTRAL WIND GAUGE PROTOCOL**. _Watch this space.._ Making progress .. About a week!  
 Got the app sending the Wind Gauge  Control TP messages  

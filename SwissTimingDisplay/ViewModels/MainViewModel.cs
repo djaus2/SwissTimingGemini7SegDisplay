@@ -527,13 +527,40 @@ namespace SwissTimingDisplay.ViewModels
                 var raw = IsReceiveConnected ? (TimeInputIn ?? string.Empty) : (TimeInput ?? string.Empty);
                 var digits = new string(raw.Where(char.IsDigit).ToArray());
 
+                if (UseWallClockTimeOfDay)
+                {
+                    return raw;
+                }
+
+                // LLMMSS format when lap counting is enabled (not None), not wall clock, and race is running
+                if (LapCountMode != LapCountMode.None && !UseWallClockTimeOfDay && IsRaceRunning && digits.Length >= 4)
+                {
+                    var mmss = digits.Length >= 4 ? digits.Substring(0, 4) : "0000";
+                    if (NumDigits == 6)
+                    {
+                        // For 6-digit display, show LLMM:SS format
+                        var lapCounter = BibNoInt >= 0 ? BibNoInt.ToString("D2") : "00";
+                        return $"{lapCounter}{mmss.Substring(0, 2)}:{mmss.Substring(2, 2)}";
+                    }
+                    else
+                    {
+                        // For 9-digit display
+                        var lapCounter = BibNoInt >= 0 ? BibNoInt.ToString("D3") : "000";
+                        if (Cosmetic)
+                        {
+                            // Cosmetic mode: LLL MM:SS.DD
+                            return $"{lapCounter}   {mmss.Substring(0, 2)}:{mmss.Substring(2, 2)}.{digits.Substring(4, 2)}";
+                        }
+                        else
+                        {
+                            // Non-cosmetic mode: LLL MMSSDD
+                            return $"{lapCounter}   {mmss.Substring(0, 2)}{mmss.Substring(2, 2)}{digits.Substring(4, 2)}";
+                        }
+                    }
+                }
+
                 if (!Cosmetic)
                 {
-                    if (UseWallClockTimeOfDay)
-                    {
-                        return raw;
-                    }
-
                     return digits;
                 }
 
@@ -544,15 +571,7 @@ namespace SwissTimingDisplay.ViewModels
 
                 digits = digits[..6];
 
-                var effectiveDisplayMode = UseWallClockTimeOfDay ? DisplayMode.HHMMSS : DisplayMode;
-
-                // LLMMSS format when lap counting is enabled (not None), 6 digits, not wall clock, and race is running
-                if (LapCountMode != LapCountMode.None && NumDigits == 6 && !UseWallClockTimeOfDay && IsRaceRunning)
-                {
-                    var lapCounter = BibNoInt >= 0 ? BibNoInt.ToString("D2") : "00";
-                    var mmss = effectiveDisplayMode == DisplayMode.HHMMSS ? digits.Substring(2, 4) : digits.Substring(0, 4);
-                    return $"{lapCounter}:{mmss.Substring(0, 2)}:{mmss.Substring(2, 2)}";
-                }
+                var effectiveDisplayMode = DisplayMode;
 
                 if (effectiveDisplayMode == DisplayMode.HHMMSS)
                 {
@@ -570,6 +589,12 @@ namespace SwissTimingDisplay.ViewModels
             {
                 if (SetProperty(ref _cosmetic, value))
                 {
+                    if (value)
+                    {
+                        // Set DisplayMode based on wallclock status when Cosmetic is enabled
+                        DisplayMode = UseWallClockTimeOfDay ? DisplayMode.HHMMSS : DisplayMode.MMSSDD;
+                    }
+
                     OnPropertyChanged(nameof(ShowDisplayModeOptions));
                     OnPropertyChanged(nameof(DisplayTime));
                 }
@@ -579,6 +604,10 @@ namespace SwissTimingDisplay.ViewModels
         public bool ShowCosmeticOptions => true;
 
         public bool ShowDisplayModeOptions => Cosmetic;
+
+        public bool ShowLapCountDisplayMode => LapCountMode != LapCountMode.None;
+
+        public string LapCountDisplayModeLabel => "LLMMSS";
 
         public DisplayMode DisplayMode
         {
@@ -612,6 +641,19 @@ namespace SwissTimingDisplay.ViewModels
                     if (value)
                     {
                         DisplayMode = DisplayMode.HHMMSS;
+                        // Set Cosmetic to true when wallclock is enabled
+                        if (!Cosmetic)
+                        {
+                            Cosmetic = true;
+                        }
+                    }
+                    else
+                    {
+                        // If wallclock is disabled and Cosmetic is true, set to MMSSDD
+                        if (Cosmetic)
+                        {
+                            DisplayMode = DisplayMode.MMSSDD;
+                        }
                     }
 
                     OnPropertyChanged(nameof(DisplayTime));
@@ -662,6 +704,7 @@ namespace SwissTimingDisplay.ViewModels
                 if (SetProperty(ref _lapCountMode, value))
                 {
                     OnPropertyChanged(nameof(DisplayTime));
+                    OnPropertyChanged(nameof(ShowLapCountDisplayMode));
                     // If switching to DownCount mode, apply IsStartAtFinish based on current RaceDistance
                     if (value == LapCountMode.DownCount)
                     {

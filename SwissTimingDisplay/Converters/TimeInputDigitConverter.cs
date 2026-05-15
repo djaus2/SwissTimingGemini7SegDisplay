@@ -15,25 +15,37 @@ namespace SwissTimingDisplay.Converters
                 return -1;
             }
 
-            if (!int.TryParse(parameter?.ToString(), out var index))
+            if (!int.TryParse(parameter?.ToString(), out var digitIndex))
             {
                 return -1;
             }
 
-            if (index < 0 || index >= s.Length)
+            if (digitIndex < 0)
             {
                 return -1;
             }
 
-            var c = s[index];
-            if (c == '-')
+            // Extract the Nth digit, skipping non-digit characters
+            var digitCount = 0;
+            foreach (var c in s)
             {
-                return 10; // Minus sign
-            }
+                if (c == '-')
+                {
+                    if (digitCount == 0)
+                    {
+                        return 10; // Minus sign at start
+                    }
+                    continue;
+                }
 
-            if (char.IsDigit(c))
-            {
-                return c - '0';
+                if (char.IsDigit(c))
+                {
+                    if (digitCount == digitIndex)
+                    {
+                        return c - '0';
+                    }
+                    digitCount++;
+                }
             }
 
             return -1;

@@ -66,7 +66,7 @@ namespace SwissTimingDisplay
 
                 if (_sendWallClockWhileRunning)
                 {
-                    _vm.TimeInput = DateTime.Now.ToString("HH:mm:ss");
+                    _vm.TimeInput = DateTime.Now.ToString("HHmmss");
                 }
                 else
                 {
