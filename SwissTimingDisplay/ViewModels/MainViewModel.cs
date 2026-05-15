@@ -454,9 +454,14 @@ namespace SwissTimingDisplay.ViewModels
                     {
                         // Disconnect receive port when hiding simulator
                         DisconnectReceive();
+                        // Set DisplaySimulatorSpeed to false when hiding simulator
+                        if (_displaySimulatorSpeed)
+                        {
+                            _displaySimulatorSpeed = false;
+                            OnPropertyChanged(nameof(DisplaySimulatorSpeed));
+                        }
                     }
                     OnPropertyChanged(nameof(HideSimulator));
-                    OnPropertyChanged(nameof(DisplaySimulatorSpeed));
                 }
             }
         }

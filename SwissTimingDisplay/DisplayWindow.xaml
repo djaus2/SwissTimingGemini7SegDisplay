@@ -378,10 +378,10 @@
             </Grid.ColumnDefinitions>
 
             <GroupBox x:Name="commandsGroupBox" Grid.Column="0" Background="Beige">
-            <GroupBox.Header>
-                <TextBlock FontWeight="Bold" FontStyle="Italic" Foreground="Blue" Text="Commands" />
-            </GroupBox.Header>
-            <Grid Margin="10" Grid.IsSharedSizeScope="True">
+                <GroupBox.Header>
+                    <TextBlock FontWeight="Bold" FontStyle="Italic" Foreground="Blue" Text="Commands" />
+                </GroupBox.Header>
+                <Grid Margin="10" Grid.IsSharedSizeScope="True">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
@@ -394,30 +394,31 @@
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="134" />
+                        <ColumnDefinition Width="256.967"/>
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
 
-                    <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,0,0,6" Text="TCP Command" FontWeight="Bold" FontStyle="Italic" Foreground="Purple" />
+                    <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,0,0,6" Text="TCP Command" FontWeight="Bold" FontStyle="Italic" Foreground="Purple" Grid.ColumnSpan="3" />
 
-                    <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal">
+                    <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal" Grid.ColumnSpan="3" Margin="0,0,0,36" Grid.RowSpan="2">
                         <ComboBox Margin="12,0,0,0"
                                   ItemsSource="{Binding RollerTcpCommands}"
                                   SelectedItem="{Binding SelectedTcpCommand}"
                                   Style="{StaticResource ComboBoxStyle}">
-                        <ComboBox.ItemTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding Converter={StaticResource UnderscoreToSpaceConverter}}" />
-                            </DataTemplate>
-                        </ComboBox.ItemTemplate>
-                    </ComboBox>
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Converter={StaticResource UnderscoreToSpaceConverter}}" />
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
                         <Button x:Name="btnSendClear" Margin="12,0,0,0" Padding="10,4" Content="Send Clear" Click="SendClearButton_Click" Style="{StaticResource SnazzyButtonStyle}" />
                         <Button x:Name="btnSend" Margin="8,0,0,0" Padding="10,4" Content="Send" Click="Button_Click" Style="{StaticResource SnazzyButtonStyle}" />
                         <Button x:Name="btnRaceTimer" Margin="8,0,0,0" Padding="10,4" Content="Start" Click="RaceTimerButton_Click" Style="{StaticResource SnazzyButtonStyle}" />
                         <Button x:Name="btnLapContinue" Margin="8,0,0,0" Padding="10,4" Content="Lap" Click="LapContinueButton_Click" Visibility="Collapsed" Style="{StaticResource SnazzyButtonStyle}" />
                     </StackPanel>
 
-                    <Grid Grid.Row="2" Grid.Column="0" Margin="0,12,0,6">
+                    <Grid Grid.Row="2" Grid.Column="0" Margin="0,12,0,6" Grid.ColumnSpan="3">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" SharedSizeGroup="LabelColumn" />
                             <ColumnDefinition Width="Auto" SharedSizeGroup="TextBoxColumn" />
@@ -437,7 +438,7 @@
                         </TextBox>
                     </Grid>
 
-                    <Grid Grid.Row="3" Grid.Column="0" Margin="0,12,0,6">
+                    <Grid Grid.Row="3" Grid.Column="0" Margin="0,12,0,6" Grid.ColumnSpan="3">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" SharedSizeGroup="LabelColumn" />
                             <ColumnDefinition Width="Auto" SharedSizeGroup="TextBoxColumn" />
@@ -446,8 +447,8 @@
                         <TextBox x:Name="tbTimeIn" Grid.Column="1" Margin="12,0,0,0" Width="100" Text="{Binding TimeInputIn, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" />
                     </Grid>
 
-                    <TextBlock Grid.Row="4" Grid.Column="0" Margin="0,12,0,6" Text="Send Bib No/Lap (0-999)            -             Recv Bib No/Lap (0-999) " FontWeight="Bold" FontStyle="Italic" Foreground="Purple" />
-                    <StackPanel Grid.Row="5" Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Grid.Row="4" Grid.Column="0" Margin="0,12,0,6" Text="Send Bib No/Lap (0-999)            -             Recv Bib No/Lap (0-999) " FontWeight="Bold" FontStyle="Italic" Foreground="Purple" Grid.ColumnSpan="3" />
+                    <StackPanel Grid.Row="5" Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Grid.ColumnSpan="3">
                         <RepeatButton Margin="0,0,4,0" Padding="8,4" Content="−" Command="{Binding BibNoDecrementCommand}" />
                         <TextBox MinWidth="60" VerticalAlignment="Center" TextAlignment="Center" Text="{Binding BibNo, UpdateSourceTrigger=PropertyChanged}" FontWeight="SemiBold" FontSize="14" />
                         <RepeatButton Margin="4,0,0,0" Padding="8,4" Content="+" Command="{Binding BibNoIncrementCommand}" />
@@ -456,25 +457,79 @@
                         <TextBox x:Name="tbRecvBibNo" MinWidth="60" MaxWidth="80" VerticalAlignment="Center" TextAlignment="Center" Text="{Binding RecvBibNoStr}" IsReadOnly="True" FontWeight="SemiBold" FontSize="14" Background="#FFEFEFEF" />
                     </StackPanel>
 
-                    <StackPanel Grid.Row="6" Grid.Column="0" Margin="0,12,0,6" Orientation="Horizontal">
+                    <StackPanel Grid.Row="6" Grid.Column="0" Margin="0,10,0,0" Orientation="Horizontal" Grid.ColumnSpan="3">
                         <TextBlock Text="Lap Count Mode" FontWeight="Bold" FontStyle="Italic" Foreground="Purple" VerticalAlignment="Top" />
                         <RadioButton Margin="12,0,0,0" Content="None" IsChecked="{Binding LapCountMode, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=None}" GroupName="LapCountMode" VerticalAlignment="Top" Style="{StaticResource RadioButtonStyle}" />
-                        <RadioButton Margin="12,0,0,0" Content="UpCount" IsChecked="{Binding LapCountMode, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=UpCount}" GroupName="LapCountMode" VerticalAlignment="Top" Style="{StaticResource RadioButtonStyle}" />
-                        <RadioButton Margin="12,0,0,0" Content="DownCount" IsChecked="{Binding LapCountMode, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=DownCount}" GroupName="LapCountMode" VerticalAlignment="Top" Style="{StaticResource RadioButtonStyle}" />
+                        <RadioButton Margin="12,0,0,0" Content="Lap Count(Up)" IsChecked="{Binding LapCountMode, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=UpCount}" GroupName="LapCountMode" VerticalAlignment="Top" Style="{StaticResource RadioButtonStyle}" />
+                        <RadioButton Margin="12,0,0,0" Content="Laps to Go(Down)" IsChecked="{Binding LapCountMode, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=DownCount}" GroupName="LapCountMode" VerticalAlignment="Top" Style="{StaticResource RadioButtonStyle}" />
                     </StackPanel>
 
-                    <StackPanel Grid.Row="7" Grid.Column="0" Margin="0,0,0,6" Orientation="Horizontal">
-                        <TextBlock Text="Lap display" FontWeight="Bold" FontStyle="Italic" Foreground="Purple" VerticalAlignment="Top" />
-                        <CheckBox Margin="12,0,0,0" IsChecked="{Binding StartAtFinish}" VerticalAlignment="Top">
-                            <CheckBox.Content>
-                                <TextBlock FontWeight="SemiBold" Foreground="Green" Text="Start is at Finish" />
-                            </CheckBox.Content>
-                        </CheckBox>
-                        <TextBlock Margin="12,0,0,0" Text="Show Lap Time (sec)" VerticalAlignment="Top" FontWeight="SemiBold" Foreground="Green" />
-                        <TextBox Width="60" Margin="8,0,0,0" Text="{Binding LapContinueDelaySeconds, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Top" />
+                    <StackPanel Grid.Row="7" Grid.Column="0" Margin="0,10,0,10" Orientation="Horizontal" Grid.ColumnSpan="3">
+                        <StackPanel.Style>
+                            <Style TargetType="StackPanel">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding LapCountMode}" Value="None">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding LapCountMode}" Value="UpCount">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding LapCountMode}" Value="DownCount">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </StackPanel.Style>
+                        <TextBlock Text="Lap Count Display" FontWeight="Bold" FontStyle="Italic" Foreground="Purple" VerticalAlignment="Center" />
+                        <StackPanel Orientation="Horizontal">
+                            <StackPanel.Style>
+                                <Style TargetType="StackPanel">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding LapCountMode}" Value="DownCount">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </StackPanel.Style>
+                            <CheckBox Margin="12,0,0,0" IsChecked="{Binding StartAtFinish}" VerticalAlignment="Center" ToolTip="If Start is not at finish then don't decrement Lap Count first time past finish.">
+                                <CheckBox.Style>
+                                    <Style TargetType="CheckBox">
+                                        <Setter Property="IsEnabled" Value="False" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding RaceDistance}" Value="Other">
+                                                <Setter Property="IsEnabled" Value="True" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </CheckBox.Style>
+                                <CheckBox.Content>
+                                    <TextBlock FontWeight="SemiBold" Foreground="Green" Text="Start is at Finish" />
+                                </CheckBox.Content>
+                            </CheckBox>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <StackPanel.Style>
+                                <Style TargetType="StackPanel">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding LapCountMode}" Value="DownCount">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding LapCountMode}" Value="UpCount">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </StackPanel.Style>
+                            <TextBlock x:Name="LapForLabel1" Margin="15,0,0,0" Text="Show Time each Lap for" VerticalAlignment="Center" FontWeight="SemiBold" Foreground="Green" ToolTip="Hold leader's elapsed time for this time. Zero for not done" />
+                            <TextBox x:Name="LapForText" Width="60" Margin="10,0,10,0" VerticalAlignment="Center" Text="{Binding LapContinueDelaySeconds, UpdateSourceTrigger=PropertyChanged}" TextAlignment="Center" ToolTip="Hold leader's elapsed time for this time. Zero for not done" />
+                            <TextBlock x:Name="LapForLabel2" Margin="0,0,0,0" Text="(sec)" VerticalAlignment="Center" FontWeight="SemiBold" Foreground="Green" ToolTip="Hold leader's elapsed time for this time. Zero for not done" />
+                        </StackPanel>
                     </StackPanel>
 
-                    <StackPanel Grid.Row="8" Grid.Column="0" Margin="0,12,0,6" Orientation="Horizontal">
+                    <StackPanel Grid.Row="8" Grid.Column="0" Margin="0,0,0,0" Orientation="Horizontal" Grid.ColumnSpan="3">
                         <StackPanel.Style>
                             <Style TargetType="StackPanel">
                                 <Setter Property="IsEnabled" Value="False" />
@@ -500,7 +555,7 @@
                 </Grid>
             </GroupBox>
 
-            <Border x:Name="rightSevenSegBorder" Grid.Column="1" Margin="12,0,0,0" BorderBrush="#FFCC0000" BorderThickness="3" CornerRadius="4" Background="Black" Padding="10" VerticalAlignment="Stretch" Visibility="Collapsed">
+            <Border x:Name="rightSevenSegBorder" Grid.Column="1" Margin="10,0,0,0" BorderBrush="#FFCC0000" BorderThickness="3" CornerRadius="4" Background="Black" Padding="10" VerticalAlignment="Stretch" Visibility="Collapsed">
                 <Viewbox x:Name="rightSevenSegViewbox" Stretch="Uniform" StretchDirection="Both" HorizontalAlignment="Center" VerticalAlignment="Center">
                     <Grid x:Name="rightSevenSegContent">
                         <controls:SixDigitSevenSegmentDisplay TimeInput="{Binding DisplayTime}">

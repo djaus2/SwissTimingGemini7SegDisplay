@@ -410,16 +410,6 @@
             <GroupBox.Header>
                 <TextBlock FontWeight="Bold" FontStyle="Italic" Foreground="Blue" Text="Wind Gauge Commands" />
             </GroupBox.Header>
-            <GroupBox.Style>
-                <Style TargetType="GroupBox">
-                    <Setter Property="Visibility" Value="Visible" />
-                    <Style.Triggers>
-                        <DataTrigger Binding="{Binding HideSimulator}" Value="True">
-                            <Setter Property="Visibility" Value="Collapsed" />
-                        </DataTrigger>
-                    </Style.Triggers>
-                </Style>
-            </GroupBox.Style>
             <Grid Margin="10" Grid.IsSharedSizeScope="True">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
@@ -445,6 +435,16 @@
                         <Button x:Name="btnSendClear" Margin="12,0,0,0" Padding="10,4" Content="Send Stop and Clear" Click="SendClearButton_Click" Style="{StaticResource SnazzyButtonStyleRed}" />
                         <Button x:Name="btnResendLast" Margin="8,0,0,0" Padding="10,4" Content="Resend Last" Click="ResendLastButton_Click"  Style="{StaticResource SnazzyButtonStylePurple}" />
                         <CheckBox x:Name="cbDisplaySimulatorSpeed" Margin="12,0,0,0" VerticalAlignment="Center" IsChecked="{Binding DisplaySimulatorSpeed}">
+                            <CheckBox.Style>
+                                <Style TargetType="CheckBox">
+                                    <Setter Property="Visibility" Value="Visible" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding HideSimulator}" Value="True">
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </CheckBox.Style>
                             <CheckBox.Content>
                                 <TextBlock FontWeight="Bold" FontStyle="Italic" Foreground="Purple" Text="Display Simulator Speed" />
                             </CheckBox.Content>
