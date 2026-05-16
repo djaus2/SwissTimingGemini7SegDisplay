@@ -1,4 +1,4 @@
-# Swiss Timing 6 Digit (or 3 + 6 Digit) 7 Segment Display
+# Swiss Timing 6 Digit (or 3 + 6 Digit) 7 Segment Display + Wind Gauge
 
 <table style="border-collapse: collapse; border: none;">
   <tr style="border: none;">
@@ -22,7 +22,8 @@ Implemented simulated Wind Gauge to interpret them using Loopback cable across S
 Runs OK.  
 So simulated WindGauge now available :construction_worker:  
 When Wind Speed determined, Mistral data output as array of CommandChar (not static) generated and displayed in Status ready to send.  
-Serial send back of Wind Speed data: See below
+Serial send back of Wind Speed data: See below  
+Siricco Wind Gauge might take a bit longer. Seems ut has a different protocol. _More later_
 
 <img width="300"  alt="image" src="https://github.com/user-attachments/assets/375c8625-0c2a-4d80-848a-c901f66a5cdf" />
 
