@@ -14,8 +14,9 @@
 > **Disclaimer:** _This software is for demostration and testing purposes only and is not provided by Swiss Timing._  
 > _Swiss Timing Display and Wind Gauge Transmission Protocols as referenced are used though._
 
-**Bug_(Fixed)_:** ~~~Cosmetic Mode and Up/Down Lap Count Display time doesn't work. None worked.~~~.  
+**Bug _(Fixed)_:** ~~Cosmetic Mode and Up/Down Lap Count Display time doesn't work. None worked.~~  
 Nb Cosmetic mode has been renamed,  
+  
  **Status**
 > **WORKING ON MISTRAL WIND GAUGE PROTOCOL**. _Watch this space.._ Making progress .. About a week!  
 Got the app sending the Wind Gauge  Control TP messages  
