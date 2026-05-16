@@ -176,6 +176,11 @@ namespace SwissTimingDisplay.ViewModels
             WindGaugeTcpCommands = new ObservableCollection<TcpCommand>(Enum.GetValues<TcpCommand>()
                 .Where(c => c.ToString().StartsWith("WindGauge")));
 
+            // Set default TCP command based on which window is shown
+            _selectedTcpCommand = ShowWindGaugeWindow
+                ? TcpCommand.WindGauge_Acquisition_Duration
+                : TcpCommand.Roller_Time_of_Day_or_Running_Time_;
+
             _sendPortsViewSource.Source = Ports;
             _sendPortsViewSource.Filter += SendPortsViewSourceOnFilter;
 
@@ -486,6 +491,10 @@ namespace SwissTimingDisplay.ViewModels
                         {
                             // Switch to the new window's ports
                             SwitchToWindowPorts(value);
+                            // Update the default TCP command for the new window
+                            SelectedTcpCommand = value
+                                ? TcpCommand.WindGauge_Acquisition_Duration
+                                : TcpCommand.Roller_Time_of_Day_or_Running_Time_;
                         }
                         finally
                         {
@@ -524,49 +533,69 @@ namespace SwissTimingDisplay.ViewModels
         {
             get
             {
-                var raw = IsReceiveConnected ? (TimeInputIn ?? string.Empty) : (TimeInput ?? string.Empty);
+                // When race is stopped, use local timer (TimeInput) to get decimals
+                // When race is running, use received data (TimeInputIn) if connected
+                var raw = IsRaceRunning 
+                    ? (IsReceiveConnected ? (TimeInputIn ?? string.Empty) : (TimeInput ?? string.Empty))
+                    : (TimeInput ?? string.Empty);
                 var digits = new string(raw.Where(char.IsDigit).ToArray());
 
                 if (UseWallClockTimeOfDay)
                 {
-                    return raw;
+                    // When using wall clock, always apply punctuation formatting
+                    if (digits.Length >= 6)
+                    {
+                        digits = digits[..6];
+                        return $"{digits.Substring(0, 2)}:{digits.Substring(2, 2)}:{digits.Substring(4, 2)}";
+                    }
+                    // Return digits only if less than 6, not raw
+                    return digits;
                 }
 
-                // LLMMSS format when lap counting is enabled (not None), not wall clock, and race is running
-                if (LapCountMode != LapCountMode.None && !UseWallClockTimeOfDay && IsRaceRunning && digits.Length >= 4)
+                // LLMMSS format when lap counting is enabled (not None), not wall clock
+                if (LapCountMode != LapCountMode.None && !UseWallClockTimeOfDay)
                 {
-                    var mmss = digits.Length >= 4 ? digits.Substring(0, 4) : "0000";
-                    if (NumDigits == 6)
+                    if (NumDigits == 6 && digits.Length >= 6)
                     {
-                        // For 6-digit display, show LLMM:SS format
-                        var lapCounter = BibNoInt >= 0 ? BibNoInt.ToString("D2") : "00";
-                        return $"{lapCounter}{mmss.Substring(0, 2)}:{mmss.Substring(2, 2)}";
+                        // Only show lap count format if race is running (receiving/sending data)
+                        // If race is stopped, show regular MM:SS.DD format
+                        if (IsRaceRunning)
+                        {
+                            // The received data already includes the lap counter (first 2 digits)
+                            var lapCounter = digits.Substring(0, 2);
+                            var minutes = digits.Substring(2, 2);
+                            var seconds = digits.Substring(4, 2);
+                            return $"{lapCounter}{minutes}:{seconds}";
+                        }
+                        // Race is stopped - use local timer data (MMSSDD format) as MM:SS.DD
+                        var mm = digits.Substring(0, 2);
+                        var ss = digits.Substring(2, 2);
+                        var dd = digits.Substring(4, 2);
+                        return $"{mm}:{ss}.{dd}";
                     }
-                    else
+                    else if (NumDigits == 9 && digits.Length >= 7)
                     {
                         // For 9-digit display
-                        var lapCounter = BibNoInt >= 0 ? BibNoInt.ToString("D3") : "000";
+                        var lapCounter = digits.Substring(0, 3);
+                        var minutes = digits.Substring(3, 2);
+                        var seconds = digits.Substring(5, 2);
                         if (ShowSimulatorPunctuation)
                         {
-                            // Cosmetic mode: LLL MM:SS.DD
-                            return $"{lapCounter}   {mmss.Substring(0, 2)}:{mmss.Substring(2, 2)}.{digits.Substring(4, 2)}";
+                            // Cosmetic mode: LLL MM:SS (no decimals - lap counter is 3 digits)
+                            return $"{lapCounter} {minutes}:{seconds}";
                         }
                         else
                         {
-                            // Non-show simulator punctuation mode: LLL MMSSDD
-                            return $"{lapCounter}   {mmss.Substring(0, 2)}{mmss.Substring(2, 2)}{digits.Substring(4, 2)}";
+                            // Non-show simulator punctuation mode: LLL MMSS
+                            return $"{lapCounter} {minutes}{seconds}";
                         }
                     }
-                }
-
-                if (!ShowSimulatorPunctuation)
-                {
-                    return digits;
                 }
 
                 if (digits.Length < 6)
                 {
-                    return raw;
+                    // Return digits only, not raw, to avoid invalid characters
+                    return digits;
                 }
 
                 digits = digits[..6];

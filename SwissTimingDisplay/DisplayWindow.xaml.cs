@@ -86,12 +86,14 @@ namespace SwissTimingDisplay
                     return;
                 }
 
-                if (!TcpCommandDefinitions.Commands.TryGetValue(_vm.SelectedTcpCommand, out var charCommands))
+                // Always use the timing data command when race timer is running, regardless of combo box selection
+                var timingCommand = TcpCommand.Roller_Time_of_Day_or_Running_Time_;
+                if (!TcpCommandDefinitions.Commands.TryGetValue(timingCommand, out var charCommands))
                 {
                     return;
                 }
 
-                var payload = BuildExpandedPayload(_vm.SelectedTcpCommand, charCommands, _sendWallClockWhileRunning);
+                var payload = BuildExpandedPayload(timingCommand, charCommands, _sendWallClockWhileRunning);
                 BeginAutoSend(payload);
             };
             _raceTimer.Start();
