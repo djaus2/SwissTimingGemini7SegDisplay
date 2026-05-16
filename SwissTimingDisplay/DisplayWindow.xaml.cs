@@ -268,6 +268,15 @@ namespace SwissTimingDisplay
 
         private async void RaceTimerButton_Click(object sender, RoutedEventArgs e)
         {
+            if (!_vm.IsConnected)
+            {
+                MessageBox.Show(
+                    "Send port not connected.",
+                    "Error",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
+                return;
+            }
             if (_raceIsRunning)
             {
                 _raceIsRunning = false;
@@ -523,13 +532,7 @@ namespace SwissTimingDisplay
                 return;
             }
 
-            var enabled = _vm.IsConnected && _vm.SelectedTcpCommand == TcpCommand.Roller_Time_of_Day_or_Running_Time_;
-            btnRaceTimer.IsEnabled = enabled;
-
-            if (!enabled && (_raceIsRunning || _raceHasStartedSinceReset))
-            {
-                ResetRaceTimerState();
-            }
+            btnRaceTimer.IsEnabled = true;
         }
 
         private async void ResetRaceTimerState()

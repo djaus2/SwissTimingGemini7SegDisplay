@@ -119,7 +119,7 @@ namespace SwissTimingDisplay.ViewModels
         private int _recvBibNoInt = -1;
         private string _status = "";
         private DisplayMode _displayMode = DisplayMode.MMSSDD;
-        private bool _cosmetic = false;
+        private bool _showSimulatorPunctuation = false;
         private int _numDigits = 6;
         private bool _isReceiveConnected;
         private string? _connectedReceivePortName;
@@ -142,7 +142,7 @@ namespace SwissTimingDisplay.ViewModels
 
         private List<byte> _sendPortReceiveBuffer = new List<byte>();
         private bool _displaySimulatorSpeed = false;
-        private bool _hideSimulator = false;
+        private bool _showSimulator = true;
 
         private string? _pendingPersistedSendPortName;
         private string? _pendingPersistedReceivePortName;
@@ -416,7 +416,7 @@ namespace SwissTimingDisplay.ViewModels
             {
                 if (SetProperty(ref _isReceiveConnected, value))
                 {
-                    OnPropertyChanged(nameof(ShowCosmeticOptions));
+                    OnPropertyChanged(nameof(ShowSimulatorPunctuation));
                     OnPropertyChanged(nameof(ShowDisplayModeOptions));
                     OnPropertyChanged(nameof(DisplayTime));
                     OnPropertyChanged(nameof(BibNoInputForDisplay));
@@ -432,7 +432,7 @@ namespace SwissTimingDisplay.ViewModels
 
         public bool DisplaySimulatorSpeed
         {
-            get => _hideSimulator ? false : _displaySimulatorSpeed;
+            get => _showSimulator ? _displaySimulatorSpeed : false;
             set
             {
                 if (_displaySimulatorSpeed != value)
@@ -443,14 +443,14 @@ namespace SwissTimingDisplay.ViewModels
             }
         }
 
-        public bool HideSimulator
+        public bool ShowSimulator
         {
-            get => _hideSimulator;
+            get => _showSimulator;
             set
             {
-                if (SetProperty(ref _hideSimulator, value))
+                if (SetProperty(ref _showSimulator, value))
                 {
-                    if (value)
+                    if (!value)
                     {
                         // Disconnect receive port when hiding simulator
                         DisconnectReceive();
@@ -461,7 +461,7 @@ namespace SwissTimingDisplay.ViewModels
                             OnPropertyChanged(nameof(DisplaySimulatorSpeed));
                         }
                     }
-                    OnPropertyChanged(nameof(HideSimulator));
+                    OnPropertyChanged(nameof(ShowSimulator));
                 }
             }
         }
@@ -546,20 +546,20 @@ namespace SwissTimingDisplay.ViewModels
                     {
                         // For 9-digit display
                         var lapCounter = BibNoInt >= 0 ? BibNoInt.ToString("D3") : "000";
-                        if (Cosmetic)
+                        if (ShowSimulatorPunctuation)
                         {
                             // Cosmetic mode: LLL MM:SS.DD
                             return $"{lapCounter}   {mmss.Substring(0, 2)}:{mmss.Substring(2, 2)}.{digits.Substring(4, 2)}";
                         }
                         else
                         {
-                            // Non-cosmetic mode: LLL MMSSDD
+                            // Non-show simulator punctuation mode: LLL MMSSDD
                             return $"{lapCounter}   {mmss.Substring(0, 2)}{mmss.Substring(2, 2)}{digits.Substring(4, 2)}";
                         }
                     }
                 }
 
-                if (!Cosmetic)
+                if (!ShowSimulatorPunctuation)
                 {
                     return digits;
                 }
@@ -582,16 +582,16 @@ namespace SwissTimingDisplay.ViewModels
             }
         }
 
-        public bool Cosmetic
+        public bool ShowSimulatorPunctuation
         {
-            get => _cosmetic;
+            get => _showSimulatorPunctuation;
             set
             {
-                if (SetProperty(ref _cosmetic, value))
+                if (SetProperty(ref _showSimulatorPunctuation, value))
                 {
                     if (value)
                     {
-                        // Set DisplayMode based on wallclock status when Cosmetic is enabled
+                        // Set DisplayMode based on wallclock status when ShowSimulatorPunctuation is enabled
                         DisplayMode = UseWallClockTimeOfDay ? DisplayMode.HHMMSS : DisplayMode.MMSSDD;
                     }
 
@@ -603,7 +603,7 @@ namespace SwissTimingDisplay.ViewModels
 
         public bool ShowCosmeticOptions => true;
 
-        public bool ShowDisplayModeOptions => Cosmetic;
+        public bool ShowDisplayModeOptions => ShowSimulatorPunctuation;
 
         public bool ShowLapCountDisplayMode => LapCountMode != LapCountMode.None;
 
@@ -641,16 +641,16 @@ namespace SwissTimingDisplay.ViewModels
                     if (value)
                     {
                         DisplayMode = DisplayMode.HHMMSS;
-                        // Set Cosmetic to true when wallclock is enabled
-                        if (!Cosmetic)
+                        // Set ShowSimulatorPunctuation to true when wallclock is enabled
+                        if (!ShowSimulatorPunctuation)
                         {
-                            Cosmetic = true;
+                            ShowSimulatorPunctuation = true;
                         }
                     }
                     else
                     {
-                        // If wallclock is disabled and Cosmetic is true, set to MMSSDD
-                        if (Cosmetic)
+                        // If wallclock is disabled and ShowSimulatorPunctuation is true, set to MMSSDD
+                        if (ShowSimulatorPunctuation)
                         {
                             DisplayMode = DisplayMode.MMSSDD;
                         }
@@ -1532,15 +1532,15 @@ namespace SwissTimingDisplay.ViewModels
             [ObservableProperty] private string? _displayReceivePortName;
             [ObservableProperty] private bool _displayReceivePortConnected = false;
             [ObservableProperty] private string? _windGaugeSendPortName;
-            [ObservableProperty] private bool _windGaugeSendPortConnected = false;
+            [ObservableProperty] private bool _windGaugeSendPortConnected = true;
             [ObservableProperty] private string? _windGaugeReceivePortName;
-            [ObservableProperty] private bool _windGaugeReceiveConnected = false;
+            [ObservableProperty] private bool _windGaugeReceiveConnected = true;
             [ObservableProperty] private bool _onlyProlific = true;
             [ObservableProperty] private bool _anchorDisplay;
             [ObservableProperty] private int _numDigits = 6;
             [ObservableProperty] private RaceDistance _raceDistance = RaceDistance.Distance600m;
             [ObservableProperty] private bool _displaySimulatorSpeed = false;
-            [ObservableProperty] private bool _hideSimulator = false;
+            [ObservableProperty] private bool _showSimulator = true;
             [ObservableProperty] private string? _windGaugeCaptureCountdown;
             [ObservableProperty] private bool _showWindGaugeWindow = false;
         }
@@ -1566,7 +1566,7 @@ namespace SwissTimingDisplay.ViewModels
                 NumDigits = settings.NumDigits;
                 RaceDistance = settings.RaceDistance;
                 DisplaySimulatorSpeed = settings.DisplaySimulatorSpeed;
-                HideSimulator = settings.HideSimulator;
+                ShowSimulator = settings.ShowSimulator;
                 WindGaugeCaptureCountdown = settings.WindGaugeCaptureCountdown ?? "10";
                 ShowWindGaugeWindow = settings.ShowWindGaugeWindow;
 
@@ -1619,7 +1619,7 @@ namespace SwissTimingDisplay.ViewModels
                     NumDigits = NumDigits,
                     RaceDistance = RaceDistance,
                     DisplaySimulatorSpeed = _displaySimulatorSpeed,
-                    HideSimulator = _hideSimulator,
+                    ShowSimulator = _showSimulator,
                     WindGaugeCaptureCountdown = WindGaugeCaptureCountdown,
                     ShowWindGaugeWindow = _showWindGaugeWindow,
                 };
