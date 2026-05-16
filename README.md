@@ -1,4 +1,4 @@
-# Swiss Timing 6 Digit (or 3 + 6 Digit) 7 Segment Display
+# Swiss Timing 6 Digit (or 3 + 6 Digit) 7 Segment Display + Wind Gauge
 
 <table style="border-collapse: collapse; border: none;">
   <tr style="border: none;">
