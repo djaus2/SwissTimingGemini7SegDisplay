@@ -575,20 +575,30 @@ namespace SwissTimingDisplay.ViewModels
                     }
                     else if (NumDigits == 9 && digits.Length >= 7)
                     {
-                        // For 9-digit display
-                        var lapCounter = digits.Substring(0, 3);
-                        var minutes = digits.Substring(3, 2);
-                        var seconds = digits.Substring(5, 2);
-                        if (ShowSimulatorPunctuation)
+                        // Only show lap count format if race is running (receiving/sending data)
+                        // If race is stopped, show regular MM:SS.DD format
+                        if (IsRaceRunning)
                         {
-                            // Cosmetic mode: LLL MM:SS (no decimals - lap counter is 3 digits)
-                            return $"{lapCounter} {minutes}:{seconds}";
+                            // For 9-digit display
+                            var lapCounter = digits.Substring(0, 3);
+                            var minutes = digits.Substring(3, 2);
+                            var seconds = digits.Substring(5, 2);
+                            if (ShowSimulatorPunctuation)
+                            {
+                                // Cosmetic mode: LLL MM:SS (no decimals - lap counter is 3 digits)
+                                return $"{lapCounter} {minutes}:{seconds}";
+                            }
+                            else
+                            {
+                                // Non-show simulator punctuation mode: LLL MMSS
+                                return $"{lapCounter} {minutes}{seconds}";
+                            }
                         }
-                        else
-                        {
-                            // Non-show simulator punctuation mode: LLL MMSS
-                            return $"{lapCounter} {minutes}{seconds}";
-                        }
+                        // Race is stopped - use local timer data (MMSSDD format) as MM:SS.DD
+                        var mm = digits.Substring(0, 2);
+                        var ss = digits.Substring(2, 2);
+                        var dd = digits.Substring(4, 2);
+                        return $"{mm}:{ss}.{dd}";
                     }
                 }
 
