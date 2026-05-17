@@ -31,6 +31,7 @@ namespace SwissTimingDisplay
         private TimeSpan _lapTime = TimeSpan.Zero;
         private bool _isClosing = false;
         private bool _firstLapCounted = false;
+        private long _startTicks = 0;
         private static readonly TimeSpan RaceTimerInterval = TimeSpan.FromMilliseconds(200);
         private readonly DispatcherTimer _lapContinueTimer;
 
@@ -288,7 +289,19 @@ namespace SwissTimingDisplay
                 _showingLapTime = false;
                 _lapTime = TimeSpan.Zero;
                 _lapContinueTimer.Stop();
-                UpdateTimeInputFromRaceElapsed();
+                
+                // Calculate accurate elapsed time from stopwatch ticks
+                if (!_vm.UseWallClockTimeOfDay)
+                {
+                    var elapsedTicks = _raceStopwatch.ElapsedTicks - _startTicks;
+                    var elapsed = TimeSpan.FromTicks(elapsedTicks);
+                    UpdateTimeInputFromTimeSpan(elapsed);
+                }
+                else
+                {
+                    UpdateTimeInputFromRaceElapsed();
+                }
+                
                 _vm.Status = "Race timer stopped.";
 
                 UpdateRaceTimerButtonContent();
@@ -343,6 +356,7 @@ namespace SwissTimingDisplay
             _raceIsRunning = true;
             _vm.IsRaceRunning = true;
             _raceStopwatch.Start();
+            _startTicks = _raceStopwatch.ElapsedTicks;
             _sendWallClockWhileRunning = _vm.UseWallClockTimeOfDay;
             _raceHasStartedSinceReset = true;
             _vm.RaceHasStartedSinceReset = true;
@@ -624,6 +638,33 @@ namespace SwissTimingDisplay
             }
 
             var totalMinutes = (int)_raceElapsed.TotalMinutes;
+            if (totalMinutes > 99)
+            {
+                totalMinutes = 99;
+            }
+
+            _vm.TimeInput = $"{totalMinutes:00}:{seconds:00}.{hundredths:00}";
+        }
+
+        private void UpdateTimeInputFromTimeSpan(TimeSpan elapsed)
+        {
+            var hours = (int)elapsed.TotalHours;
+            var minutes = elapsed.Minutes;
+            var seconds = elapsed.Seconds;
+            var hundredths = elapsed.Milliseconds / 10;
+
+            if (hours > 0)
+            {
+                if (hours > 9)
+                {
+                    hours = 9;
+                }
+
+                _vm.TimeInput = $"{hours}:{minutes:00}:{seconds:00}.{hundredths / 10}";
+                return;
+            }
+
+            var totalMinutes = (int)elapsed.TotalMinutes;
             if (totalMinutes > 99)
             {
                 totalMinutes = 99;

@@ -6,7 +6,7 @@
   <img width="200" alt="PXL_20260417_052157460" src="https://github.com/user-attachments/assets/1b730f14-3dcb-44e5-972a-ce1c5c4894e1" />
   </td>
   <td style="border: none; padding: 0;">
-<h2>Version: 2.0.0</h2>
+<h2>Version: 2.0.1</h2>
 </td>
 </tr>
 </table>
@@ -14,7 +14,6 @@
 > **Disclaimer:** _This software is for demostration and testing purposes only and is not provided by Swiss Timing._  
 > _Swiss Timing Display and Wind Gauge Transmission Protocols as referenced are used though._
 
-**Bug_(Fixed)_:** ~~~Cosmetic Mode and Up/Down Lap Count Display time doesn't work. None worked.~~~.  Nb Cosmetic mode has been renamed, 
  **Status**
 > **WORKING ON MISTRAL WIND GAUGE PROTOCOL**. _Watch this space.._ Making progress .. About a week!  
 Got the app sending the Wind Gauge  Control TP messages  
@@ -111,7 +110,33 @@ The capability for receiving messages as sent and displaying the received times 
   - 1.9.8: Preview of version 2.0.0 Splash sceen at app start and various settings are persisted including serial connections.
     - Next to test on actual Wind Gauge, next week.
   - 1.9.8.1: Spruced up Splash screen. Tidied up code.
+- 2.0.0: Completed Display fixes. 
+  - Wind Gauge waits test with actual Mistral Wind Gauge.
+- 2.0.1: Display Time displayed MM:SS:DD is not from timer 
+    - but from difference between system tics at start and at end.
+    - Much more accurate, not subject to latency of timer.
+>Nb: Re ticks resolution:
+```
+Is StopWatch time resolution normal be available on windows machines?
+Yes, Stopwatch.IsHighResolution is typically true on Windows machines. Windows has a high-resolution performance counter (QueryPerformanceCounter API) that Stopwatch uses by default.
 
+Current implementation use this:
+
+The current code uses _raceStopwatch.ElapsedTicks - _startTicks, which already uses the best available timer:
+
+If high-resolution is available (typical on Windows): Uses the performance counter with ~0.1-1 microsecond precision
+If not available: Automatically falls back to the system timer
+No need to add conditional logic:
+
+The Stopwatch class handles this internally. You don't need to check IsHighResolution and switch to System Ticks manually. The current implementation is already correct and will use the highest precision available on the system.
+
+Your current code is fine as-is:
+```
+```csharp
+var elapsedTicks = _raceStopwatch.ElapsedTicks - _startTicks;
+var elapsed = TimeSpan.FromTicks(elapsedTicks);
+//This will automatically use the high-resolution timer on Windows, giving you sub-millisecond accuracy for the MM:SS.DD display when stopped.
+```
 
 ## Hint
 For testing using one INT31:
