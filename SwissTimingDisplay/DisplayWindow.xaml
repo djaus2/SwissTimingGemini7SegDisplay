@@ -100,6 +100,7 @@
                 </CheckBox>
                 <StackPanel Grid.Column="7" Orientation="Horizontal" HorizontalAlignment="Right">
                     <Button x:Name="btnWindGauge" Margin="0,0,0,0" Padding="10,4" Content="Wind Gauge" Click="WindGaugeButton_Click" Style="{StaticResource SnazzyButtonStylePurple}" />
+                    <!--Button x:Name="btnSiricco" Margin="12,0,0,0" Padding="10,4" Content="Siricco" Click="SiriccoButton_Click" Style="{StaticResource SnazzyButtonStylePurple}" / -->
                     <Button x:Name="btnExit" Margin="12,0,0,0" Padding="10,4" Content="Exit" Click="ExitButton_Click" Style="{StaticResource SnazzyButtonStyleRed}" />
                 </StackPanel>
             </Grid>
