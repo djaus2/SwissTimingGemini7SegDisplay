@@ -51,9 +51,9 @@ namespace SwissTimingDisplay.Models
         d6 = (byte)'6',
         d7 = (byte)'7',
         d8 = (byte)'8',
-        d9 = (byte)'9'
-
-
+        d9 = (byte)'9',
+        CR = (byte)'\r',
+        Comma = (byte)','
     }
 
 }

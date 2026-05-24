@@ -88,9 +88,9 @@ namespace SwissTimingDisplay
                 }
 
                 // Always use the wind gauge start command when race timer is running, regardless of combo box selection
-                var timingCommand = TcpCommand.WindGauge_Start_of_Measurement;
-                var payload = TcpCommandDefinitions.GetPayloadBytes(timingCommand).ToArray();
-                BeginAutoSend(payload);
+                ////var timingCommand = TcpCommand.WindGauge_Start_of_Measurement;
+                ////var payload = TcpCommandDefinitions.GetPayloadBytes(timingCommand).ToArray();
+                ////BeginAutoSend(payload);
             };
             _raceTimer.Start();
 

@@ -10,9 +10,19 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="ViewModels\MainViewModelPart2 - Copy.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Remove="docs\mistralwindgauge.png" />
     <None Remove="docs\SwissTiming.png" />
   </ItemGroup>
+
+  <ItemGroup>
+    <None Include="ViewModels\MainViewModelPart2 - Copy.cs" />
+  </ItemGroup>
+
+
 
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />

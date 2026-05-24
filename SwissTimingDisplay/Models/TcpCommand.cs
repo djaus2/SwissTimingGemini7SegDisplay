@@ -14,6 +14,7 @@ namespace SwissTimingDisplay.Models
         WindGauge_Reset_Stop_Clear,
         WindGauge_Resend_Latest,
         WindGauge_Reset_CaptureTime,
-        WindGauge_Output
+        WindGauge_Output,
+        WindGauge_ReadFrequency
     }
 }

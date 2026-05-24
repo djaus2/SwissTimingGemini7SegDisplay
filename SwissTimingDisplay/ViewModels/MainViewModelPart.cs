@@ -76,6 +76,7 @@ namespace SwissTimingDisplay.ViewModels
                         _timer?.Stop();
                         WindSpeed = new Random().Next(-100, 100); // Simulate wind speed measurement
                         WindSpeed /= 10.0;
+                        System.Diagnostics.Debug.WriteLine($"Simulated Wind Speed: {WindSpeed}");
                         viewModel.UpdateSimulatedWindGaugeDisplaySpeed();
                     }
                 };
@@ -162,26 +163,66 @@ namespace SwissTimingDisplay.ViewModels
             CharCommand[] command = new CharCommand[commandWindSeed.Count()] ;
             for (int i = 0; i < (commandWindSeed.Count()); i++) {
                 command[i] = commandWindSeed[i];
-            }            
+            }
 
-            CharCommand sign = CharCommand.plus;
+            // Sign: 11 for positive (space/off), 10 for negative (g segment on)
+            byte signByte = speed < 0 ? (byte)'-': (byte)'+'; //'(byte)10 : (byte)11;
             if (speed < 0)
             {
-                sign = CharCommand.minus;
                 speed = -speed;
             }
             int locationOfS = 10; // Array.IndexOf(command, CharCommand.s);
-            string speedStr = speed.ToString("F1").PadLeft(4, '0');
-            command[locationOfS++] = sign;
-            command[locationOfS++] = TcpCommandDefinitions.GetCharCmdDigit(int.Parse(speedStr.Substring(0, 1)));   // First digit
-            command[locationOfS++] = TcpCommandDefinitions.GetCharCmdDigit(int.Parse(speedStr.Substring(1, 1)));
-            locationOfS++;
-            command[locationOfS++] = TcpCommandDefinitions.GetCharCmdDigit(int.Parse(speedStr.Substring(3, 1)));
+            command[locationOfS++] = (CharCommand)signByte;
+
+            // Extract digits directly from speed value
+            int wholePart = (int)speed;
+            int decimalPart = (int)((speed * 10) % 10);
+
+            // First digit (tens place of whole part) - always send actual digit
+            int d1 = wholePart / 10;
+            command[locationOfS++] = TcpCommandDefinitions.GetCharCmdDigit(d1);
+            // Second digit (ones place of whole part)
+            command[locationOfS++] = TcpCommandDefinitions.GetCharCmdDigit(wholePart % 10);
+            locationOfS++; // Skip dot position
+            // Third digit (decimal place)
+            command[locationOfS++] = TcpCommandDefinitions.GetCharCmdDigit(decimalPart);
 
             var msg = string.Join(",", command.Select(c => CharCommandToString(c)));
-            Status = $"Command: {msg}";
+            SendStatus = $"Command: {msg}";
 
             // Send via receive port
+            byte[] payload = command.Select(c => (byte)c).ToArray();
+            SendRawAsyncReceive(payload);
+        }
+
+        private void SendCountdown(int count)
+        {
+            var cmd = TcpCommand.WindGauge_Output;
+            var commandWindSeed = TcpCommandDefinitions.Commands[cmd];
+            CharCommand[] command = new CharCommand[commandWindSeed.Count()];
+            for (int i = 0; i < (commandWindSeed.Count()); i++)
+            {
+                command[i] = commandWindSeed[i];
+            }
+
+            int locationOfS = 10;
+            command[locationOfS++] = CharCommand.Space; // No sign for countdown
+            // Pad with zeros, always send actual digits
+            string countStr = count.ToString("D3"); // Always 3 digits: "010", "009", etc.
+            // First digit
+            int d1 = int.Parse(countStr.Substring(0, 1));
+            command[locationOfS++] = TcpCommandDefinitions.GetCharCmdDigit(d1);
+            // Second digit
+            int d2 = int.Parse(countStr.Substring(1, 1));
+            command[locationOfS++] = TcpCommandDefinitions.GetCharCmdDigit(d2);
+            locationOfS++; // Skip dot position
+            // Third digit (decimal position)
+            int d3 = int.Parse(countStr.Substring(2, 1));
+            command[locationOfS++] = TcpCommandDefinitions.GetCharCmdDigit(d3);
+
+            var msg = string.Join(",", command.Select(c => CharCommandToString(c)));
+            Status = $"Countdown: {msg}";
+
             byte[] payload = command.Select(c => (byte)c).ToArray();
             SendRawAsyncReceive(payload);
         }
@@ -198,16 +239,28 @@ namespace SwissTimingDisplay.ViewModels
 
         private void UpdateSimulatedWindGaugeDisplayCount(int count)
         {
-            // Only update display if DisplaySimulatorSpeed is true
+            // Always update display if DisplaySimulatorSpeed is true
             if (DisplaySimulatorSpeed)
             {
                 ShowDecimalDot = false;
                 WindGaugeDisplay = count.ToString().PadLeft(4, ' ');
             }
+            else
+            {
+                // When DisplaySimulatorSpeed is false, send countdown via receive port
+                SendCountdown(count);
+            }
             string msg = $"Acquisition Duration: {count} seconds remaining";
             Status = msg;
         }
 
+        /// <summary>
+        /// UpdateSimulatedWindGaugeDisplaySpeed()
+        /// if DisplaySimulatorSpeed is checked then update display direct without sending
+        /// Transmision is internally in the app in this case
+        /// Note that currently the both serial ports must be connected though.
+        /// 2Do unwind this. Other comands still need serial.
+        /// </summary>
         private void UpdateSimulatedWindGaugeDisplaySpeed()
         {
             // Only update display if DisplaySimulatorSpeed is true
@@ -216,15 +269,20 @@ namespace SwissTimingDisplay.ViewModels
                 ShowDecimalDot = true;
                 // Format without decimal point in the string (separator dot will be shown separately)
                 int wholePart = (int)Math.Abs(WindGauge.WindSpeed);
+                int wholePart10 = wholePart / 10;
+                int wholePart1 = wholePart%10;
                 int decimalPart = (int)(Math.Abs(WindGauge.WindSpeed * 10) % 10);
-                string sign = WindGauge.WindSpeed < 0 ? "-" : " ";
+                string sign = WindGauge.WindSpeed < 0 ? "-" : "+"; // + for positive (value 11), "-" for negative (value 10)
 
                 // Format as "XXX" with leading space for sign (no decimal point in string)
-                WindGaugeDisplay = $"{sign}{wholePart:00}{decimalPart}";
+                WindGaugeDisplay = $"{sign}{wholePart10:0}{wholePart1:0}{decimalPart}";
             }
-
+            else
+            {
+                SendResult();
+            }
             Status = $"Wind Speed: {WindGauge.WindSpeed}";
-            SendResult();
+            
 
             // Notify that measurement is complete
             WindGaugeMeasurementComplete?.Invoke(this, EventArgs.Empty);

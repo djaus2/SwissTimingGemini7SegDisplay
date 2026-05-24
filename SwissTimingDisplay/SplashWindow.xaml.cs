@@ -7,6 +7,7 @@ namespace SwissTimingDisplay
     {
         private static MainWindow? _mainWindow;
         private static WindGaugeWindow? _windGaugeWindow;
+        private static SiriccoWindow? _siriccoWindow;
         private MainViewModel? _vm;
 
         public SplashWindow()
@@ -40,6 +41,20 @@ namespace SwissTimingDisplay
             
             _windGaugeWindow = new WindGaugeWindow(_vm);
             _windGaugeWindow.Show();
+            this.Close();
+        }
+
+        private void SiriccoWindGaugeButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Get or create shared instance
+            _vm = MainViewModel.SharedInstance;
+
+            // Set active window and show WindGauge
+            _vm.CurrentWindow = MainViewModel.ActiveWindow.Siricco;
+            _vm.ShowWindGaugeWindow = true;
+
+            _siriccoWindow = new SiriccoWindow(_vm);
+            _siriccoWindow.Show();
             this.Close();
         }
 

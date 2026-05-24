@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.IO.Ports;
 using System.Linq;
@@ -69,7 +70,8 @@ namespace SwissTimingDisplay.ViewModels
         {
             None,
             Display,
-            WindGauge
+            WindGauge,
+            Siricco
         }
 
         private ActiveWindow _activeWindow = ActiveWindow.None;
@@ -118,6 +120,8 @@ namespace SwissTimingDisplay.ViewModels
         private string _recvBibNoStr = "   ";
         private int _recvBibNoInt = -1;
         private string _status = "";
+        private string _sendStatus = "";
+        private string _recvStatus = "";
         private DisplayMode _displayMode = DisplayMode.MMSSDD;
         private bool _showSimulatorPunctuation = false;
         private int _numDigits = 6;
@@ -132,9 +136,28 @@ namespace SwissTimingDisplay.ViewModels
         private bool _startAtFinish = true;
         private RaceDistance _raceDistance = RaceDistance.Distance600m;
         private bool _showWindGaugeWindow = false;
+        private bool _showSiriccoWindow = false;
         private bool _isLoadingSettings = false;
         private bool _isShuttingDown = false;
         private bool _isSwitchingWindows = false;
+
+        private SiriccoMessageModes _siriccoMessageMode = SiriccoMessageModes.WindGauge_ReadFrequency;
+
+        public SiriccoMessageModes SiriccoMessageMode
+        {
+            get => _siriccoMessageMode;
+            set
+            {
+                if (SetProperty(ref _siriccoMessageMode, value))
+                {
+                    // Persist the change
+                    if (!_isLoadingSettings)
+                    {
+                        SavePersistedPortNames();
+                    }
+                }
+            }
+        }
 
         private SerialPort? _receivePort;
         private CancellationTokenSource? _receiveCts;
@@ -151,6 +174,8 @@ namespace SwissTimingDisplay.ViewModels
         private bool _pendingPersistedWindGaugeSendPortConnected = false;
         private bool _pendingPersistedWindGaugeReceiveConnected = false;
         private bool _sentClearCommand = false;
+
+        public event Action<SiriccoData.SiriccoResult?>? SiriccoDataReceived;
 
         private readonly CollectionViewSource _sendPortsViewSource = new CollectionViewSource();
         private readonly CollectionViewSource _receivePortsViewSource = new CollectionViewSource();
@@ -175,6 +200,8 @@ namespace SwissTimingDisplay.ViewModels
                 .Where(c => c.ToString().StartsWith("Roller")));
             WindGaugeTcpCommands = new ObservableCollection<TcpCommand>(Enum.GetValues<TcpCommand>()
                 .Where(c => c.ToString().StartsWith("WindGauge")));
+            WindGaugeTcpCommandsMistral = new ObservableCollection<TcpCommand>(Enum.GetValues<TcpCommand>()
+                .Where(c => c.ToString().StartsWith("WindGauge") && c != TcpCommand.WindGauge_ReadFrequency));
 
             // Set default TCP command based on which window is shown
             _selectedTcpCommand = ShowWindGaugeWindow
@@ -230,6 +257,8 @@ namespace SwissTimingDisplay.ViewModels
         public ObservableCollection<TcpCommand> RollerTcpCommands { get; }
 
         public ObservableCollection<TcpCommand> WindGaugeTcpCommands { get; }
+
+        public ObservableCollection<TcpCommand> WindGaugeTcpCommandsMistral { get; }
 
         public SerialPortInfo? SelectedPort
         {
@@ -491,6 +520,58 @@ namespace SwissTimingDisplay.ViewModels
                         {
                             // Switch to the new window's ports
                             SwitchToWindowPorts(value);
+                            // Update the default TCP command for the new window
+                            SelectedTcpCommand = value
+                                ? TcpCommand.WindGauge_Acquisition_Duration
+                                : TcpCommand.Roller_Time_of_Day_or_Running_Time_;
+                        }
+                        finally
+                        {
+                            _isSwitchingWindows = false;
+                        }
+                    }
+                }
+            }
+        }
+
+        public bool ShowSiriccoWindow
+        {
+            get => _showSiriccoWindow;
+            set
+            {
+                // Only proceed if value is actually changing
+                if (_showSiriccoWindow == value)
+                {
+                    return;
+                }
+
+                if (SetProperty(ref _showSiriccoWindow, value))
+                {
+                    Debug.WriteLine($"ShowSiriccoWindow changed to: {value}");
+                    
+                    if (!_isLoadingSettings)
+                    {
+                        _isSwitchingWindows = true;
+                        try
+                        {
+                            // Set current window
+                            CurrentWindow = value ? ActiveWindow.Siricco : ActiveWindow.Display;
+                            Debug.WriteLine($"CurrentWindow set to: {CurrentWindow}");
+                            
+                            // Switch to the new window's ports
+                            if (value)
+                            {
+                                // Siricco mode - disconnect and let user select ports manually
+                                // Or we could add Siricco port persistence later
+                                Disconnect();
+                                DisconnectReceive();
+                            }
+                            else
+                            {
+                                // Switch to Display ports
+                                SwitchToWindowPorts(false);
+                            }
+                            
                             // Update the default TCP command for the new window
                             SelectedTcpCommand = value
                                 ? TcpCommand.WindGauge_Acquisition_Duration
@@ -799,6 +880,10 @@ namespace SwissTimingDisplay.ViewModels
                     {
                         // Ensure only WindGauge ports can be connected
                     }
+                    else if (value == ActiveWindow.Siricco)
+                    {
+                        // Ensure only Siricco ports can be connected
+                    }
                 }
             }
         }
@@ -919,6 +1004,16 @@ namespace SwissTimingDisplay.ViewModels
         {
             get => _status;
             set => SetProperty(ref _status, value);
+        }
+        public string SendStatus
+        {
+            get => _sendStatus;
+            set => SetProperty(ref _sendStatus, value);
+        }
+        public string RecvStatus
+        {
+            get => _recvStatus;
+            set => SetProperty(ref _recvStatus, value);
         }
 
         public RelayCommand RefreshPortsCommand { get; }
@@ -1143,6 +1238,16 @@ namespace SwissTimingDisplay.ViewModels
 
         private void ConnectReceive(string portName, int baudRate = 9600)
         {
+            Debug.WriteLine($"ConnectReceive called. CurrentWindow: {CurrentWindow}, IsSiricco: {CurrentWindow == ActiveWindow.Siricco}");
+            
+            // If in Siricco mode, use line-based reading
+            if (CurrentWindow == ActiveWindow.Siricco)
+            {
+                Debug.WriteLine("Using Siricco line-based receive loop");
+                ConnectReceiveSiricco(portName, baudRate);
+                return;
+            }
+
             DisconnectReceive();
 
             var port = new SerialPort(portName, baudRate)
@@ -1167,6 +1272,8 @@ namespace SwissTimingDisplay.ViewModels
 
         public void DisconnectReceive()
         {
+            StopSiriccoReceiveLoop();
+
             var cts = _receiveCts;
             _receiveCts = null;
             if (cts is not null)
@@ -1205,7 +1312,7 @@ namespace SwissTimingDisplay.ViewModels
             OnPropertyChanged(nameof(DisplayTime));
         }
 
-        public enum OpMode { display,windgauge, unknown}
+        public enum OpMode { display,windgauge,siricco, unknown}
 
 
 
@@ -1366,6 +1473,19 @@ namespace SwissTimingDisplay.ViewModels
                                 continue; // Invalid frame, skip
                         }
                         break;
+                    case OpMode.siricco:
+                        // Convert bytes to string and parse using SiriccoData
+                        string siriccoData = System.Text.Encoding.UTF8.GetString(buffer);
+                        var siriccoDataList = SiriccoData.ParseLines(siriccoData);
+                        foreach (var data in siriccoDataList)
+                        {
+                            if (data.IsValid)
+                            {
+                                var result = SiriccoData.Siricco_Data;
+                                Application.Current?.Dispatcher?.BeginInvoke(() => SiriccoDataReceived?.Invoke(result));
+                            }
+                        }
+                        break;
                     default:
                         continue; // Unknown mode, skip
                 }
@@ -1400,7 +1520,7 @@ namespace SwissTimingDisplay.ViewModels
                     if (_sendPortReceiveBuffer.Count == windGaugeOutputCmd.Count())
                     {
                         string csv = string.Join(",", _sendPortReceiveBuffer.Select(b => CharCommandToString((CharCommand)b)));
-                        Status += $"  Received: {csv}";
+                        RecvStatus = $"  Received: {csv}";
                         byte lastByte = _sendPortReceiveBuffer[_sendPortReceiveBuffer.Count - 1];
                         if (lastByte == 0x04) // EOT only
                         {
@@ -1459,11 +1579,12 @@ namespace SwissTimingDisplay.ViewModels
                     char digit2 = (char)frame[12];
                     char digit3 = (char)frame[14]; // Skip the dot at index 13
 
-                    // Validate that these are digit characters
+                    // Validate that digit positions are digit characters (sign at position 10 can be 10 for negative, 11 for positive)
                     if (char.IsDigit(digit1) && char.IsDigit(digit2) && char.IsDigit(digit3))
                     {
                         double speed = (digit1 - '0') * 10 + (digit2 - '0') + (digit3 - '0') / 10.0;
-                        if (signChar == '-')
+                        // Handle sign: //10 is negative, 11 is positive
+                        if (signChar == (char)'-')
                         {
                             speed = -speed;
                         }
@@ -1475,6 +1596,29 @@ namespace SwissTimingDisplay.ViewModels
                         }
                     }
                 }
+                else //Validate against Siricco
+                {
+                    // Convert byte frame to string for Siricco validation
+                    string frameString = System.Text.Encoding.UTF8.GetString(frame);
+                    var siriccoDataList = SiriccoData.ParseLines(frameString);
+
+                    foreach (var siriccoData in siriccoDataList)
+                    {
+                        if (siriccoData.IsValid)
+                        {
+                            var result = SiriccoData.Siricco_Data;
+                            // Valid Siricco message received
+                            // Raise SiriccoDataReceived event for the window to handle
+                            Application.Current?.Dispatcher?.BeginInvoke(() => SiriccoDataReceived?.Invoke(result));
+
+                            Debug.WriteLine($"Valid Siricco data in ProcessSendPortFrame: Value1={siriccoData.Value1}, Value2={siriccoData.Value2}, Value3={siriccoData.Value3}, Value4={siriccoData.Value4}, SpeedUnit={siriccoData.SpeedUnit}");
+                        }
+                        else
+                        {
+                            Debug.WriteLine($"Invalid Siricco data in ProcessSendPortFrame: {siriccoData.ErrorMessage}");
+                        }
+                    }
+                }
             }
         }
 
@@ -1483,7 +1627,7 @@ namespace SwissTimingDisplay.ViewModels
             ShowDecimalDot = true;
             int wholePart = (int)Math.Abs(speed);
             int decimalPart = (int)(Math.Abs(speed * 10) % 10);
-            string sign = speed < 0 ? "-" : " ";
+            string sign = speed < 0 ? "-" : "+"; // + for positive (value 11), "-" for negative (value 10)
 
             WindGaugeDisplay = $"{sign}{wholePart:00}{decimalPart}";
             Status = $"Received Wind Speed: {speed}";
@@ -1547,7 +1691,7 @@ namespace SwissTimingDisplay.ViewModels
                     MessageBoxButton.OK,
                     MessageBoxImage.Information);
 
-                Status = $"Prepared {payload.Length} byte(s): {hex}";
+                SendStatus = $"Prepared {payload.Length} byte(s): {hex}";
 
                 await Task.CompletedTask;
             }
@@ -1582,6 +1726,7 @@ namespace SwissTimingDisplay.ViewModels
             [ObservableProperty] private bool _showSimulator = true;
             [ObservableProperty] private string? _windGaugeCaptureCountdown;
             [ObservableProperty] private bool _showWindGaugeWindow = false;
+            [ObservableProperty] private string _siriccoMessageMode = "WindGauge_ReadFrequency";
         }
 
         private void LoadPersistedPortNames()
@@ -1608,6 +1753,12 @@ namespace SwissTimingDisplay.ViewModels
                 ShowSimulator = settings.ShowSimulator;
                 WindGaugeCaptureCountdown = settings.WindGaugeCaptureCountdown ?? "10";
                 ShowWindGaugeWindow = settings.ShowWindGaugeWindow;
+
+                // Load SiriccoMessageMode
+                if (!string.IsNullOrWhiteSpace(settings.SiriccoMessageMode) && Enum.TryParse<SiriccoMessageModes>(settings.SiriccoMessageMode, out var siriccoMode))
+                {
+                    _siriccoMessageMode = siriccoMode;
+                }
 
                 // Load the appropriate ports based on which window should be shown
                 if (ShowWindGaugeWindow)
@@ -1661,6 +1812,7 @@ namespace SwissTimingDisplay.ViewModels
                     ShowSimulator = _showSimulator,
                     WindGaugeCaptureCountdown = WindGaugeCaptureCountdown,
                     ShowWindGaugeWindow = _showWindGaugeWindow,
+                    SiriccoMessageMode = _siriccoMessageMode.ToString(),
                 };
 
                 // Save to window-specific properties based on current window

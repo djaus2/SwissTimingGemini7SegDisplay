@@ -57,7 +57,7 @@
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                 <Button Name="DisplayButton"
                         Content="Display"
-                        Width="120"
+                        Width="60"
                         Height="45"
                         FontSize="16"
                         Margin="0,0,10,0"
@@ -68,8 +68,8 @@
                         Click="DisplayButton_Click"/>
                 
                 <Button Name="WindGaugeButton"
-                        Content="Wind Gauge"
-                        Width="120"
+                        Content="Mistral Wind Gauge"
+                        Width="140"
                         Height="45"
                         FontSize="16"
                         Margin="0,0,20,0"
@@ -78,6 +78,17 @@
                         BorderThickness="0"
                         Cursor="Hand"
                         Click="WindGaugeButton_Click"/>
+                <Button Name="SiriccoButton"
+                        Content="Siricco Wind Gauge"
+                        Width="140"
+                        Height="45"
+                        FontSize="16"
+                        Margin="0,0,20,0"
+                        Background="Brown"
+                        Foreground="White"
+                        BorderThickness="0"
+                        Cursor="Hand"
+                        Click="SiriccoWindGaugeButton_Click"/>
                 <Button Name="ExitButton"
                         Content="Exit"
                         Width="60"
