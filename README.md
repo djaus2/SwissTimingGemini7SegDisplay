@@ -14,6 +14,10 @@
 > **Disclaimer:** _This software is for demostration and testing purposes only and is not provided by Swiss Timing._  
 > _Swiss Timing Display and Wind Gauge Transmission Protocols as referenced are used though._
 
+> Thie ReadMe in the Siricco branch is behind the ReadMe in master branch.  
+> But this code and functionality is ahead of the master branch.  
+> Adding the **Siricco Wind Gauge** , _under devlopment_.  
+
  **Status**
 > **WORKING ON MISTRAL WIND GAUGE PROTOCOL**. _Watch this space.._ Making progress .. About a week!  
 Got the app sending the Wind Gauge  Control TP messages  
