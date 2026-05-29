@@ -16,11 +16,13 @@ namespace SwissTimingDisplay.ViewModels
     {
         private string _windGaugeDisplay = string.Empty;
         private string _windGaugeCaptureCountdown = "10";
+        private string _siriccoWindGaugeCaptureCountsPerSec = "4";
         public string WindGaugeDisplay
         {
             get => _windGaugeDisplay;
             set => SetProperty(ref _windGaugeDisplay, value);
         }
+
 
         public string WindGaugeCaptureCountdown
         {
@@ -32,11 +34,37 @@ namespace SwissTimingDisplay.ViewModels
                     // Update the static WindGauge.duration when the property changes
                     if (int.TryParse(value, out int duration))
                     {
-                        WindGauge.duration = duration;
+                        WindGauge.AcquisitionDurationSecs = duration;
+                    }
+                    else
+                    {
+                        WindGauge.AcquisitionDurationSecs = WindGauge.AcquisitionDurationSecsDefault;
                     }
                 }
             }
         }
+
+        public string SiriccoAcquisitionMeasurementsPerSec
+        {
+            get => _siriccoWindGaugeCaptureCountsPerSec;
+            set
+            {
+                if (SetProperty(ref _siriccoWindGaugeCaptureCountsPerSec, value))
+                {
+                    // Update the static WindGauge.duration when the property changes
+                    if (int.TryParse(value, out int counts))
+                    {
+                        WindGauge.SiriccoWindGaugeCaptureCountsPerSec = counts;
+                    }
+                    else
+                    {
+                        WindGauge.SiriccoWindGaugeCaptureCountsPerSec = WindGauge.SiriccoAcquisitionMeasurementsPerSecDefault;
+                    }
+                }
+            }
+        }
+
+
 
         private bool _showDecimalDot = false;
         public bool ShowDecimalDot
@@ -45,13 +73,19 @@ namespace SwissTimingDisplay.ViewModels
             set => SetProperty(ref _showDecimalDot, value);
         }
 
-        private static class WindGauge
+        public static class WindGauge
         {
             public const int AcquisitionDurationMin = 0;
             public const int AcquisitionDurationMax = 30;
-            public const int AcquisitionDurationDefault = 10;
-            public static int duration { get; set; } = AcquisitionDurationDefault;
+            public const int AcquisitionDurationSecsDefault = 10; //Mistral uses this
+            public const int SiriccoAcquisitionMeasurementsPerSecDefault = 4; //Siricco uses this and AcquisitionDurationSecsDefault
 
+            // Mistral mode averages the wind speed over the acquisition duration and sends the result at the end of the acquisition duration.
+            public static int AcquisitionDurationSecs { get; set; } = AcquisitionDurationSecsDefault;
+
+            // Simulator for Siricco mode tallies and averages the wind speed over the acquisition duration.
+            // Total counts for the Siricco acquisition duration at the default rate would be 40 (10 secs * 4 counts/sec)
+            public static int SiriccoWindGaugeCaptureCountsPerSec { get; set; } = SiriccoAcquisitionMeasurementsPerSecDefault;
             public static double WindSpeed { get; set; } = 0;
 
             private static DispatcherTimer? _timer;
@@ -59,7 +93,7 @@ namespace SwissTimingDisplay.ViewModels
 
             public static void Start(MainViewModel viewModel)
             {
-                _countdown = duration;
+                _countdown = AcquisitionDurationSecs;
                 _timer = new DispatcherTimer
                 {
                     Interval = TimeSpan.FromSeconds(1)
@@ -136,7 +170,7 @@ namespace SwissTimingDisplay.ViewModels
 
         private void WindGaugeSetAquisitionDuration(int duration)
         {
-            WindGauge.duration = duration;
+            WindGauge.AcquisitionDurationSecs = duration;
         }
 
         private void WindGaugeResendLatest()
@@ -187,8 +221,10 @@ namespace SwissTimingDisplay.ViewModels
             // Third digit (decimal place)
             command[locationOfS++] = TcpCommandDefinitions.GetCharCmdDigit(decimalPart);
 
-            var msg = string.Join(",", command.Select(c => CharCommandToString(c)));
-            SendStatus = $"Command: {msg}";
+            var csv = string.Join("_", command.Select(c => CharCommandToString(c)));
+            csv = csv.Replace(" ", "SPC");
+            csv = csv.Replace("_", "");
+            SendStatus = $"Send: {csv}";
 
             // Send via receive port
             byte[] payload = command.Select(c => (byte)c).ToArray();
@@ -220,19 +256,22 @@ namespace SwissTimingDisplay.ViewModels
             int d3 = int.Parse(countStr.Substring(2, 1));
             command[locationOfS++] = TcpCommandDefinitions.GetCharCmdDigit(d3);
 
-            var msg = string.Join(",", command.Select(c => CharCommandToString(c)));
-            Status = $"Countdown: {msg}";
+            var csv = string.Join("_", command.Select(c => CharCommandToString(c)));
+            csv = csv.Replace(" ", "SPC");
+            csv = csv.Replace("_", "");
+            Status = $"Countdown: {csv}";
 
             byte[] payload = command.Select(c => (byte)c).ToArray();
             SendRawAsyncReceive(payload);
         }
 
-        private string CharCommandToString(CharCommand cmd)
+        public static string CharCommandToString(CharCommand cmd)
         {
+            byte b = (byte)cmd;
             char ch = (char)cmd;
             if (char.IsControl(ch))
             {
-                return cmd.ToString();
+                return '<' + cmd.ToString() + '>';
             }
             return ch.ToString();
         }

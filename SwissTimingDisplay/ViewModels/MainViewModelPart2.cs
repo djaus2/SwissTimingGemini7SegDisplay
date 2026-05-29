@@ -8,7 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
-
+using CommunityToolkit.Mvvm.ComponentModel;
 using SwissTimingDisplay.Models;
 
 namespace SwissTimingDisplay.ViewModels
@@ -18,6 +18,90 @@ namespace SwissTimingDisplay.ViewModels
         private CancellationTokenSource? _siriccoReceiveCts;
         private Task? _siriccoReceiveTask;
         private readonly StringBuilder _siriccoLineBuffer = new StringBuilder();
+        private DispatcherTimer? _simulatedSiriccoTimer;
+        private readonly Random _simulatedRandom = new Random();
+
+        public Action? WindGaugeStart;
+        public Action? WindGaugeStop;
+
+        [ObservableProperty] private bool _simulatedSiriccoWindGaugeRunning = false;
+
+        partial void OnSimulatedSiriccoWindGaugeRunningChanged(bool value)
+        {
+            if (value)
+            {
+                //if (!_vm.IsConnected)
+                //{
+                //    return;
+                //}
+                StartSimulatedSiriccoWindGauge();
+            }
+            else
+            {
+                StopSimulatedSiriccoWindGauge();
+            }
+        }
+
+        void StartSimulatedSiriccoWindGauge()
+        {
+            //SimulatedSiriccoWindGaugeRunning = true;
+            SendStatus = "Simulated Wind Gauge Started";
+            WindGaugeStart?.Invoke();
+            //if (_simulatedSiriccoTimer != null)
+            //{
+            //    return;
+            //}
+
+            //var interval = TimeSpan.FromMilliseconds(1000.0 / WindGauge.SiriccoAcquisitionMeasurementsPerSecDefault);
+            //_simulatedSiriccoTimer = new DispatcherTimer
+            //{
+            //    Interval = interval
+            //};
+            //_simulatedSiriccoTimer.Tick += SimulatedSiriccoTimer_Tick;
+            //_simulatedSiriccoTimer.Start();
+        }
+
+
+
+        //private void SimulatedSiriccoTimer_Tick(object? sender, EventArgs e)
+        //{
+        //    byte[] cmdbytes = new byte[0];
+        //    double WindSpeed = new Random().Next(-100, 100); // Simulate wind speed measurement
+        //    WindSpeed /= 10.0;
+        //    int uVector = 0;
+        //    if (WindSpeed < 0) 
+        //        uVector = 1;
+        //    string msg = $" Q,{WindSpeed:+0.0},{uVector},00,M,";
+        //    byte cs = 0;
+        //    foreach (char c in msg)
+        //    {
+        //        cs ^= (byte)c;
+        //    }
+        //    var msgBytes = msg.Select(c => (byte)c).ToArray();
+        //    cmdbytes = new byte[msgBytes.Length + 5];
+        //    cmdbytes[0] = (byte)CharCommand.STX;
+        //    Array.Copy(msgBytes, 0, cmdbytes, 1, msgBytes.Length);
+        //    cmdbytes[msgBytes.Length + 1] = (byte)CharCommand.ETX;
+        //    cmdbytes[msgBytes.Length + 2] = cs;
+        //    cmdbytes[msgBytes.Length + 3] = (byte)CharCommand.CR;
+        //    cmdbytes[msgBytes.Length + 4] = (byte)CharCommand.LF;
+        //    var payload = cmdbytes;
+        //    BeginAutoSend(payload);
+        //}
+
+        void StopSimulatedSiriccoWindGauge()
+        {
+            //SimulatedSiriccoWindGaugeRunning = false;
+            SendStatus = "Simulated Wind GaugeStopped";
+            WindGaugeStop?.Invoke();
+            //if (_simulatedSiriccoTimer != null)
+            //{
+            //    _simulatedSiriccoTimer.Stop();
+            //    _simulatedSiriccoTimer.Tick -= SimulatedSiriccoTimer_Tick;
+            //    _simulatedSiriccoTimer = null;
+            //}
+        }
+
 
         /// <summary>
         /// Connect receive port for Siricco mode using line-based reading
@@ -88,11 +172,17 @@ namespace SwissTimingDisplay.ViewModels
 
                         char c = (char)b;
                         _siriccoLineBuffer.Append(c);
+                        var length = _siriccoLineBuffer.Length;
 
                         // Check for CR-LF line terminator
                         if (c == '\n' && _siriccoLineBuffer.Length > 1 && _siriccoLineBuffer[_siriccoLineBuffer.Length - 2] == '\r')
                         {
                             // Remove the CR-LF
+                            string csv = _siriccoLineBuffer.ToString();
+                            string completeline = string.Join("_", csv.Select(b => MainViewModel.CharCommandToString((CharCommand)b)));
+                            string shrunkLine = completeline.Replace("_", "");
+                            
+
                             string line = _siriccoLineBuffer.ToString(0, _siriccoLineBuffer.Length - 2);
                             _siriccoLineBuffer.Clear();
 
@@ -100,7 +190,13 @@ namespace SwissTimingDisplay.ViewModels
                             {
                                 continue;
                             }
-
+                            if (!SiriccoIsRunning)
+                            {
+                                if(!RecvStatus.Contains("Receiving but not processing speed data"))
+                                    RecvStatus += "     Receiving but not processing speed data.";
+                                continue;
+                            }
+                            RecvStatus = "Received: " + shrunkLine.Replace(" ", "<sPC>");
                             // Validate the line using SiriccoData
                             var siriccoDataList = SiriccoData.ParseLines(line);
 

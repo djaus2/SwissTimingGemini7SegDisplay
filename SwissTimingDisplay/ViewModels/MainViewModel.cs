@@ -141,7 +141,7 @@ namespace SwissTimingDisplay.ViewModels
         private bool _isShuttingDown = false;
         private bool _isSwitchingWindows = false;
 
-        private SiriccoMessageModes _siriccoMessageMode = SiriccoMessageModes.WindGauge_ReadFrequency;
+        private SiriccoMessageModes _siriccoMessageMode = SiriccoMessageModes.Gill_Tunnel;
 
         public SiriccoMessageModes SiriccoMessageMode
         {
@@ -176,6 +176,8 @@ namespace SwissTimingDisplay.ViewModels
         private bool _sentClearCommand = false;
 
         public event Action<SiriccoData.SiriccoResult?>? SiriccoDataReceived;
+
+        [ObservableProperty] private bool _siriccoIsRunning = false;
 
         private readonly CollectionViewSource _sendPortsViewSource = new CollectionViewSource();
         private readonly CollectionViewSource _receivePortsViewSource = new CollectionViewSource();
@@ -474,6 +476,7 @@ namespace SwissTimingDisplay.ViewModels
                     _displaySimulatorSpeed = value;
                     OnPropertyChanged(nameof(DisplaySimulatorSpeed));
                 }
+
             }
         }
 
@@ -1236,7 +1239,7 @@ namespace SwissTimingDisplay.ViewModels
             RaiseCommandStates();
         }
 
-        private void ConnectReceive(string portName, int baudRate = 9600)
+        public void ConnectReceive(string portName, int baudRate = 9600)
         {
             Debug.WriteLine($"ConnectReceive called. CurrentWindow: {CurrentWindow}, IsSiricco: {CurrentWindow == ActiveWindow.Siricco}");
             
@@ -1519,7 +1522,9 @@ namespace SwissTimingDisplay.ViewModels
                     }
                     if (_sendPortReceiveBuffer.Count == windGaugeOutputCmd.Count())
                     {
-                        string csv = string.Join(",", _sendPortReceiveBuffer.Select(b => CharCommandToString((CharCommand)b)));
+                        string csv = string.Join("_", _sendPortReceiveBuffer.Select(b => CharCommandToString((CharCommand)b)));
+                        csv = csv.Replace(" ", "SPC");
+                        csv = csv.Replace("_", "");
                         RecvStatus = $"  Received: {csv}";
                         byte lastByte = _sendPortReceiveBuffer[_sendPortReceiveBuffer.Count - 1];
                         if (lastByte == 0x04) // EOT only
@@ -1726,7 +1731,7 @@ namespace SwissTimingDisplay.ViewModels
             [ObservableProperty] private bool _showSimulator = true;
             [ObservableProperty] private string? _windGaugeCaptureCountdown;
             [ObservableProperty] private bool _showWindGaugeWindow = false;
-            [ObservableProperty] private string _siriccoMessageMode = "WindGauge_ReadFrequency";
+            [ObservableProperty] private string _siriccoMessageMode = "Gill_Tunnel";
         }
 
         private void LoadPersistedPortNames()
@@ -1833,9 +1838,6 @@ namespace SwissTimingDisplay.ViewModels
 
                 var json = JsonSerializer.Serialize(settings);
                 File.WriteAllText(SettingsFilePath, json);
-                
-                // Copy settings file path to clipboard
-                Clipboard.SetText(SettingsFilePath);
             }
             catch
             {
