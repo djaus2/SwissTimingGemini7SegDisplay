@@ -270,8 +270,6 @@
                                 <TextBlock FontWeight="Bold" FontStyle="Italic" Foreground="Purple" Text="Simulate Speed" />
                             </CheckBox.Content>
                         </CheckBox>
-                        <TextBlock Text="{Binding _vm.SiriccoIsRunning}"/>
-                        <TextBlock Text="{Binding SiriccoIsRunning}"/>
                     </StackPanel>
 
                     <StackPanel Grid.Row="2" Grid.Column="0" Orientation="Horizontal" Margin="0,0,0,36" Grid.RowSpan="2">
@@ -286,6 +284,8 @@
                             </ComboBox.ItemTemplate>
                         </ComboBox>
                         <Button x:Name="btnSend" Margin="8,0,0,0" Padding="10,4" Content="← Send selected command" Click="ButtonSend_Click" Style="{StaticResource SnazzyButtonStyle}" />
+                        <TextBlock Text="Simulator is Running:" Margin="12,0,0,0" VerticalAlignment="Center" FontWeight="Bold" FontStyle="Italic" Foreground="Purple"/>
+                        <TextBlock Text="{Binding SiriccoIsRunning}" Margin="12,0,0,0" VerticalAlignment="Center" FontWeight="Bold" FontStyle="Italic" Foreground="Red"/>
                     </StackPanel>
 
 
@@ -313,7 +313,7 @@
                             <ColumnDefinition Width="Auto" SharedSizeGroup="LabelColumn" />
                             <ColumnDefinition Width="Auto" SharedSizeGroup="TextBoxColumn" />
                         </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Column="0" Text="Captures per:" FontWeight="Bold" FontStyle="Italic" Foreground="Purple" VerticalAlignment="Center" HorizontalAlignment="Right" />
+                        <TextBlock Grid.Column="0" Text="Captures per sec:" FontWeight="Bold" FontStyle="Italic" Foreground="Purple" VerticalAlignment="Center" HorizontalAlignment="Right" />
                         <TextBox x:Name="tbCountsPerSec" Grid.Column="1" Margin="12,0,0,0" Width="100" Text="{Binding SiriccoAcquisitionMeasurementsPerSec, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center">
                             <TextBox.Style>
                                 <Style TargetType="TextBox">

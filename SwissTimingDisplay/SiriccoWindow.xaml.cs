@@ -1,14 +1,15 @@
+using SwissTimingDisplay.Models;
+using SwissTimingDisplay.ViewModels;
 using System;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Diagnostics.Metrics;
 using System.Linq;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Threading;
-
-using SwissTimingDisplay.Models;
-using SwissTimingDisplay.ViewModels;
 using static SwissTimingDisplay.ViewModels.MainViewModel;
 
 namespace SwissTimingDisplay
@@ -71,15 +72,15 @@ namespace SwissTimingDisplay
             }
             SiriccoWindGaugePeriod = TimeSpan.FromSeconds(1.0 / WindGauge.AcquisitionDurationSecs);
             _WindGaugeTimer.Interval = SiriccoWindGaugePeriod;
-            MaxLoops = WindGauge.SiriccoAcquisitionMeasurementsPerSecDefault * WindGauge.AcquisitionDurationSecs;
+            MaxLoops = WindGauge.SiriccoWindGaugeCaptureCountsPerSec * WindGauge.AcquisitionDurationSecs;
             return true;
         }
 
         private bool  SetupSimulatedWindGaugeTimerInitial()
         {
             SetLoopCount((int)LoopCountState.Stopped);
-            WindGauge.AcquisitionDurationSecs = (int)LoopCountState.CountPerSecDefault;
-            WindGauge.SiriccoWindGaugeCaptureCountsPerSec = (int) LoopCountState.AcquisitionDurationSecsDefault; ;
+            WindGauge.AcquisitionDurationSecs = (int)LoopCountState.AcquisitionDurationSecsDefault;
+            WindGauge.SiriccoWindGaugeCaptureCountsPerSec = (int)LoopCountState.CountPerSecDefault;
             return SetupSimulatedWindGaugeTimerForNewStart();
         }
 
@@ -199,25 +200,50 @@ namespace SwissTimingDisplay
             _WindGaugeTimer.Tick += async (_, _) =>
             {
                 byte[] cmdbytes = new byte[0];
+
+                // Generate the wind speed data message.
                 double WindSpeed = new Random().Next(-100, 100); // Simulate wind speed measurement
                 WindSpeed /= 10.0;
                 int uVector = 0;
                 if (WindSpeed < 0)
                     uVector = 1;
-                string msg = $" Q,{WindSpeed:+0.0},{uVector},00,M,";
+                string speedStr = WindSpeed >= 0 ? $"+{WindSpeed:0.0}" : $"{WindSpeed:0.0}";
+                // Could do a switch here for the different Gill anemometers
+                string msg = $"Q,{speedStr},{uVector},00,M,";
+                var msgBytes = msg.Select(c => (byte)c).ToArray();
+
+                // Get Checksum:
+                // cs++; <-- Was done as below to invoke a failure in the Gill WinView application
+                // It was oberved that the app does verify the checksum as it failed with that included
+                // ... but does decode the messages when not inserted above.
+                // ... and so the format of its inclusion here is correct.
                 byte cs = 0;
                 foreach (char c in msg)
                 {
                     cs ^= (byte)c;
                 }
-                var msgBytes = msg.Select(c => (byte)c).ToArray();
-                cmdbytes = new byte[msgBytes.Length + 5];
+                //cs++; See above comment on checksum verification in Gill WinView app
+                byte[] csBytes = Encoding.ASCII.GetBytes(cs.ToString());
+                //.Resize(ref csBytes, csBytes.Length + 1);
+
+                // Start building the command bytes array with the correct size: STX + data + ETX + checksum + CR + LF
+                cmdbytes = new byte[msgBytes.Length + csBytes.Length + 4];
+
+                // Starts with STX
                 cmdbytes[0] = (byte)CharCommand.STX;
+
+                // Insert data bytes
                 Array.Copy(msgBytes, 0, cmdbytes, 1, msgBytes.Length);
+
+                // Ends with ETX
                 cmdbytes[msgBytes.Length + 1] = (byte)CharCommand.ETX;
-                cmdbytes[msgBytes.Length + 2] = cs;
-                cmdbytes[msgBytes.Length + 3] = (byte)CharCommand.CR;
-                cmdbytes[msgBytes.Length + 4] = (byte)CharCommand.LF;
+
+                // Append Checksum
+                Array.Copy(csBytes, 0, cmdbytes, msgBytes.Length + 2, csBytes.Length);
+
+                // Append CR, LF
+                cmdbytes[cmdbytes.Length - 2] = (byte)CharCommand.CR;
+                cmdbytes[cmdbytes.Length - 1] = (byte)CharCommand.LF;
                 var payload = cmdbytes;
                 await BeginAutoSend(payload);
             };
@@ -378,24 +404,30 @@ namespace SwissTimingDisplay
 
         private void VmOnSiriccoDataReceived(SiriccoData.SiriccoResult? result)
         {
-            if (result == null || !result.IsValid)
+            if (result == null)
+            {
+                return;
+            }
+            else if ( !result.IsValid)
             {
                 Debug.WriteLine($"Invalid Siricco data received: {result?.ErrorMessage}");
                 return;
             }
-
             // Valid Siricco message received
-            Debug.WriteLine($"Valid Siricco data received: Speed={result.Speed1}, Speed1={result.Speed1}, Speed2={result.Speed2}, Direction={result.Direction}, SpeedUnit={result.SpeedUnit}, Mode={result.Mode}");
+            //Debug.WriteLine($"Valid Siricco data received: Speed={result.Speed1}, Speed1={result.Speed1}, Speed2={result.Speed2}, Direction={result.Direction}, SpeedUnit={result.SpeedUnit}, Mode={result.Mode}");
             
             // TODO: Add interpretation logic here when defined
             int count = IncrementLoopCount2();
             speedTally += result.Speed1;
-            if(count>= MaxLoops)
-            {
-                Siricco_StartButton(null, null);
-                double speed = speedTally /count;
-                _vm.RecvStatus = $"Speed={speed:F1} (final,Total: {speedTally} over {count} measurements averaged over {WindGauge.AcquisitionDurationSecs} sec)";
+            Debug.WriteLine($"Added to tally: {result.Speed1}, Current tally: {speedTally}, Count: {count}");
+            if (count>= MaxLoops)
+            {               
+                //double speed = speedTally /count;
+                double speed = Math.Round(speedTally / count, 1);
+                _vm.RecvStatus = $"Speed={speed:F1} {speed:F3} (final,Total: {speedTally} over {count} measurements averaged over {WindGauge.AcquisitionDurationSecs} sec)";
                 Debug.WriteLine($"{_vm.RecvStatus}");
+                WindGauge.WindSpeed = speed;
+                Siricco_StartButton(null, null);
             }
             else
             {
@@ -423,6 +455,8 @@ namespace SwissTimingDisplay
                 //_raceStopwatch.Stop();
 
                 //_WindGaugeTimer.Stop();
+                _vm.DisplaySimulatorSpeed = true;
+                _vm.UpdateSimulatedWindGaugeDisplaySpeed();
 
                 _sendWallClockWhileRunning = false;
 
@@ -484,17 +518,21 @@ namespace SwissTimingDisplay
 
             ClearLoopCount2();
             //SetLoopCount((int)LoopCountState.InitialCountValue);
-
+            int val1 = WindGauge.SiriccoWindGaugeCaptureCountsPerSec;
+            int val2 = WindGauge.AcquisitionDurationSecs;
+            int.TryParse(_vm.WindGaugeCaptureCountdown, out val1);
+            int.TryParse(_vm.SiriccoAcquisitionMeasurementsPerSec, out val2);
+            MaxLoops = val1 * val2; // WindGauge.SiriccoWindGaugeCaptureCountsPerSec * WindGauge.AcquisitionDurationSecs;
             speedTally = 0.0;
             //SendCmd(TcpCommand.WindGauge_Start_of_Measurement);
-            _WindGaugeTimer.Start();
+            //_WindGaugeTimer.Start();
 
             _sendWallClockWhileRunning = _vm.UseWallClockTimeOfDay;
             _SiriccoHasStartedSinceReset = true;
             _vm.RaceHasStartedSinceReset = true;
 
-
-
+            //WindGauge.WindSpeed = speed;
+            _vm.DisplaySimulatorSpeed = false;
 
             UpdateTimeInputFromRaceElapsed();
             _vm.Status = "Race timer started.";
@@ -776,7 +814,8 @@ namespace SwissTimingDisplay
                 }
 
                 var msgBytes = msg.Select(c => (byte)c).ToArray();
-                cmdbytes = new byte[msgBytes.Length + 5];
+                var csBytes = Encoding.ASCII.GetBytes(cs.ToString());
+                cmdbytes = new byte[msgBytes.Length + csBytes.Length + 4];
                 cmdbytes[0] = (byte)CharCommand.STX;
                 Array.Copy(msgBytes, 0, cmdbytes, 1, msgBytes.Length);
                 cmdbytes[msgBytes.Length + 1] = (byte)CharCommand.ETX;
@@ -833,21 +872,20 @@ namespace SwissTimingDisplay
                 {
                     if ((tim > 0) && (tim <= 100))
                     {
-                        _vm.WindGaugeCaptureCountdown = tim.ToString(); ;
+                        _vm.WindGaugeCaptureCountdown = tim.ToString();
+                        WindGauge.AcquisitionDurationSecs = tim;
                     }
                 }
 
             }
             else if (cmd == TcpCommand.WindGauge_ReadFrequency)
             {
-                _vm.SiriccoAcquisitionMeasurementsPerSec = WindGauge.SiriccoAcquisitionMeasurementsPerSecDefault.ToString();
-
-
-                if (int.TryParse(_vm.WindGaugeCaptureCountdown, out int counts))
+                if (int.TryParse(_vm.SiriccoAcquisitionMeasurementsPerSec, out int counts))
                 {
-                    if ((counts > 0) && (counts <= 10))
+                    if ((counts > 1) && (counts <= 10))
                     {
-                        _vm.SiriccoAcquisitionMeasurementsPerSec = counts.ToString(); ;
+                        _vm.SiriccoAcquisitionMeasurementsPerSec = counts.ToString();
+                        WindGauge.SiriccoWindGaugeCaptureCountsPerSec = counts;
                     }
                 }
 

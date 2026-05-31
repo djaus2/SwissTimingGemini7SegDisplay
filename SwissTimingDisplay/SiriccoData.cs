@@ -77,20 +77,33 @@ namespace SwissTimingDisplay
                 return;
             }
 
-            // Validate ETX near end (last 2 characters: ETX + checksum)
-            if (line.Length < 2 || (byte)line[line.Length - 2] != ETX)
+            //// Validate ETX near end (last 2 characters: ETX + checksum)
+            //if (line.Length < 2 || (byte)line[line.Length - 2] != ETX)
+            //{
+            //    ErrorMessage = "Line does not contain ETX before checksum";
+            //    return;
+            //}
+
+            int etxPosn = line.IndexOf(ETX);
+            if(etxPosn<14)
             {
                 ErrorMessage = "Line does not contain ETX before checksum";
                 return;
             }
-
+            string checksumStr = line.Substring(etxPosn+1);
+            byte expectedChecksum = 0;
+            if(!byte.TryParse(checksumStr.Trim(),  out expectedChecksum))
+            {
+                ErrorMessage = "Invalid or no checksum string";
+                return;
+            }
             // Extract checksum character
-            char checksumChar = line[line.Length - 1];
-            byte expectedChecksum = (byte)checksumChar;
+            //char checksumChar = line[line.Length - 1];
+            //byte expectedChecksum = (byte)((byte)checksumChar -(byte)'0');
 
             // Calculate checksum: XOR of all bytes between STX and ETX (not including them)
             byte calculatedChecksum = 0;
-            for (int i = 1; i < line.Length - 2; i++)
+            for (int i = 1; i < etxPosn; i++)
             {
                 calculatedChecksum ^= (byte)line[i];
             }

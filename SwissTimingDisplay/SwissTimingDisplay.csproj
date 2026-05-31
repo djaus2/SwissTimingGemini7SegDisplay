@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <Version>2.3.0</Version>
+    <Version>2.3.1</Version>
     <TargetFramework>net10.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -10,16 +10,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="ViewModels\MainViewModelPart2 - Copy.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <None Remove="docs\mistralwindgauge.png" />
     <None Remove="docs\SwissTiming.png" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="ViewModels\MainViewModelPart2 - Copy.cs" />
   </ItemGroup>
 
 

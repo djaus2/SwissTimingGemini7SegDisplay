@@ -300,7 +300,7 @@ namespace SwissTimingDisplay.ViewModels
         /// Note that currently the both serial ports must be connected though.
         /// 2Do unwind this. Other comands still need serial.
         /// </summary>
-        private void UpdateSimulatedWindGaugeDisplaySpeed()
+        public void UpdateSimulatedWindGaugeDisplaySpeed()
         {
             // Only update display if DisplaySimulatorSpeed is true
             if (DisplaySimulatorSpeed)
@@ -314,7 +314,7 @@ namespace SwissTimingDisplay.ViewModels
                 string sign = WindGauge.WindSpeed < 0 ? "-" : "+"; // + for positive (value 11), "-" for negative (value 10)
 
                 // Format as "XXX" with leading space for sign (no decimal point in string)
-                WindGaugeDisplay = $"{sign}{wholePart10:0}{wholePart1:0}{decimalPart}";
+                WindGaugeDisplay = $"{sign}{wholePart10:0}{wholePart1:0}{decimalPart}";//UpdateUpdate
             }
             else
             {

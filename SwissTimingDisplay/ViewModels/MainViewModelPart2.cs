@@ -209,7 +209,7 @@ namespace SwissTimingDisplay.ViewModels
                                     // Raise SiriccoDataReceived event on UI thread
                                     Application.Current?.Dispatcher?.BeginInvoke(() => SiriccoDataReceived?.Invoke(result));
 
-                                    Debug.WriteLine($"Valid Siricco data: Value1={siriccoData.Value1}, Value2={siriccoData.Value2}, Value3={siriccoData.Value3}, Value4={siriccoData.Value4}, SpeedUnit={siriccoData.SpeedUnit}");
+                                    //Debug.WriteLine($"Valid Siricco data:  Value1={siriccoData.Value1}, Value2={siriccoData.Value2}, Value3={siriccoData.Value3}, Value4={siriccoData.Value4}, SpeedUnit={siriccoData.SpeedUnit}");
                                 }
                                 else
                                 {
