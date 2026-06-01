@@ -1756,7 +1756,7 @@ namespace SwissTimingDisplay.ViewModels
                 RaceDistance = settings.RaceDistance;
                 DisplaySimulatorSpeed = settings.DisplaySimulatorSpeed;
                 ShowSimulator = settings.ShowSimulator;
-                WindGaugeCaptureCountdown = settings.WindGaugeCaptureCountdown ?? "10";
+                WindGaugeCaptureCountdownPeriodSecsStr = settings.WindGaugeCaptureCountdown ?? "10";
                 ShowWindGaugeWindow = settings.ShowWindGaugeWindow;
 
                 // Load SiriccoMessageMode
@@ -1815,7 +1815,7 @@ namespace SwissTimingDisplay.ViewModels
                     RaceDistance = RaceDistance,
                     DisplaySimulatorSpeed = _displaySimulatorSpeed,
                     ShowSimulator = _showSimulator,
-                    WindGaugeCaptureCountdown = WindGaugeCaptureCountdown,
+                    WindGaugeCaptureCountdown = WindGaugeCaptureCountdownPeriodSecsStr,
                     ShowWindGaugeWindow = _showWindGaugeWindow,
                     SiriccoMessageMode = _siriccoMessageMode.ToString(),
                 };

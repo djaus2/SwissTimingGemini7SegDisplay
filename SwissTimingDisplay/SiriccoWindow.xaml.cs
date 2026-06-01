@@ -52,7 +52,7 @@ namespace SwissTimingDisplay
         private double speedTally { get; set; } = 0;
 
         private TimeSpan SiriccoWindGaugePeriod { get; set; } = TimeSpan.FromSeconds(1 / (int)LoopCountState.CountPerSecDefault);
-        int MaxLoops { get; set; } = (int)LoopCountState.CountPerSecDefault * (int)LoopCountState.AcquisitionDurationSecsDefault; // Add a few extra ticks as buffer
+        int MaxLoops { get; set; } = WindGauge.SiriccoAcquisitionMeasurementsPerSecDefault * WindGauge.SirricoAcquisitionDurationSecsDefault; // Add a few extra ticks as buffer
 
 
         private bool SetupSimulatedWindGaugeTimerForNewStart()
@@ -70,16 +70,16 @@ namespace SwissTimingDisplay
                 MessageBox.Show("Cannot change acquisition parameters while timer is running. Please stop the timer before changing parameters.", "Parameter Change Not Allowed", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return false;
             }
-            SiriccoWindGaugePeriod = TimeSpan.FromSeconds(1.0 / WindGauge.AcquisitionDurationSecs);
+            SiriccoWindGaugePeriod = TimeSpan.FromSeconds(1.0 / WindGauge.SiriccoWindGaugeAcquisitionDurationSecs);
             _WindGaugeTimer.Interval = SiriccoWindGaugePeriod;
-            MaxLoops = WindGauge.SiriccoWindGaugeCaptureCountsPerSec * WindGauge.AcquisitionDurationSecs;
+            MaxLoops = WindGauge.SiriccoWindGaugeCaptureCountsPerSec * WindGauge.SiriccoWindGaugeAcquisitionDurationSecs;
             return true;
         }
 
         private bool  SetupSimulatedWindGaugeTimerInitial()
         {
             SetLoopCount((int)LoopCountState.Stopped);
-            WindGauge.AcquisitionDurationSecs = (int)LoopCountState.AcquisitionDurationSecsDefault;
+            WindGauge.SiriccoWindGaugeAcquisitionDurationSecs = (int)LoopCountState.AcquisitionDurationSecsDefault;
             WindGauge.SiriccoWindGaugeCaptureCountsPerSec = (int)LoopCountState.CountPerSecDefault;
             return SetupSimulatedWindGaugeTimerForNewStart();
         }
@@ -424,7 +424,7 @@ namespace SwissTimingDisplay
             {               
                 //double speed = speedTally /count;
                 double speed = Math.Round(speedTally / count, 1);
-                _vm.RecvStatus = $"Speed={speed:F1} {speed:F3} (final,Total: {speedTally} over {count} measurements averaged over {WindGauge.AcquisitionDurationSecs} sec)";
+                _vm.RecvStatus = $"Speed={speed:F1} {speed:F3} (final,Total: {speedTally} over {count} measurements averaged over {WindGauge.SiriccoWindGaugeAcquisitionDurationSecs} sec)";
                 Debug.WriteLine($"{_vm.RecvStatus}");
                 WindGauge.WindSpeed = speed;
                 Siricco_StartButton(null, null);
@@ -517,25 +517,20 @@ namespace SwissTimingDisplay
             _vm.IsRaceRunning = true;
 
             ClearLoopCount2();
-            //SetLoopCount((int)LoopCountState.InitialCountValue);
-            int val1 = WindGauge.SiriccoWindGaugeCaptureCountsPerSec;
-            int val2 = WindGauge.AcquisitionDurationSecs;
-            int.TryParse(_vm.WindGaugeCaptureCountdown, out val1);
-            int.TryParse(_vm.SiriccoAcquisitionMeasurementsPerSec, out val2);
-            MaxLoops = val1 * val2; // WindGauge.SiriccoWindGaugeCaptureCountsPerSec * WindGauge.AcquisitionDurationSecs;
+
+            int period = _vm.WindGaugeCaptureCountdownPeriodSecs;
+            int cps = _vm.WindGaugeCaptureCountsPerSec;
+            MaxLoops = period * cps;
             speedTally = 0.0;
-            //SendCmd(TcpCommand.WindGauge_Start_of_Measurement);
-            //_WindGaugeTimer.Start();
 
             _sendWallClockWhileRunning = _vm.UseWallClockTimeOfDay;
             _SiriccoHasStartedSinceReset = true;
             _vm.RaceHasStartedSinceReset = true;
 
-            //WindGauge.WindSpeed = speed;
-            _vm.DisplaySimulatorSpeed = false;
+            _vm.StartCountDown();
 
             UpdateTimeInputFromRaceElapsed();
-            _vm.Status = "Race timer started.";
+            _vm.Status = "Siricco Wind Gauge capture started.";
 
             UpdateSiriccoStartButtonContent();
             UpdateWallClockEnabledState();
@@ -851,40 +846,40 @@ namespace SwissTimingDisplay
             //    HandleWindGaugeReadFrequencySend();
             //    return;
             //}
-            if (string.IsNullOrWhiteSpace(_vm.WindGaugeCaptureCountdown))
+            if (string.IsNullOrWhiteSpace(_vm.WindGaugeCaptureCountdownPeriodSecsStr))
             {
-                _vm.WindGaugeCaptureCountdown = ((int)LoopCountState.AcquisitionDurationSecsDefault).ToString(); ;
+                _vm.WindGaugeCaptureCountdownPeriodSecsStr = ((int)LoopCountState.AcquisitionDurationSecsDefault).ToString(); ;
             }
-            if (string.IsNullOrWhiteSpace(_vm.SiriccoAcquisitionMeasurementsPerSec))
+            if (string.IsNullOrWhiteSpace(_vm.WindGaugeCaptureCountsPerSecStr))
             {
-                _vm.SiriccoAcquisitionMeasurementsPerSec = WindGauge.SiriccoAcquisitionMeasurementsPerSecDefault.ToString();
+                _vm.WindGaugeCaptureCountsPerSecStr = WindGauge.SiriccoAcquisitionMeasurementsPerSecDefault.ToString();
             }
             var cmd = _vm.SelectedTcpCommand;
             // Clear TimeOut on send side if this was a Clear command
             if (cmd == TcpCommand.WindGauge_Reset_CaptureTime)
             {
-                _vm.WindGaugeCaptureCountdown = "10";
+                _vm.WindGaugeCaptureCountdownPeriodSecsStr = "10";
                 return;
             }
             else if (cmd == TcpCommand.WindGauge_Acquisition_Duration)
             {
-                if (int.TryParse(_vm.WindGaugeCaptureCountdown, out int tim))
+                if (int.TryParse(_vm.WindGaugeCaptureCountdownPeriodSecsStr, out int tim))
                 {
                     if ((tim > 0) && (tim <= 100))
                     {
-                        _vm.WindGaugeCaptureCountdown = tim.ToString();
-                        WindGauge.AcquisitionDurationSecs = tim;
+                        _vm.WindGaugeCaptureCountdownPeriodSecsStr = tim.ToString();
+                        WindGauge.SiriccoWindGaugeAcquisitionDurationSecs = tim;
                     }
                 }
 
             }
             else if (cmd == TcpCommand.WindGauge_ReadFrequency)
             {
-                if (int.TryParse(_vm.SiriccoAcquisitionMeasurementsPerSec, out int counts))
+                if (int.TryParse(_vm.WindGaugeCaptureCountsPerSecStr, out int counts))
                 {
                     if ((counts > 1) && (counts <= 10))
                     {
-                        _vm.SiriccoAcquisitionMeasurementsPerSec = counts.ToString();
+                        _vm.WindGaugeCaptureCountsPerSecStr = counts.ToString();
                         WindGauge.SiriccoWindGaugeCaptureCountsPerSec = counts;
                     }
                 }

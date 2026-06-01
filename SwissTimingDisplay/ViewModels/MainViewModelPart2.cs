@@ -47,59 +47,14 @@ namespace SwissTimingDisplay.ViewModels
             //SimulatedSiriccoWindGaugeRunning = true;
             SendStatus = "Simulated Wind Gauge Started";
             WindGaugeStart?.Invoke();
-            //if (_simulatedSiriccoTimer != null)
-            //{
-            //    return;
-            //}
-
-            //var interval = TimeSpan.FromMilliseconds(1000.0 / WindGauge.SiriccoAcquisitionMeasurementsPerSecDefault);
-            //_simulatedSiriccoTimer = new DispatcherTimer
-            //{
-            //    Interval = interval
-            //};
-            //_simulatedSiriccoTimer.Tick += SimulatedSiriccoTimer_Tick;
-            //_simulatedSiriccoTimer.Start();
         }
 
-
-
-        //private void SimulatedSiriccoTimer_Tick(object? sender, EventArgs e)
-        //{
-        //    byte[] cmdbytes = new byte[0];
-        //    double WindSpeed = new Random().Next(-100, 100); // Simulate wind speed measurement
-        //    WindSpeed /= 10.0;
-        //    int uVector = 0;
-        //    if (WindSpeed < 0) 
-        //        uVector = 1;
-        //    string msg = $" Q,{WindSpeed:+0.0},{uVector},00,M,";
-        //    byte cs = 0;
-        //    foreach (char c in msg)
-        //    {
-        //        cs ^= (byte)c;
-        //    }
-        //    var msgBytes = msg.Select(c => (byte)c).ToArray();
-        //    cmdbytes = new byte[msgBytes.Length + 5];
-        //    cmdbytes[0] = (byte)CharCommand.STX;
-        //    Array.Copy(msgBytes, 0, cmdbytes, 1, msgBytes.Length);
-        //    cmdbytes[msgBytes.Length + 1] = (byte)CharCommand.ETX;
-        //    cmdbytes[msgBytes.Length + 2] = cs;
-        //    cmdbytes[msgBytes.Length + 3] = (byte)CharCommand.CR;
-        //    cmdbytes[msgBytes.Length + 4] = (byte)CharCommand.LF;
-        //    var payload = cmdbytes;
-        //    BeginAutoSend(payload);
-        //}
 
         void StopSimulatedSiriccoWindGauge()
         {
             //SimulatedSiriccoWindGaugeRunning = false;
             SendStatus = "Simulated Wind GaugeStopped";
             WindGaugeStop?.Invoke();
-            //if (_simulatedSiriccoTimer != null)
-            //{
-            //    _simulatedSiriccoTimer.Stop();
-            //    _simulatedSiriccoTimer.Tick -= SimulatedSiriccoTimer_Tick;
-            //    _simulatedSiriccoTimer = null;
-            //}
         }
 
 
@@ -142,6 +97,30 @@ namespace SwissTimingDisplay.ViewModels
         {
             _siriccoReceiveCts = new CancellationTokenSource();
             _siriccoReceiveTask = Task.Run(() => SiriccoReceiveLoopAsync(port, _siriccoReceiveCts.Token), _siriccoReceiveCts.Token);
+        }
+
+        int currentCount = 0;
+        int capturesPerSec = 4;
+        int AcquistionPeriod = 10;
+
+        public int CountDownToGoSecs()
+        {
+            if (currentCount <= 0)
+            {
+                return 0;
+            }
+            int toGoSecs = (currentCount + capturesPerSec / 2) / capturesPerSec;
+            currentCount--;
+            UpdateSimulatedWindGaugeDisplayCount(toGoSecs);
+            return toGoSecs;
+        }
+
+        public void StartCountDown()
+        {
+            int AcquistionPeriod = WindGaugeCaptureCountdownPeriodSecs;
+            int capturesPerSec = WindGaugeCaptureCountsPerSec;
+            int MaxLoops = AcquistionPeriod * capturesPerSec; ;
+            currentCount = MaxLoops;
         }
 
         /// <summary>
@@ -196,6 +175,8 @@ namespace SwissTimingDisplay.ViewModels
                                     RecvStatus += "     Receiving but not processing speed data.";
                                 continue;
                             }
+                            System.Diagnostics.Debug.WriteLine($"\t\t\t\t\t\\t\t\t\t\t\t\t\t\t\t\t\tCountDownToGoSecs: left2Do={CountDownToGoSecs()} Count{currentCount}");
+
                             RecvStatus = "Received: " + shrunkLine.Replace(" ", "<sPC>");
                             // Validate the line using SiriccoData
                             var siriccoDataList = SiriccoData.ParseLines(line);

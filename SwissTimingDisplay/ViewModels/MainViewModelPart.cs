@@ -15,50 +15,73 @@ namespace SwissTimingDisplay.ViewModels
     public sealed partial class MainViewModel
     {
         private string _windGaugeDisplay = string.Empty;
-        private string _windGaugeCaptureCountdown = "10";
-        private string _siriccoWindGaugeCaptureCountsPerSec = "4";
+        private string _windGaugeCaptureCountdownPeriodSecsStr = "10";
+        private string _windGaugeCaptureCountsPerSecStr = "4";
+        private int _windGaugeCaptureCountdownPeriodSecs = 10;
+        private int _windGaugeCaptureCountsPerSec = 4;
+
+        // This gets sent to the display control
         public string WindGaugeDisplay
         {
             get => _windGaugeDisplay;
             set => SetProperty(ref _windGaugeDisplay, value);
         }
 
-
-        public string WindGaugeCaptureCountdown
+        
+        public int WindGaugeCaptureCountdownPeriodSecs
         {
-            get => _windGaugeCaptureCountdown;
+            get => _windGaugeCaptureCountdownPeriodSecs;
             set
             {
-                if (SetProperty(ref _windGaugeCaptureCountdown, value))
+                if (SetProperty(ref _windGaugeCaptureCountdownPeriodSecs, value))
+                {
+                    WindGaugeCaptureCountdownPeriodSecsStr = value.ToString();
+                    WindGauge.SiriccoWindGaugeAcquisitionDurationSecs = value;
+                }
+            }
+        }
+
+        public string WindGaugeCaptureCountdownPeriodSecsStr
+        {
+            get => _windGaugeCaptureCountdownPeriodSecsStr;
+            set
+            {
+                if (SetProperty(ref _windGaugeCaptureCountdownPeriodSecsStr, value))
                 {
                     // Update the static WindGauge.duration when the property changes
                     if (int.TryParse(value, out int duration))
                     {
-                        WindGauge.AcquisitionDurationSecs = duration;
-                    }
-                    else
-                    {
-                        WindGauge.AcquisitionDurationSecs = WindGauge.AcquisitionDurationSecsDefault;
+                        WindGaugeCaptureCountdownPeriodSecs = duration;
                     }
                 }
             }
         }
 
-        public string SiriccoAcquisitionMeasurementsPerSec
+        
+        public int WindGaugeCaptureCountsPerSec
         {
-            get => _siriccoWindGaugeCaptureCountsPerSec;
+            get => _windGaugeCaptureCountsPerSec;
             set
             {
-                if (SetProperty(ref _siriccoWindGaugeCaptureCountsPerSec, value))
+                if (SetProperty(ref _windGaugeCaptureCountsPerSec, value))
+                {
+                    WindGaugeCaptureCountdownPeriodSecsStr = value.ToString();
+                    WindGauge.SiriccoWindGaugeCaptureCountsPerSec = value;
+                }
+            }
+        }
+
+        public string WindGaugeCaptureCountsPerSecStr
+        {
+            get => _windGaugeCaptureCountsPerSecStr;
+            set
+            {
+                if (SetProperty(ref _windGaugeCaptureCountsPerSecStr, value))
                 {
                     // Update the static WindGauge.duration when the property changes
                     if (int.TryParse(value, out int counts))
                     {
-                        WindGauge.SiriccoWindGaugeCaptureCountsPerSec = counts;
-                    }
-                    else
-                    {
-                        WindGauge.SiriccoWindGaugeCaptureCountsPerSec = WindGauge.SiriccoAcquisitionMeasurementsPerSecDefault;
+                        WindGaugeCaptureCountsPerSec = counts;
                     }
                 }
             }
@@ -77,11 +100,11 @@ namespace SwissTimingDisplay.ViewModels
         {
             public const int AcquisitionDurationMin = 0;
             public const int AcquisitionDurationMax = 30;
-            public const int AcquisitionDurationSecsDefault = 10; //Mistral uses this
+            public const int SirricoAcquisitionDurationSecsDefault = 10; //Mistral uses this
             public const int SiriccoAcquisitionMeasurementsPerSecDefault = 4; //Siricco uses this and AcquisitionDurationSecsDefault
 
             // Mistral mode averages the wind speed over the acquisition duration and sends the result at the end of the acquisition duration.
-            public static int AcquisitionDurationSecs { get; set; } = AcquisitionDurationSecsDefault;
+            public static int SiriccoWindGaugeAcquisitionDurationSecs { get; set; } = SirricoAcquisitionDurationSecsDefault;
 
             // Simulator for Siricco mode tallies and averages the wind speed over the acquisition duration.
             // Total counts for the Siricco acquisition duration at the default rate would be 40 (10 secs * 4 counts/sec)
@@ -93,7 +116,7 @@ namespace SwissTimingDisplay.ViewModels
 
             public static void Start(MainViewModel viewModel)
             {
-                _countdown = AcquisitionDurationSecs;
+                _countdown = SiriccoWindGaugeAcquisitionDurationSecs;
                 _timer = new DispatcherTimer
                 {
                     Interval = TimeSpan.FromSeconds(1)
@@ -170,7 +193,7 @@ namespace SwissTimingDisplay.ViewModels
 
         private void WindGaugeSetAquisitionDuration(int duration)
         {
-            WindGauge.AcquisitionDurationSecs = duration;
+            WindGauge.SiriccoWindGaugeAcquisitionDurationSecs = duration;
         }
 
         private void WindGaugeResendLatest()

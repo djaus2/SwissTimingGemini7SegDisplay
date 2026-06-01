@@ -677,7 +677,7 @@ namespace SwissTimingDisplay
                 // Clear TimeOut on send side if this was a Clear command
                 if (cmd == TcpCommand.WindGauge_Reset_CaptureTime)
                 {
-                    _vm.WindGaugeCaptureCountdown = "10";
+                    _vm.WindGaugeCaptureCountdownPeriodSecsStr = "10";
                     return;
                 }
                 CharCommand[] cmdx;
@@ -705,12 +705,12 @@ namespace SwissTimingDisplay
                 if (needsTime)
                 {
 
-                    if (string.IsNullOrWhiteSpace(_vm.WindGaugeCaptureCountdown))
+                    if (string.IsNullOrWhiteSpace(_vm.WindGaugeCaptureCountdownPeriodSecsStr))
                     {
-                        _vm.WindGaugeCaptureCountdown = "10";
+                        _vm.WindGaugeCaptureCountdownPeriodSecsStr = "10";
                     }
 
-                    if(int.TryParse(_vm.WindGaugeCaptureCountdown, out int tim))
+                    if(int.TryParse(_vm.WindGaugeCaptureCountdownPeriodSecsStr, out int tim))
                     {
                         if ((tim > 0) && (tim <= 100))
                         {
