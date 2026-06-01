@@ -45,7 +45,7 @@
 
                 <!-- Right image -->
                 <Image Source="pack://application:,,,/docs/mistralwindgauge.png"
-                       Height="120"
+                       Height="140"
                        Stretch="Uniform"
                        VerticalAlignment="Bottom"
                        HorizontalAlignment="Right"
