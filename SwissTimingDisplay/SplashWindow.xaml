@@ -7,7 +7,7 @@
         WindowStartupLocation="CenterScreen"
         ResizeMode="NoResize"
         WindowStyle="None"
-        Background="#2C3E50">
+        Background="#00A2E8">
     <Grid>
         <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
 
@@ -26,25 +26,32 @@
                        Height="40" Stretch="Uniform" 
                        VerticalAlignment="Center" Margin="0,10,0,10" 
                        Grid.Row="0" Grid.Column="1"/>
+                
 
 
                 <!-- Left image -->
                 <Image Source="pack://application:,,,/docs/gemini6display.png"
-           Height="100"
-           Stretch="Uniform"
-           VerticalAlignment="Center"
-           HorizontalAlignment="Left"
-           Grid.Column="0" Grid.Row="1"/>
+                       Height="100"
+                       Stretch="Uniform"
+                       VerticalAlignment="Center"
+                       HorizontalAlignment="Left"
+                       Grid.Column="0" Grid.Row="1"/>
+
+                <!-- Centre Image -->
+                <Image Source="pack://application:,,,/docs/siriccoWindGauge2.png" 
+                       Height="100" Stretch="Uniform" 
+                       VerticalAlignment="Center" Margin="0" 
+                       Grid.Row="1" Grid.Column="1"/>
 
                 <!-- Right image -->
                 <Image Source="pack://application:,,,/docs/mistralwindgauge.png"
-           Height="120"
-           Stretch="Uniform"
-           VerticalAlignment="Bottom"
-           HorizontalAlignment="Right"
-                       Grid.Row="0"
-                       Grid.RowSpan="2"
-           Grid.Column="2"/>
+                       Height="120"
+                       Stretch="Uniform"
+                       VerticalAlignment="Bottom"
+                       HorizontalAlignment="Right"
+                        Grid.Row="0"
+                        Grid.RowSpan="2"
+                       Grid.Column="2"/>
             </Grid>
 
 
@@ -57,68 +64,76 @@
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                 <Button Name="DisplayButton"
                         Content="Display"
-                        Width="60"
+
+                        Width="100"
                         Height="45"
                         FontSize="16"
-                        Margin="0,0,10,0"
-                        Background="#3498DB"
+                        Margin="5,0,0,0"
+                        Background="Red"
                         Foreground="White"
                         BorderThickness="0"
                         Cursor="Hand"
                         Click="DisplayButton_Click"/>
                 
-                <Button Name="WindGaugeButton"
-                        Content="Mistral Wind Gauge"
+                <Button Name="SiriccoButton"
+                        Content="Siricco Wind Gauge"
+
                         Width="140"
                         Height="45"
                         FontSize="16"
-                        Margin="0,0,20,0"
+                        Margin="20,0,10,0"
                         Background="Green"
                         Foreground="White"
                         BorderThickness="0"
                         Cursor="Hand"
-                        Click="WindGaugeButton_Click"/>
-                <Button Name="SiriccoButton"
-                        Content="Siricco Wind Gauge"
-                        Width="140"
+                        Click="SiriccoWindGaugeButton_Click"/>
+                
+                <Button Name="WindGaugeButton"
+                        Content="Mistral Wind Gauge"
+                        Width="145"
                         Height="45"
                         FontSize="16"
-                        Margin="0,0,20,0"
-                        Background="Brown"
+                        Margin="20,0,5,0"
+                        Background="Purple"
                         Foreground="White"
                         BorderThickness="0"
                         Cursor="Hand"
-                        Click="SiriccoWindGaugeButton_Click"/>
-                <Button Name="ExitButton"
-                        Content="Exit"
-                        Width="60"
-                        Height="30"
-                        FontSize="16"
-                        FontStyle="Italic"
-                        Background="#E74C3C"
-                        Foreground="White"
-                        BorderThickness="0"
-                        Cursor="Hand"
-                        Click="ExitButton_Click"/>
+                        Click="WindGaugeButton_Click"/>
+
+            
             </StackPanel>
 
-            <TextBlock Text="Disclaimer: This software is for demostration and testing purposes only and is not provided by Swiss Timing.&#x0A;Swiss Timing Display and Wind Gauge Transmission Protocols as referenced are used though."
-           FontSize="12"
-           FontStyle="Italic"
-           Foreground="#BDC3C7"
-           TextWrapping="Wrap"
-                       TextAlignment="Justify"
-           HorizontalAlignment="Center"
-           Margin="0,10,0,20" Width="414" RenderTransformOrigin="0.5,0.5">
-                <TextBlock.RenderTransform>
-                    <TransformGroup>
-                        <ScaleTransform/>
-                        <SkewTransform AngleX="-1.315"/>
-                        <RotateTransform/>
-                        <TranslateTransform X="-0.977"/>
-                    </TransformGroup>
-                </TextBlock.RenderTransform>
-            </TextBlock>
+            <StackPanel Orientation="Horizontal">
+                <Button Name="ExitButton"
+                    Content="Exit"
+                    Width="100"
+                    Height="45"
+                    FontSize="16"
+                    FontStyle="Italic"
+                        Margin="5,0,5,0"
+                    Background="brown"
+                    Foreground="White"
+                    BorderThickness="0"
+                    Cursor="Hand"
+                    Click="ExitButton_Click"/>
+                <TextBlock Text="Disclaimer: This software is for demostration and testing&#x0A;purposes only and is not provided by Swiss Timing.&#x0A;Swiss Timing Display and Wind Gauge Transmission&#x0A;Protocols as referenced are used though."
+               FontSize="12"
+               FontStyle="Italic"
+               Foreground="#BDC3C7"
+               TextWrapping="Wrap"
+                           TextAlignment="Justify"
+               HorizontalAlignment="Center"
+               Margin="20,10,5,20" Width="335"  RenderTransformOrigin="0.5,0.5">
+                    <TextBlock.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform/>
+                            <SkewTransform AngleX="-1.315"/>
+                            <RotateTransform/>
+                            <TranslateTransform X="-0.977"/>
+                        </TransformGroup>
+                    </TextBlock.RenderTransform>
+                </TextBlock>
+            </StackPanel>
 
         </StackPanel>
         
