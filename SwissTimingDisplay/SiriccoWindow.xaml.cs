@@ -51,8 +51,10 @@ namespace SwissTimingDisplay
         private int _loopCount2 = (int)LoopCountState.Stopped;
         private double speedTally { get; set; } = 0;
 
-        private TimeSpan SiriccoWindGaugePeriod { get; set; } = TimeSpan.FromSeconds(1 / (int)LoopCountState.CountPerSecDefault);
-        int MaxLoops { get; set; } = WindGauge.SiriccoAcquisitionMeasurementsPerSecDefault * WindGauge.SirricoAcquisitionDurationSecsDefault; // Add a few extra ticks as buffer
+        private TimeSpan SiriccoWindGaugePeriodSec { get { return TimeSpan.FromSeconds(1.0 / _vm.WindGaugeCaptureCountsPerSec); } }
+        int MaxLoops { get { return _vm.WindGaugeCaptureCountdownPeriodSecs * _vm.WindGaugeCaptureCountsPerSec;
+                    //WindGauge.SiriccoWindGaugeCaptureCountsPerSec * WindGauge.SiriccoWindGaugeAcquisitionDurationSecs; 
+            } }// Add a few extra ticks as buffer
 
 
         private bool SetupSimulatedWindGaugeTimerForNewStart()
@@ -70,9 +72,10 @@ namespace SwissTimingDisplay
                 MessageBox.Show("Cannot change acquisition parameters while timer is running. Please stop the timer before changing parameters.", "Parameter Change Not Allowed", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return false;
             }
-            SiriccoWindGaugePeriod = TimeSpan.FromSeconds(1.0 / WindGauge.SiriccoWindGaugeAcquisitionDurationSecs);
-            _WindGaugeTimer.Interval = SiriccoWindGaugePeriod;
-            MaxLoops = WindGauge.SiriccoWindGaugeCaptureCountsPerSec * WindGauge.SiriccoWindGaugeAcquisitionDurationSecs;
+            //SiriccoWindGaugePeriod = TimeSpan.FromSeconds(1.0 /
+            var xx = WindGauge.SiriccoWindGaugeAcquisitionDurationSecs;
+            _WindGaugeTimer.Interval = SiriccoWindGaugePeriodSec;
+            //MaxLoops = WindGauge.SiriccoWindGaugeCaptureCountsPerSec * WindGauge.SiriccoWindGaugeAcquisitionDurationSecs;
             return true;
         }
 
@@ -188,13 +191,16 @@ namespace SwissTimingDisplay
 
             _vm.PropertyChanged += VmOnPropertyChanged;
             _vm.SiriccoDataReceived += VmOnSiriccoDataReceived;
+            _vm.SiriccoWindGaugePeriodChanged += OnSiriccoWindGaugePeriodChanged;
 
             Loaded += (_, _) => ApplyAnchorLayout();
             SizeChanged += (_, _) => ApplyAnchorLayout();
 
+            //SiriccoWindGaugePeriod =
+            var xx = WindGauge.SiriccoWindGaugeAcquisitionDurationSecs;
             _WindGaugeTimer = new DispatcherTimer
             {
-                Interval = SiriccoWindGaugePeriod
+                Interval = SiriccoWindGaugePeriodSec
             };
             SetupSimulatedWindGaugeTimerInitial();
             _WindGaugeTimer.Tick += async (_, _) =>
@@ -269,6 +275,20 @@ namespace SwissTimingDisplay
             if (e.PropertyName == nameof(MainViewModel.AnchorDisplay))
             {
                 ApplyAnchorLayout();
+            }
+        }
+
+        private void OnSiriccoWindGaugePeriodChanged()
+        {
+            bool wasRunning = _WindGaugeTimer.IsEnabled;
+            if (wasRunning)
+            {
+                _WindGaugeTimer.Stop();
+            }
+            _WindGaugeTimer.Interval = SiriccoWindGaugePeriodSec;
+            if (wasRunning)
+            {
+                _WindGaugeTimer.Start();
             }
         }
 
@@ -436,7 +456,7 @@ namespace SwissTimingDisplay
             {               
                 //double speed = speedTally /count;
                 double speed = Math.Round(speedTally / count, 1);
-                _vm.RecvStatus = $"Speed={speed:F1} {speed:F3} (final,Total: {speedTally} over {count} measurements averaged over {WindGauge.SiriccoWindGaugeAcquisitionDurationSecs} sec )";
+                _vm.RecvStatus = $"Speed={speed:F1} {speed:F3} (final,Total: {speedTally} over {count} measurements averaged over {_vm.WindGaugeCaptureCountdownPeriodSecs} sec )";
                 Debug.WriteLine($"{_vm.RecvStatus}");
                 WindGauge.WindSpeed = speed;
                 Siricco_StartButton(null, null);
@@ -530,16 +550,18 @@ namespace SwissTimingDisplay
 
             ClearLoopCount2();
 
-            int period = _vm.WindGaugeCaptureCountdownPeriodSecs;
-            int cps = _vm.WindGaugeCaptureCountsPerSec;
-            MaxLoops = period * cps;
+            //int period = _vm.WindGaugeCaptureCountdownPeriodSecs;
+            //int cps = _vm.WindGaugeCaptureCountsPerSec;
+            //WindGauge.SiriccoWindGaugeCaptureCountsPerSec = cps;
+            //WindGauge.SiriccoWindGaugeAcquisitionDurationSecs = period;
+            ////MaxLoops = period * cps;
             speedTally = 0.0;
 
             _sendWallClockWhileRunning = _vm.UseWallClockTimeOfDay;
             _SiriccoHasStartedSinceReset = true;
             _vm.RaceHasStartedSinceReset = true;
 
-            _vm.StartCountDown();
+            _vm.StartCountDown(MaxLoops);
 
             UpdateTimeInputFromRaceElapsed();
             _vm.Status = "Siricco Wind Gauge capture started.";
@@ -958,6 +980,11 @@ namespace SwissTimingDisplay
         {
             _vm.BeginShutdown();
             Application.Current.Shutdown();
+        }
+
+        private void tbTime_TextChanged(object sender, TextChangedEventArgs e)
+        {
+
         }
     }
 }

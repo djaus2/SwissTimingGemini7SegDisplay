@@ -551,7 +551,7 @@ namespace SwissTimingDisplay.ViewModels
                 if (SetProperty(ref _showSiriccoWindow, value))
                 {
                     Debug.WriteLine($"ShowSiriccoWindow changed to: {value}");
-                    
+
                     if (!_isLoadingSettings)
                     {
                         _isSwitchingWindows = true;
@@ -1732,6 +1732,7 @@ namespace SwissTimingDisplay.ViewModels
             [ObservableProperty] private string? _windGaugeCaptureCountdown;
             [ObservableProperty] private bool _showWindGaugeWindow = false;
             [ObservableProperty] private string _siriccoMessageMode = "Gill_Tunnel";
+            [ObservableProperty] private string _siriccoCaptureCountsPerSec = "4";
         }
 
         private void LoadPersistedPortNames()
@@ -1756,13 +1757,22 @@ namespace SwissTimingDisplay.ViewModels
                 RaceDistance = settings.RaceDistance;
                 DisplaySimulatorSpeed = settings.DisplaySimulatorSpeed;
                 ShowSimulator = settings.ShowSimulator;
-                WindGaugeCaptureCountdownPeriodSecsStr = settings.WindGaugeCaptureCountdown ?? "10";
                 ShowWindGaugeWindow = settings.ShowWindGaugeWindow;
 
                 // Load SiriccoMessageMode
                 if (!string.IsNullOrWhiteSpace(settings.SiriccoMessageMode) && Enum.TryParse<SiriccoMessageModes>(settings.SiriccoMessageMode, out var siriccoMode))
                 {
                     _siriccoMessageMode = siriccoMode;
+                }
+
+                // Load capture properties
+                if (!string.IsNullOrWhiteSpace(settings.WindGaugeCaptureCountdown))
+                {
+                    WindGaugeCaptureCountdownPeriodSecsStr = settings.WindGaugeCaptureCountdown;
+                }
+                if (!string.IsNullOrWhiteSpace(settings.SiriccoCaptureCountsPerSec))
+                {
+                    WindGaugeCaptureCountsPerSecStr = settings.SiriccoCaptureCountsPerSec;
                 }
 
                 // Load the appropriate ports based on which window should be shown
@@ -1818,6 +1828,7 @@ namespace SwissTimingDisplay.ViewModels
                     WindGaugeCaptureCountdown = WindGaugeCaptureCountdownPeriodSecsStr,
                     ShowWindGaugeWindow = _showWindGaugeWindow,
                     SiriccoMessageMode = _siriccoMessageMode.ToString(),
+                    SiriccoCaptureCountsPerSec = WindGaugeCaptureCountsPerSecStr,
                 };
 
                 // Save to window-specific properties based on current window

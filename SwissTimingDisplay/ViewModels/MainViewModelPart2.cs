@@ -99,9 +99,13 @@ namespace SwissTimingDisplay.ViewModels
             _siriccoReceiveTask = Task.Run(() => SiriccoReceiveLoopAsync(port, _siriccoReceiveCts.Token), _siriccoReceiveCts.Token);
         }
 
-        int currentCount = 0;
-        int capturesPerSec = 4;
-        int AcquistionPeriod = 10;
+        int currentCount
+        {
+            get;
+            set;
+        } = 0;
+        int capturesPerSec { get => WindGaugeCaptureCountsPerSec; }
+        int AcquisitionPeriod { get => WindGaugeCaptureCountdownPeriodSecs; }
 
         public int CountDownToGoSecs()
         {
@@ -115,12 +119,12 @@ namespace SwissTimingDisplay.ViewModels
             return toGoSecs;
         }
 
-        public void StartCountDown()
+        public void StartCountDown(int maxLoops)
         {
-            int AcquistionPeriod = WindGaugeCaptureCountdownPeriodSecs;
-            int capturesPerSec = WindGaugeCaptureCountsPerSec;
-            int MaxLoops = AcquistionPeriod * capturesPerSec; ;
-            currentCount = MaxLoops;
+            //int AcquistionPeriod = WindGaugeCaptureCountdownPeriodSecs;
+            //int capturesPerSec = WindGaugeCaptureCountsPerSec;
+            //int MaxLoops = AcquistionPeriod * capturesPerSec; ;
+            currentCount = maxLoops;
         }
 
         /// <summary>

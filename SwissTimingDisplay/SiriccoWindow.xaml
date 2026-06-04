@@ -295,7 +295,7 @@
                             <ColumnDefinition Width="Auto" SharedSizeGroup="TextBoxColumn" />
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Column="0" Text="Capture Count Down Period (sec):" FontWeight="Bold" FontStyle="Italic" Foreground="Purple" VerticalAlignment="Center" HorizontalAlignment="Right" />
-                        <TextBox x:Name="tbTime" Grid.Column="1" Margin="12,0,0,0" Width="100" Text="{Binding WindGaugeCaptureCountdown, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center">
+                        <TextBox x:Name="tbTime" Grid.Column="1" Margin="12,0,0,0" Width="100" Text="{Binding WindGaugeCaptureCountdownPeriodSecsStr , UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" TextChanged="tbTime_TextChanged">
                             <TextBox.Style>
                                 <Style TargetType="TextBox">
                                     <Setter Property="IsEnabled" Value="True" />
@@ -312,9 +312,11 @@
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" SharedSizeGroup="LabelColumn" />
                             <ColumnDefinition Width="Auto" SharedSizeGroup="TextBoxColumn" />
+                            <ColumnDefinition Width="Auto" SharedSizeGroup="LabelColumn" />
+                            <ColumnDefinition Width="Auto" SharedSizeGroup="TextBoxColumn" />
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Column="0" Text="Captures per sec:" FontWeight="Bold" FontStyle="Italic" Foreground="Purple" VerticalAlignment="Center" HorizontalAlignment="Right" />
-                        <TextBox x:Name="tbCountsPerSec" Grid.Column="1" Margin="12,0,0,0" Width="100" Text="{Binding SiriccoAcquisitionMeasurementsPerSec, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center">
+                        <TextBox x:Name="tbCountsPerSec" Grid.Column="1" Margin="12,0,0,0" Width="100" Text="{Binding WindGaugeCaptureCountsPerSecStr, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center">
                             <TextBox.Style>
                                 <Style TargetType="TextBox">
                                     <Setter Property="IsEnabled" Value="True" />
@@ -326,6 +328,10 @@
                                 </Style>
                             </TextBox.Style>
                         </TextBox>
+                        <TextBlock Grid.Column="2" Text="Period (ms):" FontWeight="Bold" FontStyle="Italic" Foreground="Purple" VerticalAlignment="Center" HorizontalAlignment="Right" />
+
+                        <TextBlock  Grid.Column="3" Text="{Binding SiriccoWindGaugePeriodMs}"  VerticalAlignment="Center" FontWeight="Bold" FontStyle="Italic" Foreground="Red"/>
+
 
 
                     </Grid>

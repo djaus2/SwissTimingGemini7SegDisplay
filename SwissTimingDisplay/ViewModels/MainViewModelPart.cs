@@ -35,11 +35,16 @@ namespace SwissTimingDisplay.ViewModels
             {
                 if (SetProperty(ref _windGaugeCaptureCountdownPeriodSecs, value))
                 {
-                    WindGaugeCaptureCountdownPeriodSecsStr = value.ToString();
+                    if (value.ToString() != _windGaugeCaptureCountdownPeriodSecsStr)
+                    {
+                        _windGaugeCaptureCountdownPeriodSecsStr = value.ToString();
+                    }
                     WindGauge.SiriccoWindGaugeAcquisitionDurationSecs = value;
                 }
             }
         }
+
+
 
         public string WindGaugeCaptureCountdownPeriodSecsStr
         {
@@ -49,7 +54,7 @@ namespace SwissTimingDisplay.ViewModels
                 if (SetProperty(ref _windGaugeCaptureCountdownPeriodSecsStr, value))
                 {
                     // Update the static WindGauge.duration when the property changes
-                    if (int.TryParse(value, out int duration))
+                    if (int.TryParse(value, out int duration) && duration != _windGaugeCaptureCountdownPeriodSecs)
                     {
                         WindGaugeCaptureCountdownPeriodSecs = duration;
                     }
@@ -65,8 +70,14 @@ namespace SwissTimingDisplay.ViewModels
             {
                 if (SetProperty(ref _windGaugeCaptureCountsPerSec, value))
                 {
-                    WindGaugeCaptureCountdownPeriodSecsStr = value.ToString();
+                    if (value.ToString() != _windGaugeCaptureCountsPerSecStr)
+                    {
+                        WindGaugeCaptureCountsPerSecStr = value.ToString();
+                    }
                     WindGauge.SiriccoWindGaugeCaptureCountsPerSec = value;
+                    OnPropertyChanged(nameof(SiriccoWindGaugePeriodSec));
+                    OnPropertyChanged(nameof(SiriccoWindGaugePeriodMs));
+                    SiriccoWindGaugePeriodChanged?.Invoke();
                 }
             }
         }
@@ -79,12 +90,28 @@ namespace SwissTimingDisplay.ViewModels
                 if (SetProperty(ref _windGaugeCaptureCountsPerSecStr, value))
                 {
                     // Update the static WindGauge.duration when the property changes
-                    if (int.TryParse(value, out int counts))
+                    if (int.TryParse(value, out int counts) && counts != _windGaugeCaptureCountsPerSec)
                     {
                         WindGaugeCaptureCountsPerSec = counts;
                     }
+                    else
+                    {
+                        SiriccoWindGaugePeriodChanged?.Invoke();
+                    }
                 }
             }
+        }
+
+        public event Action? SiriccoWindGaugePeriodChanged;
+
+        public TimeSpan SiriccoWindGaugePeriodSec
+        {
+            get => TimeSpan.FromSeconds(1.0 / WindGaugeCaptureCountsPerSec);
+        }
+
+        public int SiriccoWindGaugePeriodMs
+        {
+            get => (int) TimeSpan.FromSeconds(1.0 / WindGaugeCaptureCountsPerSec).TotalMilliseconds;
         }
 
 
