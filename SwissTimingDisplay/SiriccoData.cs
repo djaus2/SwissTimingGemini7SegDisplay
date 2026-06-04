@@ -235,15 +235,17 @@ namespace SwissTimingDisplay
             {
                 result.SpeedUnit = SpeedUnit;
             }
-            if ((element2IsDouble)&& (element3IsInt) && (intVal3 == 1))
+            if ((element2IsDouble)&& (element3IsInt) && ((intVal3 == 0)|| (intVal3 == 1)))
             {
+                //Expect <double><0|1> = Speed, Direction Down or up straight
                 result.IsValid = true;
                 IsValid = true;
                 result.Speed = doubleVal2;
                 result.Mode = SiriccoMessageModes.Gill_Tunnel;
             }
-            else if((element2IsInt)&&(element3IsDouble))
+            else if(((element2IsInt) && (intVal2 >= 0) && (intVal2 < 360)) && (element3IsDouble))
             {
+                // Expect <int><double> = Direction (angle) 0..360, Speed
                 result.IsValid = true;
                 IsValid = true;
                 result.Direction = intVal2;
@@ -252,6 +254,7 @@ namespace SwissTimingDisplay
             }
             else if ((element2IsDouble) && (element3IsDouble))
             {
+                // Expect <double><double> = Speed-U (NS), Speed-V (EW)
                 result.IsValid = true;
                 IsValid = true;
                 result.Speed1 = doubleVal2;

@@ -178,6 +178,7 @@ namespace SwissTimingDisplay.ViewModels
                             System.Diagnostics.Debug.WriteLine($"\t\t\t\t\t\\t\t\t\t\t\t\t\t\t\t\t\tCountDownToGoSecs: left2Do={CountDownToGoSecs()} Count{currentCount}");
 
                             RecvStatus = "Received: " + shrunkLine.Replace(" ", "<sPC>");
+                            //return;
                             // Validate the line using SiriccoData
                             var siriccoDataList = SiriccoData.ParseLines(line);
 
@@ -189,8 +190,8 @@ namespace SwissTimingDisplay.ViewModels
                                     // Valid Siricco message received
                                     // Raise SiriccoDataReceived event on UI thread
                                     Application.Current?.Dispatcher?.BeginInvoke(() => SiriccoDataReceived?.Invoke(result));
-
-                                    //Debug.WriteLine($"Valid Siricco data:  Value1={siriccoData.Value1}, Value2={siriccoData.Value2}, Value3={siriccoData.Value3}, Value4={siriccoData.Value4}, SpeedUnit={siriccoData.SpeedUnit}");
+                                    Debug.WriteLine($"{line}");
+                                    Debug.WriteLine($"Valid Siricco data:  Value1={siriccoData.Value1}, Value2={siriccoData.Value2}, Value3={siriccoData.Value3}, Value4={siriccoData.Value4}, SpeedUnit={siriccoData.SpeedUnit}");
                                 }
                                 else
                                 {

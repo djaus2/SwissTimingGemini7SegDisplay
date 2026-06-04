@@ -414,17 +414,29 @@ namespace SwissTimingDisplay
                 return;
             }
             // Valid Siricco message received
-            //Debug.WriteLine($"Valid Siricco data received: Speed={result.Speed1}, Speed1={result.Speed1}, Speed2={result.Speed2}, Direction={result.Direction}, SpeedUnit={result.SpeedUnit}, Mode={result.Mode}");
             
             // TODO: Add interpretation logic here when defined
             int count = IncrementLoopCount2();
-            speedTally += result.Speed1;
-            Debug.WriteLine($"Added to tally: {result.Speed1}, Current tally: {speedTally}, Count: {count}");
+            double speedval = result.Speed;
+            switch(result.Mode)
+            {
+                case SiriccoMessageModes.Gill_Tunnel:
+                    speedval = result.Speed;
+                    break;
+                case SiriccoMessageModes.Gill_PolarContinuous:
+                    speedval = result.Speed1;
+                    int direction = result.Direction;
+                    break;
+                default:
+                    break;
+            }
+            speedTally += speedval;
+            Debug.WriteLine($"Added to tally: {speedval}, Current tally: {speedTally}, Count: {count} Mode:{ result.Mode}");
             if (count>= MaxLoops)
             {               
                 //double speed = speedTally /count;
                 double speed = Math.Round(speedTally / count, 1);
-                _vm.RecvStatus = $"Speed={speed:F1} {speed:F3} (final,Total: {speedTally} over {count} measurements averaged over {WindGauge.SiriccoWindGaugeAcquisitionDurationSecs} sec)";
+                _vm.RecvStatus = $"Speed={speed:F1} {speed:F3} (final,Total: {speedTally} over {count} measurements averaged over {WindGauge.SiriccoWindGaugeAcquisitionDurationSecs} sec )";
                 Debug.WriteLine($"{_vm.RecvStatus}");
                 WindGauge.WindSpeed = speed;
                 Siricco_StartButton(null, null);
