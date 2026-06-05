@@ -414,11 +414,11 @@ namespace SwissTimingDisplay
         {
             if (e.AddedItems.Count > 0 && e.AddedItems[0] is SiriccoMessageModes mode)
             {
-                if (mode == SiriccoMessageModes.WindGauge_ReadFrequency)
-                {
-                    Debug.WriteLine("WindGauge_ReadFrequency mode selected");
-                    // Add logic for WindGauge_ReadFrequency mode here
-                }
+                //if (mode == SiriccoMessageModes.WindGauge_ReadFrequency)
+                //{
+                //    Debug.WriteLine("WindGauge_ReadFrequency mode selected");
+                //    // Add logic for WindGauge_ReadFrequency mode here
+                //}
             }
         }
 
@@ -983,6 +983,11 @@ namespace SwissTimingDisplay
         }
 
         private void tbTime_TextChanged(object sender, TextChangedEventArgs e)
+        {
+
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
         {
 
         }

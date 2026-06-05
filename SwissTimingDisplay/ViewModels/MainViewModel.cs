@@ -141,7 +141,7 @@ namespace SwissTimingDisplay.ViewModels
         private bool _isShuttingDown = false;
         private bool _isSwitchingWindows = false;
 
-        private SiriccoMessageModes _siriccoMessageMode = SiriccoMessageModes.Gill_Tunnel;
+        private SiriccoMessageModes _siriccoMessageMode = SiriccoMessageModes.Gill_UVContinuous;
 
         public SiriccoMessageModes SiriccoMessageMode
         {
@@ -1731,7 +1731,7 @@ namespace SwissTimingDisplay.ViewModels
             [ObservableProperty] private bool _showSimulator = true;
             [ObservableProperty] private string? _windGaugeCaptureCountdown;
             [ObservableProperty] private bool _showWindGaugeWindow = false;
-            [ObservableProperty] private string _siriccoMessageMode = "Gill_Tunnel";
+            [ObservableProperty] private string _siriccoMessageMode = "Gill_UVContinuous";
             [ObservableProperty] private string _siriccoCaptureCountsPerSec = "4";
         }
 

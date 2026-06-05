@@ -1,5 +1,7 @@
 using System;
+using System.Globalization;
 using System.Linq;
+using System.Xml.Linq;
 
 namespace SwissTimingDisplay
 {
@@ -9,8 +11,7 @@ namespace SwissTimingDisplay
         Gill_UVContinuous,
         NMEANMEA,
         NMEAGill,
-        Gill_Tunnel,
-        WindGauge_ReadFrequency
+        Gill_Tunnel
     }
 
     public enum SiriccoSpeedUnits
@@ -56,6 +57,7 @@ namespace SwissTimingDisplay
             SiriccoResult result = new SiriccoResult();
             IsValid = false;
             ErrorMessage = null;
+            result.IsValid = false;
 
             if (string.IsNullOrWhiteSpace(line))
             {
@@ -92,7 +94,8 @@ namespace SwissTimingDisplay
             }
             string checksumStr = line.Substring(etxPosn+1);
             byte expectedChecksum = 0;
-            if(!byte.TryParse(checksumStr.Trim(),  out expectedChecksum))
+            string trimmedChecksumStr = checksumStr.Trim();
+            if (!byte.TryParse(trimmedChecksumStr, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out expectedChecksum))
             {
                 ErrorMessage = "Invalid or no checksum string";
                 return;
@@ -196,25 +199,58 @@ namespace SwissTimingDisplay
                 return;
             }
 
-            // Parse element 4: positive integer
-            string element4 = parts[3].Trim();
-            if (!int.TryParse(element4, out int intVal4) || intVal4 < 0)
-            {
-                ErrorMessage = "Element 4 is not a valid positive integer";
-                return;
-            }
-            Value3 = intVal4;
+            char speedUnitChar = 'M'; // Default to M if not specified i.e. m/s
 
-            // Parse element 5: positive integer followed by speed unit character
-            string element5 = parts[4].Trim();
-            if (string.IsNullOrEmpty(element5) || element5.Length < 1)
+            // Parse element 4: positive integer
+            string statusStr = parts[3].Trim();
+            if (string.IsNullOrEmpty(statusStr))
             {
                 ErrorMessage = "Element 5 is empty";
                 return;
             }
+            string speedUnitPartStr = parts[4].Trim();
+            if (string.IsNullOrEmpty(speedUnitPartStr))
+            {
+                ErrorMessage = "Element 5 is empty";
+                return;
+            }
+            if (ParseSpeedUnit(statusStr[0]) != null)
+            {
+                speedUnitChar = statusStr[0];
+                statusStr = speedUnitPartStr;
+
+                if (!int.TryParse(statusStr, out int intVal4) || intVal4 < 0)
+                {
+                    ErrorMessage = "Element 5 is not a valid positive integer";
+                    return;
+                }
+                Value3 = intVal4;
+
+            }
+            else if (ParseSpeedUnit(speedUnitPartStr[0]) != null)
+            {
+                if (!int.TryParse(statusStr, out int intVal4) || intVal4 < 0)
+                {
+                    ErrorMessage = "Element 4 is not a valid positive integer";
+                    return;
+                }
+                Value3 = intVal4;
+                speedUnitChar = speedUnitPartStr[speedUnitPartStr.Length - 1];
+            }
+            else
+            {
+                ErrorMessage = $"Missing speed unit character";
+                return;
+            }
 
             // Extract speed unit character (last character before ETX)
-            char speedUnitChar = element5[element5.Length - 1];
+
+            int status = (int)Value3;
+            if(status != 0)
+            {
+                ErrorMessage = $"Invalid Status: {status}. Should be 0.";
+                return;
+            }
 
             // Parse speed unit
             SpeedUnit = ParseSpeedUnit(speedUnitChar);

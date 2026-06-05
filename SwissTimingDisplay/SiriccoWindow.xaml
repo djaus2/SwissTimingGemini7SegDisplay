@@ -23,7 +23,6 @@
             <local:SiriccoMessageModes>NMEANMEA</local:SiriccoMessageModes>
             <local:SiriccoMessageModes>NMEAGill</local:SiriccoMessageModes>
             <local:SiriccoMessageModes>Gill_Tunnel</local:SiriccoMessageModes>
-            <local:SiriccoMessageModes>WindGauge_ReadFrequency</local:SiriccoMessageModes>
         </x:Array>
 
         <converters:TimeInputDigitConverter x:Key="TimeInputDigitConverter" />
@@ -148,7 +147,7 @@
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
-                <TextBlock Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" Text="Send Port" FontWeight="Bold" FontStyle="Italic" Foreground="Purple" />
+                <TextBlock Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" Text="Simulator Send Port" FontWeight="Bold" FontStyle="Italic" Foreground="Purple" />
                 <ComboBox Grid.Row="0" Grid.Column="1"
                           Margin="12,0,0,0"
                           ItemsSource="{Binding SendPortsView}"
@@ -157,7 +156,7 @@
                           DisplayMemberPath="DisplayName"
                           Style="{StaticResource ComboBoxStyle}" />
 
-                <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,8,0,0" VerticalAlignment="Center" Text="Simulator Port" FontWeight="Bold" FontStyle="Italic" Foreground="Purple">
+                <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,8,0,0" VerticalAlignment="Center" Text="Receive Port" FontWeight="Bold" FontStyle="Italic" Foreground="Purple">
                     <TextBlock.Style>
                         <Style TargetType="TextBlock">
                             <Setter Property="Visibility" Value="Visible" />
@@ -200,7 +199,7 @@
                     </Button.Style>
                 </Button>
 
-                <Button Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="2" Margin="12,8,0,0" Padding="10,4" Command="{Binding ReceiveConnectToggleCommand}" Height="26" VerticalAlignment="Top">
+                <Button Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="2" Margin="12,8,0,0" Padding="10,4" Command="{Binding ReceiveConnectToggleCommand}" Height="26" VerticalAlignment="Top" Click="Button_Click">
                     <Button.Style>
                         <Style TargetType="Button" BasedOn="{StaticResource SnazzyButtonStyle}">
                             <Setter Property="Content" Value="Connect" />
