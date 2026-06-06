@@ -16,7 +16,7 @@
 
 > Thie ReadMe in the Siricco branch is behind the ReadMe in master branch.  
 > But this code and functionality is ahead of the master branch.  
-> Adding the **Siricco Wind Gauge** , _under devlopment_.  
+> Added the **Siricco Wind Gauge**    
 
  **Status**
 > **WORKING ON MISTRAL WIND GAUGE PROTOCOL**. _Watch this space.._ Making progress .. About a week!  
