@@ -6,7 +6,7 @@
   <img width="200" alt="PXL_20260417_052157460" src="https://github.com/user-attachments/assets/1b730f14-3dcb-44e5-972a-ce1c5c4894e1" />
   </td>
   <td style="border: none; padding: 0;">
-<h2>Version: 2.4.0</h2>
+<h2>Version: 2.5.0</h2>
 </td>
 </tr>
 </table>
@@ -26,7 +26,7 @@ Runs OK.
 So simulated WindGauge now available :construction_worker:  
 When Wind Speed determined, Mistral data output as array of CommandChar (not static) generated and displayed in Status ready to send.  
 Serial send back of Wind Speed data: See below  
-Siricco Wind Gauge might take a bit longer. Seems ut has a different protocol. _More later_
+**Siricco Wind Gauge *Now Works!***  :construction_worker: , _Code tidyup to go.  
 
 > Have implemented Gill WinSonic protocol for Siricco with simulator. Now to test on real device.
 
