@@ -46,16 +46,53 @@ namespace SwissTimingDisplay
             public int Direction { get; set; } = 0;
             public int iSpeed { get; set; } = 0;
             public SiriccoSpeedUnits? SpeedUnit { get; set; }
-            public SiriccoMessageModes? Mode { get; set; }
+
+            private SiriccoMessageModes? _mode = null;
+            public SiriccoMessageModes? Mode
+            {
+                get => _mode;
+                set { 
+                    if(_mode==null)
+                    {
+                        // Initial value. Fire event if different from ComboBox value
+                        // Keep separate to geneeral as might need caveats with instance init later??
+                        _mode = value;
+                        if (value != CurrentSiriccoMode)
+                        {
+                            ModeChanged?.Invoke(value);
+                        }
+                    }
+                    else if (_mode != value)
+                    {
+                        _mode = value;                       
+                        if (value != CurrentSiriccoMode)
+                        {                            
+                            ModeChanged?.Invoke(value);
+                        }
+                        //ModeChanged?.Invoke(value);
+                    }
+                }
+            }
+
+            public event Action<SiriccoMessageModes?>? ModeChanged;
+
             public string ErrorMessage { get; set; } = string.Empty;
 
         }
+
+        public static event Action<SiriccoMessageModes?>? SiriccoModeChanged;
+
+        public static SiriccoMessageModes? CurrentSiriccoMode { get; set; } = SiriccoMessageModes.Gill_UVContinuous;
+
         public static SiriccoResult? Siricco_Data { get; set; } = null;
         public SiriccoData(string line)
         {
             Siricco_Data = null;
             SiriccoResult result = new SiriccoResult();
             IsValid = false;
+
+            // Subscribe to mode changes immediately after creation
+            result.ModeChanged += (newMode) => SiriccoModeChanged?.Invoke(newMode);
             ErrorMessage = null;
             result.IsValid = false;
 
@@ -303,6 +340,13 @@ namespace SwissTimingDisplay
                 result.IsValid = false;
                 result.ErrorMessage = "Invalid combination of values";
             }
+
+            // Set default mode if not already set by parsing
+            if (result.Mode == null)
+            {
+                result.Mode = CurrentSiriccoMode;
+            }
+
             Siricco_Data = result;
         }
 

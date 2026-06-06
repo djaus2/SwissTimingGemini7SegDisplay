@@ -150,6 +150,7 @@ namespace SwissTimingDisplay.ViewModels
             {
                 if (SetProperty(ref _siriccoMessageMode, value))
                 {
+                    SiriccoData.CurrentSiriccoMode = value;
                     // Persist the change
                     if (!_isLoadingSettings)
                     {
@@ -223,7 +224,13 @@ namespace SwissTimingDisplay.ViewModels
             RefreshPorts();
             AutoConnectIfNeeded();
             _isLoadingSettings = false;
-            
+
+            // Initialize static current mode with loaded value
+            SiriccoData.CurrentSiriccoMode = _siriccoMessageMode;
+
+            // Subscribe to Siricco mode changes from received data
+            SiriccoData.SiriccoModeChanged += OnSiriccoModeChanged;
+
             // Save once after initialization to persist connection state
             SavePersistedPortNames();
         }
@@ -231,11 +238,21 @@ namespace SwissTimingDisplay.ViewModels
         protected override void OnPropertyChanged(PropertyChangedEventArgs e)
         {
             base.OnPropertyChanged(e);
-            
+
             // Auto-save settings when any property changes (except during loading, shutdown, or window switching)
             if (!_isLoadingSettings && !_isShuttingDown && !_isSwitchingWindows)
             {
                 SavePersistedPortNames();
+            }
+        }
+
+        private void OnSiriccoModeChanged(SiriccoMessageModes? newMode)
+        {
+            if (newMode.HasValue && newMode != _siriccoMessageMode)
+            {
+                _siriccoMessageMode = newMode.Value;
+                SiriccoData.CurrentSiriccoMode = newMode.Value;
+                OnPropertyChanged(nameof(SiriccoMessageMode));
             }
         }
 

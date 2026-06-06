@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <Version>2.4.1</Version>
+    <Version>2.5.0</Version>
     <TargetFramework>net10.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -10,24 +10,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="SplashWindow - Copy.xaml.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <None Remove="docs\mistralwindgauge.png" />
     <None Remove="docs\siriccoWindGauge2.png" />
     <None Remove="docs\SwissTiming.png" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Page Remove="SplashWindow - Copy.xaml" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="SplashWindow - Copy.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </None>
-    <None Include="SplashWindow - Copy.xaml.cs" />
   </ItemGroup>
 
 

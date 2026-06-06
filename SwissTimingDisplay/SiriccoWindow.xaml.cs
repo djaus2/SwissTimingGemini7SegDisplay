@@ -192,6 +192,7 @@ namespace SwissTimingDisplay
             _vm.PropertyChanged += VmOnPropertyChanged;
             _vm.SiriccoDataReceived += VmOnSiriccoDataReceived;
             _vm.SiriccoWindGaugePeriodChanged += OnSiriccoWindGaugePeriodChanged;
+            SiriccoData.SiriccoModeChanged += OnSiriccoModeChanged;
 
             Loaded += (_, _) => ApplyAnchorLayout();
             SizeChanged += (_, _) => ApplyAnchorLayout();
@@ -289,6 +290,14 @@ namespace SwissTimingDisplay
             if (wasRunning)
             {
                 _WindGaugeTimer.Start();
+            }
+        }
+
+        private void OnSiriccoModeChanged(SiriccoMessageModes? newMode)
+        {
+            if (newMode.HasValue)
+            {
+                MessageBox.Show($"Received Message type has changed to: {newMode}", "Siricco Mode Changed", MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
 
@@ -447,16 +456,21 @@ namespace SwissTimingDisplay
                     speedval = result.Speed1;
                     int direction = result.Direction;
                     break;
+                case SiriccoMessageModes.Gill_UVContinuous:
+                    speedval = result.Speed1;
+                    var speedAcross = result.Speed2;
+                    break;
                 default:
                     break;
             }
             speedTally += speedval;
             Debug.WriteLine($"Added to tally: {speedval}, Current tally: {speedTally}, Count: {count} Mode:{ result.Mode}");
             if (count>= MaxLoops)
-            {               
+            {
                 //double speed = speedTally /count;
+                double speedl = speedTally / count;
                 double speed = Math.Round(speedTally / count, 1);
-                _vm.RecvStatus = $"Speed={speed:F1} {speed:F3} (final,Total: {speedTally} over {count} measurements averaged over {_vm.WindGaugeCaptureCountdownPeriodSecs} sec )";
+                _vm.RecvStatus = $"Speed={speed:F1} {speedl:F3} (final,Total: {speedTally} over {count} measurements averaged over {_vm.WindGaugeCaptureCountdownPeriodSecs} sec )";
                 Debug.WriteLine($"{_vm.RecvStatus}");
                 WindGauge.WindSpeed = speed;
                 Siricco_StartButton(null, null);
@@ -473,6 +487,7 @@ namespace SwissTimingDisplay
             _WindGaugeTimer.Stop();
             _vm.PropertyChanged -= VmOnPropertyChanged;
             _vm.SiriccoDataReceived -= VmOnSiriccoDataReceived;
+            SiriccoData.SiriccoModeChanged -= OnSiriccoModeChanged;
             // Don't dispose _vm since it's shared
             base.OnClosed(e);
         }
