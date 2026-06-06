@@ -28,7 +28,8 @@ When Wind Speed determined, Mistral data output as array of CommandChar (not sta
 Serial send back of Wind Speed data: See below  
 **Siricco Wind Gauge *Now Works!***  :construction_worker: , _Code tidyup to go.  
 
-> Have implemented Gill WinSonic protocol for Siricco with simulator. Now to test on real device.
+> Have implemented Gill WinSonic protocol for Siricco with simulator and actual device. 
+> For simulator and for reception can use one of 3 message protocols athough Siricco Wind Gauge uses Gill_UVContinous, not Tunnel as I had though.
 
 <img width="300"  alt="image" src="https://github.com/user-attachments/assets/375c8625-0c2a-4d80-848a-c901f66a5cdf" />
 
