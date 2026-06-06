@@ -111,15 +111,11 @@ namespace SwissTimingDisplay.ViewModels
         private string? _selectedReceivePortName;
         private TcpCommand _selectedTcpCommand;
         private bool _onlyProlific = true;
-        private string _timeInput = "";
         private string _timeInputIn = "";
-        private bool _useWallClockTimeOfDay = false;
-        private bool _anchorDisplay = false;
         private string _bibNo = "";
         private int _bibNoInt = -1;
         private string _recvBibNoStr = "   ";
         private int _recvBibNoInt = -1;
-        private string _status = "";
         private string _sendStatus = "";
         private string _recvStatus = "";
         private DisplayMode _displayMode = DisplayMode.MMSSDD;
@@ -130,9 +126,6 @@ namespace SwissTimingDisplay.ViewModels
         private bool _isUpdatingPortLists;
         private bool _isSyncingSelectedPorts;
         private LapCountMode _lapCountMode = LapCountMode.None;
-        private TimeSpan _lapContinueDelay = TimeSpan.FromSeconds(5);
-        private bool _isRaceRunning = false;
-        private bool _raceHasStartedSinceReset = false;
         private bool _startAtFinish = true;
         private RaceDistance _raceDistance = RaceDistance.Distance600m;
         private bool _showWindGaugeWindow = false;
@@ -174,11 +167,6 @@ namespace SwissTimingDisplay.ViewModels
         private bool _pendingPersistedReceivePortConnected = false;
         private bool _pendingPersistedWindGaugeSendPortConnected = false;
         private bool _pendingPersistedWindGaugeReceiveConnected = false;
-        private bool _sentClearCommand = false;
-
-        public event Action<SiriccoData.SiriccoResult?>? SiriccoDataReceived;
-
-        [ObservableProperty] private bool _siriccoIsRunning = false;
 
         private readonly CollectionViewSource _sendPortsViewSource = new CollectionViewSource();
         private readonly CollectionViewSource _receivePortsViewSource = new CollectionViewSource();
@@ -415,18 +403,6 @@ namespace SwissTimingDisplay.ViewModels
             }
         }
 
-        public Task SendRawAsync(byte[] payload)
-        {
-            // Check if this is a clear command (STX + B + EOT/ETX)
-            // The payload contains the full frame including STX and EOT/ETX
-            if (payload.Length >= 3 && payload[0] == 0x02 && payload[1] == 0x42)
-            {
-                _sentClearCommand = true;
-            }
-
-            return _serialPortService.SendAsync(payload);
-        }
-
         public Task SendRawAsyncReceive(byte[] payload)
         {
             if (_receivePort is null || !_receivePort.IsOpen)
@@ -457,10 +433,6 @@ namespace SwissTimingDisplay.ViewModels
                 }
             }
         }
-
-        public bool IsConnected => _serialPortService.IsConnected;
-
-        public string? ConnectedPortName => _serialPortService.ConnectedPortName;
 
         public bool IsReceiveConnected
         {
@@ -602,18 +574,6 @@ namespace SwissTimingDisplay.ViewModels
                             _isSwitchingWindows = false;
                         }
                     }
-                }
-            }
-        }
-
-        public string TimeInput
-        {
-            get => _timeInput;
-            set
-            {
-                if (SetProperty(ref _timeInput, value))
-                {
-                    OnPropertyChanged(nameof(DisplayTime));
                 }
             }
         }
@@ -771,49 +731,6 @@ namespace SwissTimingDisplay.ViewModels
             set => DisplayMode = value ? DisplayMode.HHMMSS : DisplayMode.MMSSDD;
         }
 
-        public bool UseWallClockTimeOfDay
-        {
-            get => _useWallClockTimeOfDay;
-            set
-            {
-                if (SetProperty(ref _useWallClockTimeOfDay, value))
-                {
-                    if (value)
-                    {
-                        DisplayMode = DisplayMode.HHMMSS;
-                        // Set ShowSimulatorPunctuation to true when wallclock is enabled
-                        if (!ShowSimulatorPunctuation)
-                        {
-                            ShowSimulatorPunctuation = true;
-                        }
-                    }
-                    else
-                    {
-                        // If wallclock is disabled and ShowSimulatorPunctuation is true, set to MMSSDD
-                        if (ShowSimulatorPunctuation)
-                        {
-                            DisplayMode = DisplayMode.MMSSDD;
-                        }
-                    }
-
-                    OnPropertyChanged(nameof(DisplayTime));
-                    OnPropertyChanged(nameof(DisplayModeLabel));
-                    OnPropertyChanged(nameof(IsDisplayModeHHMMSS));
-                }
-            }
-        }
-
-        public bool AnchorDisplay
-        {
-            get => _anchorDisplay;
-            set
-            {
-                if (SetProperty(ref _anchorDisplay, value))
-                {
-                }
-            }
-        }
-
         public int NumDigits
         {
             get => _numDigits;
@@ -852,36 +769,6 @@ namespace SwissTimingDisplay.ViewModels
                     }
                 }
             }
-        }
-
-        public TimeSpan LapContinueDelay
-        {
-            get => _lapContinueDelay;
-            set => SetProperty(ref _lapContinueDelay, value);
-        }
-
-        public double LapContinueDelaySeconds
-        {
-            get => _lapContinueDelay.TotalSeconds;
-            set => LapContinueDelay = TimeSpan.FromSeconds(value);
-        }
-
-        public bool IsRaceRunning
-        {
-            get => _isRaceRunning;
-            set
-            {
-                if (SetProperty(ref _isRaceRunning, value))
-                {
-                    OnPropertyChanged(nameof(DisplayTime));
-                }
-            }
-        }
-
-        public bool RaceHasStartedSinceReset
-        {
-            get => _raceHasStartedSinceReset;
-            set => SetProperty(ref _raceHasStartedSinceReset, value);
         }
 
         public ActiveWindow CurrentWindow
@@ -1020,11 +907,6 @@ namespace SwissTimingDisplay.ViewModels
             }
         }
 
-        public string Status
-        {
-            get => _status;
-            set => SetProperty(ref _status, value);
-        }
         public string SendStatus
         {
             get => _sendStatus;

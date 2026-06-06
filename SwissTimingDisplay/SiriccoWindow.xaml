@@ -20,8 +20,8 @@
         <x:Array x:Key="SiriccoMessageModesFiltered" Type="local:SiriccoMessageModes">
             <local:SiriccoMessageModes>Gill_PolarContinuous</local:SiriccoMessageModes>
             <local:SiriccoMessageModes>Gill_UVContinuous</local:SiriccoMessageModes>
-            <local:SiriccoMessageModes>NMEANMEA</local:SiriccoMessageModes>
-            <local:SiriccoMessageModes>NMEAGill</local:SiriccoMessageModes>
+            <!-- <local:SiriccoMessageModes>NMEANMEA</local:SiriccoMessageModes> -->
+            <!-- <local:SiriccoMessageModes>NMEAGill</local:SiriccoMessageModes> -->
             <local:SiriccoMessageModes>Gill_Tunnel</local:SiriccoMessageModes>
         </x:Array>
 

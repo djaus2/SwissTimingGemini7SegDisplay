@@ -24,7 +24,23 @@ namespace SwissTimingDisplay.ViewModels
         public Action? WindGaugeStart;
         public Action? WindGaugeStop;
 
+        public event Action<SiriccoData.SiriccoResult?>? SiriccoDataReceived;
+
+        [ObservableProperty] private bool _siriccoIsRunning = false;
+
         [ObservableProperty] private bool _simulatedSiriccoWindGaugeRunning = false;
+
+        public event Action? SiriccoWindGaugePeriodChanged;
+
+        public TimeSpan SiriccoWindGaugePeriodSec
+        {
+            get => TimeSpan.FromSeconds(1.0 / WindGaugeCaptureCountsPerSec);
+        }
+
+        public int SiriccoWindGaugePeriodMs
+        {
+            get => (int) TimeSpan.FromSeconds(1.0 / WindGaugeCaptureCountsPerSec).TotalMilliseconds;
+        }
 
         partial void OnSimulatedSiriccoWindGaugeRunningChanged(bool value)
         {

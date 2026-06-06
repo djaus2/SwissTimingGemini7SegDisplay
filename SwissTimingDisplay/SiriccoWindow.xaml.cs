@@ -207,31 +207,59 @@ namespace SwissTimingDisplay
             _WindGaugeTimer.Tick += async (_, _) =>
             {
                 byte[] cmdbytes = new byte[0];
-
-                // Generate the wind speed data message.
-                double WindSpeed = new Random().Next(-100, 100); // Simulate wind speed measurement
-                WindSpeed /= 10.0;
+                double UWindSpeed = 0;
+                double VWindSpeed = 0;
                 int uVector = 0;
-                if (WindSpeed < 0)
-                    uVector = 1;
-                string speedStr = WindSpeed >= 0 ? $"+{WindSpeed:0.0}" : $"{WindSpeed:0.0}";
-                // Could do a switch here for the different Gill anemometers
-                string msg = $"Q,{speedStr},{uVector},00,M,";
-                var msgBytes = msg.Select(c => (byte)c).ToArray();
+                string speedUStr = "";
+                string speedVStr = "";
+                int polar = 0;
+                string msg = "";
+                byte[] msgBytes = Array.Empty<byte>();
+                // Generate the wind speed data message.
+                switch (_vm.SiriccoMessageMode)
+                {
+                    case SiriccoMessageModes.Gill_Tunnel:
+                        UWindSpeed = new Random().Next(-100, 100); // Simulate wind speed measurement
+                        UWindSpeed /= 10.0;
+                        uVector = 0;
+                        if (UWindSpeed < 0)
+                            uVector = 1;
+                        speedUStr = UWindSpeed >= 0 ? $"+{UWindSpeed:0.0}" : $"{UWindSpeed:0.0}";
+                        // Could do a switch here for the different Gill anemometers
+                        msg = $"Q,{speedUStr},{uVector},00,M,";
+                        msgBytes = msg.Select(c => (byte)c).ToArray();
+                        break;
+                    case SiriccoMessageModes.Gill_PolarContinuous:
+                        UWindSpeed = new Random().Next(0, 100); // Simulate wind speed measurement
+                        UWindSpeed /= 10.0;
+                        polar = (int)new Random().Next(0, 359);
+                        speedUStr = UWindSpeed >= 0 ? $"+{UWindSpeed:0.0}" : $"{UWindSpeed:0.0}";
+                        // Could do a switch here for the different Gill anemometers
+                        msg = $"Q,{polar},{speedUStr},M,00,";
+                        msgBytes = msg.Select(c => (byte)c).ToArray();
+                        break;
+                    case SiriccoMessageModes.Gill_UVContinuous:
+                        UWindSpeed = new Random().Next(-100, 100); // Simulate wind speed measurement
+                        UWindSpeed /= 10.0;
+                        VWindSpeed = new Random().Next(-10, 10); // Simulate wind speed measurement
+                        VWindSpeed /= 10.0;;
+                        speedUStr = UWindSpeed >= 0 ? $"+{UWindSpeed:0.0}" : $"{UWindSpeed:0.0}";
+                        speedVStr = UWindSpeed >= 0 ? $"+{UWindSpeed:0.0}" : $"{UWindSpeed:0.0}";
+                        // Could do a switch here for the different Gill anemometers
+                        msg = $"Q,{speedUStr},{speedVStr},M,00,";
+                        msgBytes = msg.Select(c => (byte)c).ToArray();
+                        break;
+                    default:
+                        break;
+                }
+ 
 
                 // Get Checksum:
                 // cs++; <-- Was done as below to invoke a failure in the Gill WinView application
                 // It was oberved that the app does verify the checksum as it failed with that included
                 // ... but does decode the messages when not inserted above.
                 // ... and so the format of its inclusion here is correct.
-                byte cs = 0;
-                foreach (char c in msg)
-                {
-                    cs ^= (byte)c;
-                }
-                //cs++; See above comment on checksum verification in Gill WinView app
-                byte[] csBytes = Encoding.ASCII.GetBytes(cs.ToString());
-                //.Resize(ref csBytes, csBytes.Length + 1);
+                byte[] csBytes = StringXor2ByteCheckSum.CalculateAsBytes(msg);
 
                 // Start building the command bytes array with the correct size: STX + data + ETX + checksum + CR + LF
                 cmdbytes = new byte[msgBytes.Length + csBytes.Length + 4];
@@ -851,21 +879,15 @@ namespace SwissTimingDisplay
             {
                 byte[] cmdbytes = null;
                 string msg = " Q,001.59,1,00,M,";
-                byte cs = 0;
-                foreach (char c in msg)
-                {
-                    cs ^= (byte)c;
-                }
-
                 var msgBytes = msg.Select(c => (byte)c).ToArray();
-                var csBytes = Encoding.ASCII.GetBytes(cs.ToString());
+                var csBytes = StringXor2ByteCheckSum.CalculateAsBytes(msg);
                 cmdbytes = new byte[msgBytes.Length + csBytes.Length + 4];
                 cmdbytes[0] = (byte)CharCommand.STX;
                 Array.Copy(msgBytes, 0, cmdbytes, 1, msgBytes.Length);
                 cmdbytes[msgBytes.Length + 1] = (byte)CharCommand.ETX;
-                cmdbytes[msgBytes.Length + 2] = cs;
-                cmdbytes[msgBytes.Length + 3] = (byte)CharCommand.CR;
-                cmdbytes[msgBytes.Length + 4] = (byte)CharCommand.LF;
+                Array.Copy(csBytes, 0, cmdbytes, msgBytes.Length + 2, csBytes.Length);
+                cmdbytes[cmdbytes.Length - 2] = (byte)CharCommand.CR;
+                cmdbytes[cmdbytes.Length - 1] = (byte)CharCommand.LF;
                 var payload = cmdbytes;
 
                 if (_vm.IsConnected)

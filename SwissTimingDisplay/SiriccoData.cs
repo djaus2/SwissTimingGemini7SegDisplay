@@ -1,6 +1,7 @@
 using System;
 using System.Globalization;
 using System.Linq;
+using System.Printing;
 using System.Xml.Linq;
 
 namespace SwissTimingDisplay
@@ -9,8 +10,8 @@ namespace SwissTimingDisplay
     {
         Gill_PolarContinuous,
         Gill_UVContinuous,
-        NMEANMEA,
-        NMEAGill,
+        //NMEANMEA,
+        //NMEAGill,
         Gill_Tunnel
     }
 
@@ -45,6 +46,7 @@ namespace SwissTimingDisplay
             public double Speed2 { get; set; } = 0;
             public int Direction { get; set; } = 0;
             public int iSpeed { get; set; } = 0;
+            public byte Checksum { get; set; } = 0;
             public SiriccoSpeedUnits? SpeedUnit { get; set; }
 
             private SiriccoMessageModes? _mode = null;
@@ -142,11 +144,8 @@ namespace SwissTimingDisplay
             //byte expectedChecksum = (byte)((byte)checksumChar -(byte)'0');
 
             // Calculate checksum: XOR of all bytes between STX and ETX (not including them)
-            byte calculatedChecksum = 0;
-            for (int i = 1; i < etxPosn; i++)
-            {
-                calculatedChecksum ^= (byte)line[i];
-            }
+            string dataToChecksum = line.Substring(1, etxPosn - 1);
+            byte calculatedChecksum = StringXor2ByteCheckSum.AsByte(dataToChecksum);
 
             if (calculatedChecksum != expectedChecksum)
             {
@@ -188,19 +187,38 @@ namespace SwissTimingDisplay
                 return;
             }
 
-            // Validate element 1: <STX>Q (space already removed if present)
-            string element1 = parts[0];
-            if (element1.Length < 2 || element1[0] != STX || element1[1] != 'Q')
+            // Validate element 0: <STX>Q (space already removed if present)
+            string element0 = parts[0];
+            if (element0.Length < 2 || element0[0] != STX || element0[1] != 'Q')
             {
-                ErrorMessage = "Element 1 is not in format <STX>Q";
+                ErrorMessage = "Element 0 is not in format <STX>Q";
                 return;
             }
 
-            // Parse element 2: integer (0-359) or double
-            string element2 = parts[1].Trim();
-            bool element2IsInt = int.TryParse(element2, out int intVal2);
-            bool element2IsDouble = double.TryParse(element2, out double doubleVal2);
+            // Parse element 1: integer (0-359) or double
+            string element1 = parts[1].Trim();
+            bool element1IsInt = int.TryParse(element1, out int intVal2);
+            bool element1IsDouble = double.TryParse(element1, out double doubleVal2);
 
+
+            if (!element1IsInt && !element1IsDouble)
+            {
+                ErrorMessage = "Element 1 is not a valid integer or double";
+                return;
+            }
+
+            if (element1IsInt && (intVal2 < 0 || intVal2 > 359))
+            {
+                ErrorMessage = "Element 2 integer must be between 0 and 359";
+                return;
+            }
+
+            Value1 = element1IsInt ? intVal2 : doubleVal2;
+
+            // Parse element 2: double or integer
+            string element2 = parts[2].Trim();
+            bool element2IsInt = int.TryParse(element2, out int intVal3);
+            bool element2IsDouble = double.TryParse(element2, out double doubleVal3);
 
             if (!element2IsInt && !element2IsDouble)
             {
@@ -208,29 +226,10 @@ namespace SwissTimingDisplay
                 return;
             }
 
-            if (element2IsInt && (intVal2 < 0 || intVal2 > 359))
-            {
-                ErrorMessage = "Element 2 integer must be between 0 and 359";
-                return;
-            }
-
-            Value1 = element2IsInt ? intVal2 : doubleVal2;
-
-            // Parse element 3: double or integer
-            string element3 = parts[2].Trim();
-            bool element3IsInt = int.TryParse(element3, out int intVal3);
-            bool element3IsDouble = double.TryParse(element3, out double doubleVal3);
-
-            if (!element3IsInt && !element3IsDouble)
-            {
-                ErrorMessage = "Element 3 is not a valid integer or double";
-                return;
-            }
-
-            Value2 = element3IsInt ? intVal3 : doubleVal3;
+            Value2 = element2IsInt ? intVal3 : doubleVal3;
 
             // Qualification: items 1 and 2 cannot both be integer
-            if (element2IsInt && element3IsInt)
+            if (element1IsInt && element2IsInt)
             {
                 ErrorMessage = "Elements 1 and 2 cannot both be integers";
                 return;
@@ -242,13 +241,13 @@ namespace SwissTimingDisplay
             string statusStr = parts[3].Trim();
             if (string.IsNullOrEmpty(statusStr))
             {
-                ErrorMessage = "Element 5 is empty";
+                ErrorMessage = "Element 3 is empty";
                 return;
             }
             string speedUnitPartStr = parts[4].Trim();
             if (string.IsNullOrEmpty(speedUnitPartStr))
             {
-                ErrorMessage = "Element 5 is empty";
+                ErrorMessage = "Element 4 is empty";
                 return;
             }
             if (ParseSpeedUnit(statusStr[0]) != null)
@@ -258,7 +257,7 @@ namespace SwissTimingDisplay
 
                 if (!int.TryParse(statusStr, out int intVal4) || intVal4 < 0)
                 {
-                    ErrorMessage = "Element 5 is not a valid positive integer";
+                    ErrorMessage = "Element 4 is not a valid positive integer";
                     return;
                 }
                 Value3 = intVal4;
@@ -268,7 +267,7 @@ namespace SwissTimingDisplay
             {
                 if (!int.TryParse(statusStr, out int intVal4) || intVal4 < 0)
                 {
-                    ErrorMessage = "Element 4 is not a valid positive integer";
+                    ErrorMessage = "Element 3 is not a valid positive integer";
                     return;
                 }
                 Value3 = intVal4;
@@ -297,18 +296,22 @@ namespace SwissTimingDisplay
                 return;
             }
 
-            // Validate element 6: <ETX>D where D is checksum
-            string element6 = parts[5].Trim();
-            if (element6.Length < 2 || element6[0] != ETX)
+            // Validate element 6: <ETX>DD where DD is checksum as hex
+            string element5 = parts[5].Trim();
+
+            byte cs = 0;
+            if ((element5.Length != 3) || (!byte.TryParse(element5.Substring(1), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out cs)) || (element5[0] != ETX))
             {
-                ErrorMessage = "Element 6 is not in format <ETX>D";
+                ErrorMessage = "Element 6 is not in format <ETX>DD where DD is the Checksum as Hex";
                 return;
             }
+            result.Checksum = cs;
+
             if (SpeedUnit != null)
             {
                 result.SpeedUnit = SpeedUnit;
             }
-            if ((element2IsDouble)&& (element3IsInt) && ((intVal3 == 0)|| (intVal3 == 1)))
+            if ((element1IsDouble)&& (element2IsInt) && ((intVal3 == 0)|| (intVal3 == 1)))
             {
                 //Expect <double><0|1> = Speed, Direction Down or up straight
                 result.IsValid = true;
@@ -316,7 +319,7 @@ namespace SwissTimingDisplay
                 result.Speed = doubleVal2;
                 result.Mode = SiriccoMessageModes.Gill_Tunnel;
             }
-            else if(((element2IsInt) && (intVal2 >= 0) && (intVal2 < 360)) && (element3IsDouble))
+            else if(((element1IsInt) && (intVal2 >= 0) && (intVal2 < 360)) && (element2IsDouble))
             {
                 // Expect <int><double> = Direction (angle) 0..360, Speed
                 result.IsValid = true;
@@ -325,7 +328,7 @@ namespace SwissTimingDisplay
                 result.Speed = doubleVal3;
                 result.Mode = SiriccoMessageModes.Gill_PolarContinuous;
             }
-            else if ((element2IsDouble) && (element3IsDouble))
+            else if ((element1IsDouble) && (element2IsDouble))
             {
                 // Expect <double><double> = Speed-U (NS), Speed-V (EW)
                 result.IsValid = true;

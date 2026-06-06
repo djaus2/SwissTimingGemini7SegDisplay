@@ -18,6 +18,7 @@ namespace SwissTimingDisplay.ViewModels
         private string _windGaugeCaptureCountdownPeriodSecsStr = "10";
         private string _windGaugeCaptureCountsPerSecStr = "4";
         private int _windGaugeCaptureCountdownPeriodSecs = 10;
+        private TimeSpan _lapContinueDelay = TimeSpan.FromSeconds(5);
         private int _windGaugeCaptureCountsPerSec = 4;
 
         // This gets sent to the display control
@@ -94,27 +95,9 @@ namespace SwissTimingDisplay.ViewModels
                     {
                         WindGaugeCaptureCountsPerSec = counts;
                     }
-                    else
-                    {
-                        SiriccoWindGaugePeriodChanged?.Invoke();
-                    }
                 }
             }
         }
-
-        public event Action? SiriccoWindGaugePeriodChanged;
-
-        public TimeSpan SiriccoWindGaugePeriodSec
-        {
-            get => TimeSpan.FromSeconds(1.0 / WindGaugeCaptureCountsPerSec);
-        }
-
-        public int SiriccoWindGaugePeriodMs
-        {
-            get => (int) TimeSpan.FromSeconds(1.0 / WindGaugeCaptureCountsPerSec).TotalMilliseconds;
-        }
-
-
 
         private bool _showDecimalDot = false;
         public bool ShowDecimalDot
@@ -371,10 +354,22 @@ namespace SwissTimingDisplay.ViewModels
                 SendResult();
             }
             Status = $"Wind Speed: {WindGauge.WindSpeed}";
-            
+
 
             // Notify that measurement is complete
             WindGaugeMeasurementComplete?.Invoke(this, EventArgs.Empty);
+        }
+
+        public TimeSpan LapContinueDelay
+        {
+            get => _lapContinueDelay;
+            set => SetProperty(ref _lapContinueDelay, value);
+        }
+
+        public double LapContinueDelaySeconds
+        {
+            get => _lapContinueDelay.TotalSeconds;
+            set => LapContinueDelay = TimeSpan.FromSeconds(value);
         }
 
         public event EventHandler? WindGaugeMeasurementComplete;
