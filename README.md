@@ -78,9 +78,10 @@ As per [MVACDisplayandWindGaugeCabling](/SwissTimingDisplay/docs/MVACDisplayandW
 > - The display takes power from infield mains via a power cable.  
 > - The Sirrico Wind Gauge takes power from the INT131 via the RS424 port from Pin
 
-- NB There is a local issue (at MVAC) with inground wiring (under the finish line) in that only one of INT131 power pins on both RS424 port is not connected.  
-  - Only the RS424 Pin 1 is connected from outside to inside whereas the wind gauge requires power from pin 2. 
-  - A Special cable was developed to fix this which is connected betwenn the reel and the Sirrcco Wind gauge cable.
+- NB There is a local issue (at MVAC) with inground wiring (under the finish line) in that only one of INT131 power pins (pins 1 & 2) on both RS424 ports is not connected.  
+  - Only the RS424 Pin 2 is connected from outside to inside whereas the wind gauge requires power from pin 1. 
+  - A Special RS424 inline cable was developed to fix this which is connected betwenn the reel and the Sirrcco Wind gauge cable.
+    - Connected pin 2 of the female to pin 1 of the male
   - Not an issue with the Display.
 
 ## Protocols
@@ -96,7 +97,7 @@ As per [MVACDisplayandWindGaugeCabling](/SwissTimingDisplay/docs/MVACDisplayandW
 
 ## Actual display running
 
-  <img width="800"  alt="image" src="https://media.giphy.com/media/vkdTVE9bwFJqjR9y7t/giphy.gif" />
+ <img width="800"  alt="image" src="https://media.giphy.com/media/vkdTVE9bwFJqjR9y7t/giphy.gif" />
 
 
  <img width="600"  alt="image" src="SwissTimingDisplay/docs/giphy.gif" />
