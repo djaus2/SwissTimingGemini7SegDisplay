@@ -101,6 +101,13 @@ There are 2 RS424 sockets either side of the finish line with male 7 pin Tuchel 
 > Have implemented Gill WinSonic protocol for Siricco with simulator.
 <img width="300"  alt="image" src="https://github.com/user-attachments/assets/375c8625-0c2a-4d80-848a-c901f66a5cdf" />
 
+6.2. Gill format – UV  <-- Sirrico Uses this mode
+In this mode, the output is given as signed (i.e., positive, or negative) speeds along the 
+‘U’ (= South – North) axis and the ‘V’ (= East – West) axis. 
+
+<img width="400"  alt="639186122074625264" src = "img_639186122074625264.png" />
+
+With the wind gauge correctly positioned, the U axis is aligned with the track and the V axis is perpendicular to the track, so the software uses the U axis speed as the wind speed. The V axis speed is not used.
 
 ---
 
