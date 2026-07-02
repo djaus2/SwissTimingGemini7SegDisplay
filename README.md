@@ -14,6 +14,14 @@
 > **Disclaimer:** _This software is for demostration and testing purposes only and is not provided by Swiss Timing._  
 > _Swiss Timing Display and Wind Gauge Transmission Protocols as referenced are used though._
 
+## About
+This is a WPF app that can generate display timing messages for a Swiss Timing Gemini 6 Digit 7 segment display, functioning for example, as a running clock or elapsed race time for Athletics events. Messages are sent via the selected Serial-Send port.
+
+Times (wallclock or race running time) are also displayed in a simulated 6 x 7 Segement display in-app. When the Serial-Receive port is not connected, that display displays the transmitted time.
+
+The capability for receiving messages as sent and displaying the received times has also been added so that a loopback cable can be used for testing. To enable serial reception,the Serial-Receive and Serial-Send ports are connected and as such the sent then received data is displayed in-app in the 7 segments rather than the transmitted data ditrectly. In this mode,the app can simulate the physical display.
+
+The app can also run in a mode where it can receive wind speed data from a Swiss Timing Wind Gauge (Sirrico or Mistral) and display the wind speed in the app. There is also a simulator for both wind gauges that can be used to test the app without the actual wind gauge connected. The app can also send back the wind speed to the simulator or actual wind gauge.
 
 ---
 
@@ -73,15 +81,16 @@ Can use RS232 or RS424 ports on the INT131 (Have tested OK with both)
 ---
 ## Connectivity and Power
 ***The display is a data sink whereas the wind gauge is a data source.***  
-As per [MVACDisplayandWindGaugeCabling](/SwissTimingDisplay/docs/MVACDisplayandWindGaugeCabling.pdf) diagram
-
-> - The display takes power from infield mains via a power cable.  
+As per [MVACDisplayandWindGaugeCabling](/SwissTimingDisplay/docs/MVACDisplayandWindGaugeCabling.pdf) diagram 
+There are 2 RS424 sockets either side of the finish line with male 7 pin Tuchel sockets.
+> - The display takes power from infield mains via a mains power cable.  
 > - The Sirrico Wind Gauge takes power from the INT131 via the RS424 port from Pin
 
-- NB There is a local issue (at MVAC) with inground wiring (under the finish line) in that only one of INT131 power pins (pins 1 & 2) on both RS424 ports is not connected.  
+- NB There is a local issue (at MVAC) with inground wiring (under the finish line) in that only one of INT131 power pins (pins 1 & 2) on both RS424 ports is connected under the finish line.  
   - Only the RS424 Pin 2 is connected from outside to inside whereas the wind gauge requires power from pin 1. 
   - A Special RS424 inline cable was developed to fix this which is connected betwenn the reel and the Sirrcco Wind gauge cable.
     - Connected pin 2 of the female to pin 1 of the male
+    - Female end of this cable connects to the infield socket and the male end connects to the reel.
   - Not an issue with the Display.
 
 ## Protocols
@@ -126,12 +135,6 @@ As per [MVACDisplayandWindGaugeCabling](/SwissTimingDisplay/docs/MVACDisplayandW
 
 
 
-## About
-This is a WPF app that can generate display timing messages for a Swiss Timing Gemini 6 Digit 7 segment display, functioning for example, as a running clock or elapsed race time for Athletics events. Messages are sent via the selected Serial-Send port.
-
-Times (wallclock or race running time) are also displayed in a simulated 6 x 7 Segement display in-app. When the Serial-Receive port is not connected, that display displays the transmitted time.
-
-The capability for receiving messages as sent and displaying the received times has also been added so that a loopback cable can be used for testing. To enable serial reception,the Serial-Receive and Serial-Send ports are connected and as such the sent then received data is displayed in-app in the 7 segments rather than the transmitted data ditrectly. In this mode,the app can simulate the physical display.
 
 
 ## Latest
