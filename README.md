@@ -14,26 +14,96 @@
 > **Disclaimer:** _This software is for demostration and testing purposes only and is not provided by Swiss Timing._  
 > _Swiss Timing Display and Wind Gauge Transmission Protocols as referenced are used though._
 
-> Thie ReadMe in the Siricco branch is behind the ReadMe in master branch.  
-> But this code and functionality is ahead of the master branch.  
-> Added the **Siricco Wind Gauge**    
 
- **Status**
-> **WORKING ON MISTRAL WIND GAUGE PROTOCOL**. _Watch this space.._ Making progress .. About a week!  
-Got the app sending the Wind Gauge  Control TP messages  
-Implemented simulated Wind Gauge to interpret them using Loopback cable across Swiss Timing  INT131  
-Runs OK.  
-So simulated WindGauge now available :construction_worker:  
-When Wind Speed determined, Mistral data output as array of CommandChar (not static) generated and displayed in Status ready to send.  
-Serial send back of Wind Speed data: See below  
-**Siricco Wind Gauge *Now Works!***  :construction_worker: , _Code tidyup to go.  
+---
 
-> Have implemented Gill WinSonic protocol for Siricco with simulator. Now to test on real device.
+## The Equipment
 
+<img width="670" height="466" alt="image" src="https://github.com/user-attachments/assets/7127c5b8-eca1-4074-b8d7-c89a84dcb5c2" />  
+
+***6 and 9 digits Swiss Timing displays.***   
+_Whilst there is some implementation for the 9 digit display, only the 6 digit display is fully impelmeneted and tested\ here._
+
+
+
+<table style="border-collapse: collapse; border: none;">
+  <tr style="border: none;">
+    <td style="border: none; padding: 0; text-align: center;">
+      <img width="150" alt="Siricco" src="https://raw.githubusercontent.com/djaus2/SwissTimingGemini7SegDisplay/Siricco/SwissTimingDisplay/docs/siriccoWindGauge.png" />
+    </td>
+    <td style="border: none; width: 40px;"></td>
+    <td style="border: none; padding: 0; text-align: center;">
+      <img width="200" alt="Mistral" src="https://raw.githubusercontent.com/djaus2/SwissTimingGemini7SegDisplay/Siricco/SwissTimingDisplay/docs/mistralwindgauge.png" />
+    </td>
+  </tr>
+  <tr style="border: none;">
+    <td style="border: none; padding-top: 6px; text-align: center;">
+      <strong>Siricco Wind Gauge</strong>
+    </td>
+    <td style="border: none; width: 40px;"></td>
+    <td style="border: none; padding-top: 6px; text-align: center;">
+      <strong>Mistral Wind Gauge</strong>
+    </td>
+  </tr>
+</table>  
+
+_Sirrico Wind Gauge has been tested whereas Mistral Wind Gauge is yet to be tested with teh software._
+
+---
+
+## Links
+
+
+---
+
+## Status
+
+### With Hardware
+>   As per [MVACDisplayandWindGaugeCabling](/SwissTimingDisplay/docs/MVACDisplayandWindGaugeCabling.pdf) diagram
+> - Display functionality has been successfully tested in the fieldwith a Gemini 6 Digit 7 Segment Display
+> - Wind Gauge has been successfully tested in the field with a Siricco Wind Gauge.
+> - Mistral Wind Gauge has not yet been tested in the field.
+
+### With Simulator
+> All 3 simulators work OK :construction_worker:   
+
+Use a loopback cable between 2 ports on the same INT131 to test the app with the simulators.  
+Can use RS232 or RS424 ports on the INT131 (Have tested OK with both)
+
+---
+## Connectivity and Power
+***The display is a data sink whereas the wind gauge is a data source.***  
+As per [MVACDisplayandWindGaugeCabling](/SwissTimingDisplay/docs/MVACDisplayandWindGaugeCabling.pdf) diagram
+
+> - The display takes power from infield mains via a power cable.  
+> - The Sirrico Wind Gauge takes power from the INT131 via the RS424 port from Pin
+
+- NB There is a local issue (at MVAC) with inground wiring (under the finish line) in that only one of INT131 power pins on both RS424 port is not connected.  
+  - Only the RS424 Pin 1 is connected from outside to inside whereas the wind gauge requires power from pin 2. 
+  - A Special cable was developed to fix this which is connected betwenn the reel and the Sirrcco Wind gauge cable.
+  - Not an issue with the Display.
+
+## Protocols
+
+### Gemini 6 Digit 7 Segment Display
+
+### Sirrico Wind Gauge
+> Have implemented Gill WinSonic protocol for Siricco with simulator.
 <img width="300"  alt="image" src="https://github.com/user-attachments/assets/375c8625-0c2a-4d80-848a-c901f66a5cdf" />
 
+
+---
+
+## Actual display running
+
+  <img width="800"  alt="image" src="https://media.giphy.com/media/vkdTVE9bwFJqjR9y7t/giphy.gif" />
+
+
+ <img width="600"  alt="image" src="SwissTimingDisplay/docs/giphy.gif" />
+
+
+
 > - (In situ)Test with actual display in field **WORKS**!
->   - As per [MVACDisplayandWindGaugeCabling](/SwissTimingDisplay/docs/MVACDisplayandWindGaugeCabling.pdf) diagram
 >   - Nb: Wind Gauge as per this diagram not yet tested and not part of this software _yet_.
 > - (in vitro) 6 Digit Gemini display  works in race mode as well clear function
 >   - Using Turchel Null Modem cable.
@@ -46,15 +116,13 @@ Serial send back of Wind Speed data: See below
 >   - Tuchel Null Modem cable works with INT31 and Simulated Display
 
 
-<img width="670" height="466" alt="image" src="https://github.com/user-attachments/assets/7127c5b8-eca1-4074-b8d7-c89a84dcb5c2" />
 
 
 
-  <img width="800"  alt="image" src="https://media.giphy.com/media/vkdTVE9bwFJqjR9y7t/giphy.gif" />
 
  ### In the field!:
 
- <img width="600"  alt="image" src="SwissTimingDisplay/docs/giphy.gif" />
+
 
 
 ## About
