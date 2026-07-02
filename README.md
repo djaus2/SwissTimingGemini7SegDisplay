@@ -97,6 +97,16 @@ There are 2 RS424 sockets either side of the finish line with male 7 pin Tuchel 
 
 ### Gemini 6 Digit 7 Segment Display
 
+<img width="400"  alt="639186287704097738" src = "img_639186287704097738.png" />  
+
+- The first 3 character command clears the display.  
+- The second 15 character command displays the event running time:  
+  - Min Min : Sec Sec . Hundth Hundth  
+- The third 15 character command displays the wallclock time.  
+- _nnn is 3 characters for event number or placing but is ignored by 6 digit display._  
+- _The other 3 characters are spaces._
+
+
 ### Sirrico Wind Gauge
 > Have implemented Gill WinSonic protocol for Siricco with simulator.
 <img width="300"  alt="image" src="https://github.com/user-attachments/assets/375c8625-0c2a-4d80-848a-c901f66a5cdf" />
@@ -105,9 +115,13 @@ There are 2 RS424 sockets either side of the finish line with male 7 pin Tuchel 
 In this mode, the output is given as signed (i.e., positive, or negative) speeds along the 
 ‘U’ (= South – North) axis and the ‘V’ (= East – West) axis. 
 
-<img width="400"  alt="639186122074625264" src = "img_639186122074625264.png" />
+<img width="700"  alt="639186122074625264" src = "img_639186122074625264.png" />
 
 With the wind gauge correctly positioned, the U axis is aligned with the track and the V axis is perpendicular to the track, so the software uses the U axis speed as the wind speed. The V axis speed is not used.
+
+### Mistral Wind Gauge
+
+See the end of this document. Unlike the Sirrico Wind Gauge, the Mistral one has input as setup commands as well as output of the wind speed.
 
 ---
 
@@ -117,28 +131,6 @@ With the wind gauge correctly positioned, the U axis is aligned with the track a
 
 
  <img width="600"  alt="image" src="SwissTimingDisplay/docs/giphy.gif" />
-
-
-
-> - (In situ)Test with actual display in field **WORKS**!
->   - Nb: Wind Gauge as per this diagram not yet tested and not part of this software _yet_.
-> - (in vitro) 6 Digit Gemini display  works in race mode as well clear function
->   - Using Turchel Null Modem cable.
->   - INT31 -> Display In Port
->   - Required mains power.
-> - Previous
->   - Null modem cable across  INT131 enables sent time to be displayed in Simulated 7 seg display, with/without colon and dot between digits.
->   - 6 Simulated Digit diplay implemented.  
->   - 3 + 6 digit display option now works in Simulator.
->   - Tuchel Null Modem cable works with INT31 and Simulated Display
-
-
-
-
-
-
- ### In the field!:
-
 
 
 
