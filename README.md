@@ -111,7 +111,6 @@ There are 2 RS424 sockets either side of the finish line with male 7 pin Tuchel 
 
 ### Sirrico Wind Gauge
 > Have implemented Gill WinSonic protocol for Siricco with simulator.
-<img width="300"  alt="image" src="https://github.com/user-attachments/assets/375c8625-0c2a-4d80-848a-c901f66a5cdf" />
 
 6.2. Gill format – UV  <-- Sirrico Uses this mode
 In this mode, the output is given as signed (i.e., positive, or negative) speeds along the 
@@ -149,6 +148,27 @@ See the end of this document. Unlike the Sirrico Wind Gauge, the Mistral one has
  ***The Mistral Wind Gauge Screen***
 
 
+ ## The Simulators
+
+![Diaplysimulator 6Normal](diaplysimulator-6normal.png) TBA  
+ ***Display Simulator 6: MM:SS.HH***
+
+ ![Displaysimulator 6 Laps](displaysimulator-6-laps.png)
+ ***Display Simulator 6: LL MM:SS***  
+ LL = Laps to go
+
+![Simulateddiaply 9](simulateddiaply-9.png)
+***Display Simulator 9: LLL MM:SS:HH***
+   
+<img width="300"  alt="image" src="https://github.com/user-attachments/assets/375c8625-0c2a-4d80-848a-c901f66a5cdf" />
+   
+
+ ***Sirrico Wind Gauge Simulator***
+
+   
+ TBA  
+
+ ***Mistral Wind Gauge Simulator***
 
 ## Some previous history of the app
 - There is now a **Cosmetic** state variable that if true, the app adds appropiate colon/s and dot between digits in the simulated display for the selected time format. 

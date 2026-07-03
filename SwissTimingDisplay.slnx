@@ -1,8 +1,11 @@
 <Solution>
   <Folder Name="/Solution Items/">
+    <File Path="diaplysimulator-6normal.png" />
     <File Path="displayscreen.png" />
+    <File Path="displaysimulator-6-laps.png" />
     <File Path="mistralwindgauge.png" />
     <File Path="README.md" />
+    <File Path="simulateddiaply-9.png" />
     <File Path="siriccowindgauge.png" />
     <File Path="splashscreen.png" />
   </Folder>
