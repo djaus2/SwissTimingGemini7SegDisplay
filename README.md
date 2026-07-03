@@ -163,12 +163,8 @@ See the end of this document. Unlike the Sirrico Wind Gauge, the Mistral one has
 <img width="300"  alt="image" src="https://github.com/user-attachments/assets/375c8625-0c2a-4d80-848a-c901f66a5cdf" />
    
 
- ***Sirrico Wind Gauge Simulator***
+ ***Wind Gauge Simulator***  
 
-   
- TBA  
-
- ***Mistral Wind Gauge Simulator***
 
 ## Some previous history of the app
 - There is now a **Cosmetic** state variable that if true, the app adds appropiate colon/s and dot between digits in the simulated display for the selected time format. 
