@@ -6,10 +6,12 @@
   <img width="200" alt="PXL_20260417_052157460" src="https://github.com/user-attachments/assets/1b730f14-3dcb-44e5-972a-ce1c5c4894e1" />
   </td>
   <td style="border: none; padding: 0;">
-<h2>Version: 2.5.0</h2>
+<h2>Version: 3.0.0</h2>
 </td>
 </tr>
 </table>
+
+> Nb: 3 July  26 Have merged Siricco branch back into main
 
 > **Disclaimer:** _This software is for demostration and testing purposes only and is not provided by Swiss Timing._  
 > _Swiss Timing Display and Wind Gauge Transmission Protocols as referenced are used though._
@@ -132,11 +134,23 @@ See the end of this document. Unlike the Sirrico Wind Gauge, the Mistral one has
 
  <img width="600"  alt="image" src="SwissTimingDisplay/docs/giphy.gif" />
 
+ ## The App
+
+![Splashscreen](splashscreen.png)
+ ***The Splash Screen***
+
+![Displayscreen](displayscreen.png)
+ ***The Display Screen***
+
+![Siriccowindgauge](siriccowindgauge.png)
+ ***The Sirrico Wind Gauge Screen***
+
+![Mistralwindgauge](mistralwindgauge.png)
+ ***The Mistral Wind Gauge Screen***
 
 
 
-
-## Latest
+## Some previous history of the app
 - There is now a **Cosmetic** state variable that if true, the app adds appropiate colon/s and dot between digits in the simulated display for the selected time format. 
   - If Receive port not connected then Cosmetic checkbox does not show.
     - 7 Segement display shows the Sent data (Time out) directly.

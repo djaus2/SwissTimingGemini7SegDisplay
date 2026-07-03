@@ -1,6 +1,10 @@
 <Solution>
   <Folder Name="/Solution Items/">
+    <File Path="displayscreen.png" />
+    <File Path="mistralwindgauge.png" />
     <File Path="README.md" />
+    <File Path="siriccowindgauge.png" />
+    <File Path="splashscreen.png" />
   </Folder>
   <Project Path="SwissTimingDisplay/SwissTimingDisplay.csproj" />
 </Solution>
