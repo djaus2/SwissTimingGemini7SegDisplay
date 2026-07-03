@@ -136,16 +136,16 @@ See the end of this document. Unlike the Sirrico Wind Gauge, the Mistral one has
 
  ## The App
 
-![Splashscreen](splashscreen.png)
+![Splashscreen](splashscreen.png)  
  ***The Splash Screen***
 
-![Displayscreen](displayscreen.png)
+![Displayscreen](displayscreen.png)  
  ***The Display Screen***
 
-![Siriccowindgauge](siriccowindgauge.png)
+![Siriccowindgauge](siriccowindgauge.png)  
  ***The Sirrico Wind Gauge Screen***
 
-![Mistralwindgauge](mistralwindgauge.png)
+![Mistralwindgauge](mistralwindgauge.png)  
  ***The Mistral Wind Gauge Screen***
 
 
