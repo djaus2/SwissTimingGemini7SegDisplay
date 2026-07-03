@@ -150,14 +150,14 @@ See the end of this document. Unlike the Sirrico Wind Gauge, the Mistral one has
 
  ## The Simulators
 
-![Diaplysimulator 6Normal](diaplysimulator-6normal.png) TBA  
- ***Display Simulator 6: MM:SS.HH***
+![Diaplysimulator 6Normal](diaplysimulator-6normal.png)   
+ ***Display Simulator for race time 6: MM:SS.HH***
 
- ![Displaysimulator 6 Laps](displaysimulator-6-laps.png)
+ ![Displaysimulator 6 Laps](displaysimulator-6-laps.png)  
  ***Display Simulator 6: LL MM:SS***  
  LL = Laps to go
 
-![Simulateddiaply 9](simulateddiaply-9.png)
+![Simulateddiaply 9](simulateddiaply-9.png)  
 ***Display Simulator 9: LLL MM:SS:HH***
    
 <img width="300"  alt="image" src="https://github.com/user-attachments/assets/375c8625-0c2a-4d80-848a-c901f66a5cdf" />
