@@ -1,6 +1,8 @@
 # Create a new Release, auto incremented
 param(
-    [string]$version
+    [string]$version,
+    [string]$appName = "",
+    [switch]$TriggerWorkflow
 )
 
 $versionFile = ".version"
@@ -77,6 +79,62 @@ while ($attempt -lt $maxAttempts) {
         Write-Host "✅ Release triggered for $version"
         # persist version only after successful push
         Set-Content $versionFile $version
+        
+        # Optionally trigger the release workflow with an app_name input so the workflow
+        # receives the chosen application name. This uses the GitHub CLI if available,
+        # otherwise falls back to the REST API (requires GITHUB_TOKEN or GITHUB_PAT env).
+        if ($TriggerWorkflow.IsPresent) {
+            if ([string]::IsNullOrWhiteSpace($appName)) {
+                Write-Host "TriggerWorkflow requested but no appName provided — skipping workflow_dispatch."
+            }
+            else {
+                $gh = Get-Command gh -ErrorAction SilentlyContinue
+                if ($gh) {
+                    Write-Host "Triggering workflow via gh CLI (release.yml) with app_name=$appName and ref=$version..."
+                    try {
+                        gh workflow run release.yml --ref $version -f app_name=$appName
+                        Write-Host "Workflow dispatch sent via gh CLI."
+                    }
+                    catch {
+                        Write-Warning "gh CLI failed to dispatch workflow: $_. Exception.Message"
+                    }
+                }
+                else {
+                    # Fallback to GitHub REST API
+                    Write-Host "gh CLI not found — attempting REST API dispatch."
+                    $remoteUrl = (git remote get-url origin) -as [string]
+                    if (-not $remoteUrl) {
+                        Write-Warning "Cannot determine origin remote URL — skipping REST dispatch."
+                    }
+                    else {
+                        # Parse owner/repo from remote URL
+                        if ($remoteUrl -match 'github.com[:/](?<owner>[^/]+)/(?<repo>[^/.]+)') {
+                            $owner = $Matches['owner']
+                            $repo = $Matches['repo']
+                            $apiUrl = "https://api.github.com/repos/$owner/$repo/actions/workflows/release.yml/dispatches"
+                            $token = $env:GITHUB_TOKEN
+                            if (-not $token) { $token = $env:GITHUB_PAT }
+                            if (-not $token) {
+                                Write-Warning "No GITHUB_TOKEN or GITHUB_PAT found in environment — cannot call REST API."
+                            }
+                            else {
+                                $payload = @{ ref = $version; inputs = @{ app_name = $appName } } | ConvertTo-Json
+                                try {
+                                    Invoke-RestMethod -Method Post -Uri $apiUrl -Headers @{ Authorization = "token $token"; 'User-Agent' = 'release.ps1' } -Body $payload -ContentType 'application/json'
+                                    Write-Host "Workflow dispatch sent via REST API."
+                                }
+                                catch {
+                                    Write-Warning "REST API dispatch failed: $_"
+                                }
+                            }
+                        }
+                        else {
+                            Write-Warning "Could not parse owner/repo from remote URL: $remoteUrl"
+                        }
+                    }
+                }
+            }
+        }
         exit 0
     }
 

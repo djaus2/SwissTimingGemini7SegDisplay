@@ -7,13 +7,23 @@ on:
       - main        # Run on every commit
     tags:
       - 'v*'        # Run on version tags (v1.0.0 etc.)
+  workflow_dispatch:
+    inputs:
+      app_name:
+        description: 'Optional application name to use for artifact/release'
+        required: false
+        default: 'SwissTimingDisplay'
 
 permissions:
   contents: write   # Required to create releases
 
+# APP_NAME is resolved per-run so it can be optionally overridden when using workflow_dispatch
+
 jobs:
   build:
     runs-on: windows-latest
+    env:
+      APP_NAME: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.app_name || 'SwissTimingDisplay' }}
 
     steps:
     - name: Checkout repository
@@ -40,18 +50,18 @@ jobs:
     - name: Zip published output
       shell: pwsh
       run: |
-        Compress-Archive -Path publish\* -DestinationPath SwissTimingDisplay-${{ github.ref_name }}.zip
+        Compress-Archive -Path publish\* -DestinationPath ${{ env.APP_NAME }}-${{ github.ref_name }}.zip
 
     - name: Upload published artifact
       uses: actions/upload-artifact@v4
       with:
-        name: SwissTimingDisplay-${{ github.ref_name }}
-        path: SwissTimingDisplay-${{ github.ref_name }}.zip
+        name: ${{ env.APP_NAME }}-${{ github.ref_name }}
+        path: ${{ env.APP_NAME }}-${{ github.ref_name }}.zip
 
     - name: Create GitHub Release
       if: startsWith(github.ref, 'refs/tags/')
       uses: softprops/action-gh-release@v1
       with:
-        files: SwissTimingDisplay-${{ github.ref_name }}.zip
+        files: ${{ env.APP_NAME }}-${{ github.ref_name }}.zip
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
