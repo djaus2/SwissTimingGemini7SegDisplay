@@ -40,7 +40,7 @@ namespace SwissTimingDisplay
         {
         }
 
-        public WindGaugeWindow(MainViewModel vm, MainWindow mainWindow = null)
+        public WindGaugeWindow(MainViewModel vm, MainWindow? mainWindow = null)
         {
             _vm = vm;
             _mainWindow = mainWindow;
@@ -619,8 +619,8 @@ namespace SwissTimingDisplay
         {
             if (cmd == TcpCommand.WindGauge_Acquisition_Duration)
             {
-                CharCommand[] cmdx;
-                byte[] cmdbytes = null;
+                CharCommand[]? cmdx;
+                byte[]? cmdbytes = null;
                 if (TcpCommandDefinitions.Commands.TryGetValue(cmd, out var charCommands))
                 {
                     cmdx = charCommands.ToArray<CharCommand>();
@@ -643,8 +643,8 @@ namespace SwissTimingDisplay
             }
             else
             {
-                CharCommand[] cmdx;
-                byte[] cmdbytes = null;
+                CharCommand[]? cmdx;
+                byte[]? cmdbytes = null;
                 if (TcpCommandDefinitions.Commands.TryGetValue(cmd, out var charCommands))
                 {
                     cmdx = charCommands.ToArray<CharCommand>();
@@ -680,8 +680,8 @@ namespace SwissTimingDisplay
                     _vm.WindGaugeCaptureCountdownPeriodSecsStr = "10";
                     return;
                 }
-                CharCommand[] cmdx;
-                byte[] cmdbytes = null;
+                CharCommand[]? cmdx;
+                byte[]? cmdbytes = null;
                 if (TcpCommandDefinitions.Commands.TryGetValue(cmd, out var charCommands))
                 {
                    cmdx = charCommands.ToArray<CharCommand>();

@@ -92,7 +92,7 @@ namespace SwissTimingDisplay.Services
             return Task.Run(() =>
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                try { port.Write(payload, 0, payload.Length); } catch (Exception ex) { }
+                try { port.Write(payload, 0, payload.Length); } catch (Exception) { }
             }, cancellationToken);
         }
 

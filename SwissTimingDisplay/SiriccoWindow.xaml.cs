@@ -178,7 +178,7 @@ namespace SwissTimingDisplay
         {
         }
 
-        public SiriccoWindow(MainViewModel vm, MainWindow mainWindow = null)
+        public SiriccoWindow(MainViewModel vm, MainWindow? mainWindow = null)
         {
             _vm = vm;
             _mainWindow = mainWindow;
@@ -186,8 +186,8 @@ namespace SwissTimingDisplay
             _vm.WindGaugeStop = WindGaugeStop;
             InitializeComponent();
             DataContext = _vm;
-            if(!string.IsNullOrEmpty(_vm?.SelectedReceivePortName))
-                _vm.ConnectReceive(_vm.SelectedReceivePortName);
+            if (!string.IsNullOrEmpty(_vm.SelectedReceivePortName))
+                _vm.ConnectReceive(_vm.SelectedReceivePortName!);
 
             _vm.PropertyChanged += VmOnPropertyChanged;
             _vm.SiriccoDataReceived += VmOnSiriccoDataReceived;
@@ -501,7 +501,8 @@ namespace SwissTimingDisplay
                 _vm.RecvStatus = $"Speed={speed:F1} {speedl:F3} (final,Total: {speedTally} over {count} measurements averaged over {_vm.WindGaugeCaptureCountdownPeriodSecs} sec )";
                 Debug.WriteLine($"{_vm.RecvStatus}");
                 WindGauge.WindSpeed = speed;
-                Siricco_StartButton(null, null);
+                // Call the start button handler to reset/stop; provide non-null args to satisfy nullable analysis
+                Siricco_StartButton(this, new RoutedEventArgs());
             }
             else
             {
@@ -853,8 +854,8 @@ namespace SwissTimingDisplay
             }
             else if (cmd == TcpCommand.WindGauge_Reset_Stop_Clear)
             {
-                CharCommand[] cmdx;
-                byte[] cmdbytes = null;
+                CharCommand[]? cmdx;
+                byte[]? cmdbytes = null;
                 if (TcpCommandDefinitions.Commands.TryGetValue(cmd, out var charCommands))
                 {
                     cmdx = charCommands.ToArray<CharCommand>();
@@ -877,7 +878,7 @@ namespace SwissTimingDisplay
             }
             else
             {
-                byte[] cmdbytes = null;
+                byte[]? cmdbytes = null;
                 string msg = " Q,001.59,1,00,M,";
                 var msgBytes = msg.Select(c => (byte)c).ToArray();
                 var csBytes = StringXor2ByteCheckSum.CalculateAsBytes(msg);

@@ -8,19 +8,26 @@ namespace SwissTimingDisplay.Converters
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value == null || parameter == null)
+            var valStr = System.Convert.ToString(value);
+            var paramStr = System.Convert.ToString(parameter);
+            if (valStr is null || paramStr is null)
             {
                 return false;
             }
 
-            return value.ToString().Equals(parameter.ToString(), StringComparison.OrdinalIgnoreCase);
+            return string.Equals(valStr, paramStr, StringComparison.OrdinalIgnoreCase);
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
             if (value is bool boolValue && boolValue && parameter != null)
             {
-                return Enum.Parse(targetType, parameter.ToString()!);
+                var paramStr = System.Convert.ToString(parameter);
+                if (paramStr is null)
+                {
+                    return Binding.DoNothing;
+                }
+                return Enum.Parse(targetType, paramStr);
             }
             return Binding.DoNothing;
         }

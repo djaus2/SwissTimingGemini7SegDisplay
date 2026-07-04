@@ -1009,7 +1009,7 @@ namespace SwissTimingDisplay.ViewModels
                 {
                     try
                     {
-                        ConnectReceive(SelectedReceivePortName);
+                        ConnectReceive(SelectedReceivePortName!);
                         RaiseCommandStates();
                         Status = $"Auto-connected to {SelectedSendPortName} (send) and {SelectedReceivePortName} (receive).";
                     }
@@ -1040,7 +1040,7 @@ namespace SwissTimingDisplay.ViewModels
                 {
                     try
                     {
-                        ConnectReceive(SelectedReceivePortName);
+                        ConnectReceive(SelectedReceivePortName!);
                         RaiseCommandStates();
                         Status = $"Auto-connected to {SelectedSendPortName} (send) and {SelectedReceivePortName} (receive).";
                     }

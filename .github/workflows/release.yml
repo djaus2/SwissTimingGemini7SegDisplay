@@ -1,0 +1,57 @@
+name: Build and Release WPF App
+
+on:
+  push:
+    branches:
+      - master
+      - main        # Run on every commit
+    tags:
+      - 'v*'        # Run on version tags (v1.0.0 etc.)
+
+permissions:
+  contents: write   # Required to create releases
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup .NET SDK
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '10.0.x'
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Publish WPF App
+      shell: pwsh
+      run: |
+        dotnet publish SwissTimingDisplay/SwissTimingDisplay.csproj `
+          -c Release `
+          -r win-x64 `
+          --self-contained true `
+          /p:PublishSingleFile=true `
+          -o publish
+
+    - name: Zip published output
+      shell: pwsh
+      run: |
+        Compress-Archive -Path publish\* -DestinationPath HelloWpfApp-${{ github.ref_name }}.zip
+
+    - name: Upload published artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: HelloWpfApp-${{ github.ref_name }}
+        path: HelloWpfApp-${{ github.ref_name }}.zip
+
+    - name: Create GitHub Release
+      if: startsWith(github.ref, 'refs/tags/')
+      uses: softprops/action-gh-release@v1
+      with:
+        files: HelloWpfApp-${{ github.ref_name }}.zip
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

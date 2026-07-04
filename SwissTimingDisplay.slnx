@@ -1,10 +1,15 @@
 <Solution>
+  <Folder Name="/.github/" />
+  <Folder Name="/.github/workflow/">
+    <File Path="releae.yml" />
+  </Folder>
   <Folder Name="/Solution Items/">
     <File Path="diaplysimulator-6normal.png" />
     <File Path="displayscreen.png" />
     <File Path="displaysimulator-6-laps.png" />
     <File Path="mistralwindgauge.png" />
     <File Path="README.md" />
+    <File Path="release.ps1" />
     <File Path="simulateddiaply-9.png" />
     <File Path="siriccowindgauge.png" />
     <File Path="splashscreen.png" />

@@ -18,7 +18,7 @@ namespace SwissTimingDisplay.ViewModels
         private CancellationTokenSource? _siriccoReceiveCts;
         private Task? _siriccoReceiveTask;
         private readonly StringBuilder _siriccoLineBuffer = new StringBuilder();
-        private DispatcherTimer? _simulatedSiriccoTimer;
+        // Simulated Siricco timer removed (unused)
         private readonly Random _simulatedRandom = new Random();
 
         public Action? WindGaugeStart;
