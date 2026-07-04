@@ -11,7 +11,8 @@
 </tr>
 </table>
 
-> Nb: 3 July  26 Have merged Siricco branch back into main
+> ***Nb:***  Have merged Siricco branch back into main  
+>  ***Also:*** There are now a self contained Release available.
 
 > **Disclaimer:** _This software is for demostration and testing purposes only and is not provided by Swiss Timing._  
 > _Swiss Timing Display and Wind Gauge Transmission Protocols as referenced are used though._
