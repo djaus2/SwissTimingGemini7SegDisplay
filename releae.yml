@@ -36,12 +36,12 @@ jobs:
           -o publish
 
     - name: Zip published output
-      run: Compress-Archive -Path publish\* -DestinationPath HelloWpfApp-${{ github.ref_name }}.zip
+      run: Compress-Archive -Path publish\* -DestinationPath SwissTimingDisplay-${{ github.ref_name }}.zip
 
     - name: Create GitHub Release
       if: startsWith(github.ref, 'refs/tags/')
       uses: softprops/action-gh-release@v1
       with:
-        files: HelloWpfApp-${{ github.ref_name }}.zip
+        files: SwissTimingDisplay-${{ github.ref_name }}.zip
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
