@@ -1,6 +1,7 @@
 <Solution>
   <Folder Name="/.github/" />
   <Folder Name="/.github/workflow/">
+    <File Path=".github/workflows/release.yml" />
     <File Path="releae.yml" />
   </Folder>
   <Folder Name="/Solution Items/">
