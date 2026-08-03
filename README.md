@@ -12,12 +12,13 @@
 </table>
 
 > ***Nb:***  Have merged Siricco branch back into main  
->  ***Also:*** There are now a self contained Release available.
-
-> **Disclaimer:** _This software is for demostration and testing purposes only and is not provided by Swiss Timing._  
-> _Swiss Timing Display and Wind Gauge Transmission Protocols as referenced are used though._
+> ***Also:*** There are now a self contained Release available.
+>
+> **Disclaimer:** *This software is for demostration and testing purposes only and is not provided by Swiss Timing.*  
+> *Swiss Timing Display and Wind Gauge Transmission Protocols as referenced are used though.*
 
 ## About
+
 This is a WPF app that can generate display timing messages for a Swiss Timing Gemini 6 Digit 7 segment display, functioning for example, as a running clock or elapsed race time for Athletics events. Messages are sent via the selected Serial-Send port.
 
 Times (wallclock or race running time) are also displayed in a simulated 6 x 7 Segement display in-app. When the Serial-Receive port is not connected, that display displays the transmitted time.
@@ -28,14 +29,14 @@ The app can also run in a mode where it can receive wind speed data from a Swiss
 
 ---
 
+> Latest: Can choose at the splash screen *(only)* whether the app uses the actual wind gauge or the simulator. Is persisted.
+
 ## The Equipment
 
 <img width="670" height="466" alt="image" src="https://github.com/user-attachments/assets/7127c5b8-eca1-4074-b8d7-c89a84dcb5c2" />  
 
-***6 and 9 digits Swiss Timing displays.***   
-_Whilst there is some implementation for the 9 digit display, only the 6 digit display is fully impelmeneted and tested\ here._
-
-
+***6 and 9 digits Swiss Timing displays.***
+*Whilst there is some implementation for the 9 digit display, only the 6 digit display is fully impelmeneted and tested\ here.*
 
 <table style="border-collapse: collapse; border: none;">
   <tr style="border: none;">
@@ -58,39 +59,46 @@ _Whilst there is some implementation for the 9 digit display, only the 6 digit d
   </tr>
 </table>  
 
-_Sirrico Wind Gauge has been tested whereas Mistral Wind Gauge is yet to be tested with teh software._
+*Sirrico Wind Gauge has been tested whereas Mistral Wind Gauge is yet to be tested with teh software.*
 
 ---
 
 ## Links
-
 
 ---
 
 ## Status
 
 ### With Hardware
->   As per [MVACDisplayandWindGaugeCabling](/SwissTimingDisplay/docs/MVACDisplayandWindGaugeCabling.pdf) diagram
+> As per [MVACDisplayandWindGaugeCabling](/SwissTimingDisplay/docs/MVACDisplayandWindGaugeCabling.pdf) diagram
+
+
 > - Display functionality has been successfully tested in the fieldwith a Gemini 6 Digit 7 Segment Display
+
 > - Wind Gauge has been successfully tested in the field with a Siricco Wind Gauge.
 > - Mistral Wind Gauge has not yet been tested in the field.
 
 ### With Simulator
-> All 3 simulators work OK :construction_worker:   
+> All 3 simulators work OK :construction_worker:
+
 
 Use a loopback cable between 2 ports on the same INT131 to test the app with the simulators.  
 Can use RS232 or RS422/485 ports on the INT131 (Have tested OK with both)
 
 ---
+
 ## Connectivity and Power
+
 ***The display is a data sink whereas the wind gauge is a data source.***  
-As per [MVACDisplayandWindGaugeCabling](/SwissTimingDisplay/docs/MVACDisplayandWindGaugeCabling.pdf) diagram 
+As per [MVACDisplayandWindGaugeCabling](/SwissTimingDisplay/docs/MVACDisplayandWindGaugeCabling.pdf) diagram
 There are 2 RS422/485 sockets either side of the finish line with male 7 pin Tuchel sockets.
+
 > - The display takes power from infield mains via a mains power cable.  
+
 > - The Sirrico Wind Gauge takes power from the INT131 via the RS422/485 port from Pin
 
 - NB There is a local issue (at MVAC) with inground wiring (under the finish line) in that only one of INT131 power pins (pins 1 & 2) on both RS422/485 ports is connected under the finish line.  
-  - Only the RS422/485 Pin 2 is connected from outside to inside whereas the wind gauge requires power from pin 1. 
+  - Only the RS422/485 Pin 2 is connected from outside to inside whereas the wind gauge requires power from pin 1.
   - A Special RS424/485 inline cable was developed to fix this which is connected betwenn the reel and the Sirrcco Wind gauge cable.
     - Connected pin 2 of the female to pin 1 of the male
     - Female end of this cable connects to the infield socket and the male end connects to the reel.
@@ -106,16 +114,16 @@ There are 2 RS422/485 sockets either side of the finish line with male 7 pin Tuc
 - The second 15 character command displays the event running time:  
   - Min Min : Sec Sec . Hundth Hundth  
 - The third 15 character command displays the wallclock time.  
-- _nnn is 3 characters for event number or placing but is ignored by 6 digit display._  
-- _The other 3 characters are spaces._
-
+- *nnn is 3 characters for event number or placing but is ignored by 6 digit display.*  
+- *The other 3 characters are spaces.*
 
 ### Sirrico Wind Gauge
+
 > Have implemented Gill WinSonic protocol for Siricco with simulator.
 
 6.2. Gill format – UV  <-- Sirrico Uses this mode
-In this mode, the output is given as signed (i.e., positive, or negative) speeds along the 
-‘U’ (= South – North) axis and the ‘V’ (= East – West) axis. 
+In this mode, the output is given as signed (i.e., positive, or negative) speeds along the
+‘U’ (= South – North) axis and the ‘V’ (= East – West) axis.
 
 <img width="700"  alt="639186122074625264" src = "img_639186122074625264.png" />
 
@@ -131,10 +139,9 @@ See the end of this document. Unlike the Sirrico Wind Gauge, the Mistral one has
 
  <img width="800"  alt="image" src="https://media.giphy.com/media/vkdTVE9bwFJqjR9y7t/giphy.gif" />
 
-
  <img width="600"  alt="image" src="SwissTimingDisplay/docs/giphy.gif" />
 
- ## The App
+## The App
 
 ![Splashscreen](splashscreen.png)  
  ***The Splash Screen***
@@ -148,10 +155,9 @@ See the end of this document. Unlike the Sirrico Wind Gauge, the Mistral one has
 ![Mistralwindgauge](mistralwindgauge.png)  
  ***The Mistral Wind Gauge Screen***
 
+## The Simulators
 
- ## The Simulators
-
-![Diaplysimulator 6Normal](diaplysimulator-6normal.png)   
+![Diaplysimulator 6Normal](diaplysimulator-6normal.png)
  ***Display Simulator for race time 6: MM:SS.HH***
 
  ![Displaysimulator 6 Laps](displaysimulator-6-laps.png)  
@@ -160,36 +166,35 @@ See the end of this document. Unlike the Sirrico Wind Gauge, the Mistral one has
 
 ![Simulateddiaply 9](simulateddiaply-9.png)  
 ***Display Simulator 9: LLL MM:SS:HH***
-   
+
 <img width="300"  alt="image" src="https://github.com/user-attachments/assets/375c8625-0c2a-4d80-848a-c901f66a5cdf" />
-   
 
  ***Wind Gauge Simulator***  
 
-
 ## Some previous history of the app
-- There is now a **Cosmetic** state variable that if true, the app adds appropiate colon/s and dot between digits in the simulated display for the selected time format. 
+- There is now a **Cosmetic** state variable that if true, the app adds appropiate colon/s and dot between digits in the simulated display for the selected time format.
+
   - If Receive port not connected then Cosmetic checkbox does not show.
     - 7 Segement display shows the Sent data (Time out) directly.
     - Colon/s and dot show as per the Sent Data format
   - If Receive port is connected then Cosmetic checkbox shows
-    - If not selected then no colons/dot show on the receive display. 
-      - HHMMSS/MMSSDD checkbox does not display. 
+    - If not selected then no colons/dot show on the receive display.
+      - HHMMSS/MMSSDD checkbox does not display.
     - If selected then HHMMSS/MMSSDD checkbox shows which determines the displayed time format:
       - HHMMSS/MMSSDD selection determines what separators show on the receive display.
-      - Note that selecting Wallclock triggers this to select HHMMSS. 
+      - Note that selecting Wallclock triggers this to select HHMMSS.
 - Selected ports are now persisted as well as other app settings
 - 3 + 6 Digit display now works.
-  - 3 left most digits can display Bib Number, Event No or Lap Count etc. 
+  - 3 left most digits can display Bib Number, Event No or Lap Count etc.
   - Note that the 3 digit display is not intended for use with the Gemini 6 Digit Gemini display.
 - Added [Lap]/[Continue] button that captures race elapsed time whilst clock continues in background. Can continue.
   - Also have lap up and down count options
 - If both persisted COM ports exist autoconnect.
 - Clear timing button added and resolved.
 - In 6 Digit Mode can display LLMMSS meaning lap as first 2 digits
-  - ***Nb:*** _(2Do)_ This works in simulator ~~but not in actual display~~
+  - ***Nb:*** *(2Do)* This works in simulator ~~but not in actual display~~
   - **Update** This should now work in Gemini display:
-  ```
+  ```text
   02  49 30 39 30 30 30 34 30 30 39 20 20 03  <- Sent/Recvd Bytes
   STX I  09    00    04    009      sp sp ETX <- Interpretation
   ```
@@ -205,7 +210,7 @@ See the end of this document. Unlike the Sirrico Wind Gauge, the Mistral one has
 - Spruced up the layout
   - And added Race distance selection which sets the laps to go for DownCount mode
   - And added Start at Finish option for DownCount mode which is set or cleared appropriately.
-    - If clear then first lap does not decrement the lap count as per 5K, 3K and 1500m where start is as 200m or 300m 
+    - If clear then first lap does not decrement the lap count as per 5K, 3K and 1500m where start is as 200m or 300m
     - For example, at start of 1500m is Laps set to 3 laps to go so and only decrements when leader passes start second time.
 - Wind Gauge
   - V1.4.1 Kill either Window by clicking on the Window X top right completely kills the app.
@@ -218,13 +223,15 @@ See the end of this document. Unlike the Sirrico Wind Gauge, the Mistral one has
   - 1.9.8: Preview of version 2.0.0 Splash sceen at app start and various settings are persisted including serial connections.
     - Next to test on actual Wind Gauge, next week.
   - 1.9.8.1: Spruced up Splash screen. Tidied up code.
-- 2.0.0: Completed Display fixes. 
+- 2.0.0: Completed Display fixes.
   - Wind Gauge waits test with actual Mistral Wind Gauge.
-- 2.0.1: Display Time displayed MM:SS:DD is not from timer 
+- 2.0.1: Display Time displayed MM:SS:DD is not from timer
     - but from difference between system tics at start and at end.
     - Much more accurate, not subject to latency of timer.
+
 >Nb: Re ticks resolution:
-```
+
+```text
 Is StopWatch time resolution normal be available on windows machines?
 Yes, Stopwatch.IsHighResolution is typically true on Windows machines. Windows has a high-resolution performance counter (QueryPerformanceCounter API) that Stopwatch uses by default.
 
@@ -240,6 +247,7 @@ The Stopwatch class handles this internally. You don't need to check IsHighResol
 
 Your current code is fine as-is:
 ```
+
 ```csharp
 var elapsedTicks = _raceStopwatch.ElapsedTicks - _startTicks;
 var elapsed = TimeSpan.FromTicks(elapsedTicks);
@@ -247,11 +255,14 @@ var elapsed = TimeSpan.FromTicks(elapsedTicks);
 ```
 
 ## Hint
+
 For testing using one INT31:
+
 - Connected INT131 to the PC USB port
-- Connected a standard null modem cable between the 2 INT131 RS232 (DB9) ports. 
+- Connected a standard null modem cable between the 2 INT131 RS232 (DB9) ports.
 
 ## Related Documents
+
 - [INT31 Manual](SwissTimingDisplay/docs/INT131.pdf)
 - [Gemini 6 Digit  7 Segment Display Manual](SwissTimingDisplay/docs/SwissTimingGeminiDisplay.pdf)
 - [MVAC Track Setup](SwissTimingDisplay/docs/MVACDisplayandWindGaugeCabling.pdf)
@@ -260,19 +271,17 @@ For testing using one INT31:
 
 ## The App
 
-
 <img width="1632" height="1210" alt="image" src="https://github.com/user-attachments/assets/e6c3addc-868c-45ad-afe9-b43f98196cb7" />  
 
-**_The app displaying sent wallclock time_** 
+**_The app displaying sent wallclock time_***The app displaying sent wallclock time*
 
 ## RollerMode Commands
+
 <img width="1584" height="918" alt="image" src="https://github.com/user-attachments/assets/283229b8-4c18-467b-b261-169f04f8c451" />
 
 ## Mistral Wind Gauge Commands
 
 <img width="1288" height="1286" alt="image" src="https://github.com/user-attachments/assets/aafbd4c7-fda9-4aa0-8a3b-3df035255282" />
-
-
 
 Also see [Models/CharCommand.cs](SwissTimingDisplay/Models/CharCommand.cs)
 

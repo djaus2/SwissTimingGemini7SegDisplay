@@ -19,6 +19,7 @@ namespace SwissTimingDisplay
     {
         private static WindGaugeWindow? _windGaugeWindow;
         private static SiriccoWindow? _siriccoWindow;
+        private static SiriccoWindowWG? _siriccoWindowWG;
         private readonly MainViewModel _vm;
 
         private readonly DispatcherTimer _raceTimer;
@@ -882,6 +883,12 @@ namespace SwissTimingDisplay
         }
         private void SiriccoButton_Click(object sender, RoutedEventArgs e)
         {
+            if (!Properties.Settings.Default.useSiriccoSimulator)
+            {
+                SiriccoWGButton_Click(sender, e);
+                return;
+            }
+
             // Set current window and save state
             _vm.CurrentWindow = MainViewModel.ActiveWindow.Siricco;
             _vm.ShowSiriccoWindow = true;
@@ -891,6 +898,20 @@ namespace SwissTimingDisplay
                 _siriccoWindow = new SiriccoWindow(_vm, this);
             }
             _siriccoWindow.Show();
+            this.Hide();
+        }
+
+        private void SiriccoWGButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Set current window and save state
+            _vm.CurrentWindow = MainViewModel.ActiveWindow.SiriccoWG;
+            _vm.ShowSiriccoWindow = true;
+
+            if (_siriccoWindowWG == null)
+            {
+                _siriccoWindowWG = new SiriccoWindowWG(_vm, this);
+            }
+            _siriccoWindowWG.Show();
             this.Hide();
         }
 
