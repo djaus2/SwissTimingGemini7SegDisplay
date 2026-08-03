@@ -16,6 +16,9 @@
 >
 > **Disclaimer:** *This software is for demostration and testing purposes only and is not provided by Swiss Timing.*  
 > *Swiss Timing Display and Wind Gauge Transmission Protocols as referenced are used though.*
+  
+> Latest: Can choose at the splash screen, _(only)_,  whether the app uses the actual wind gauge or the simulator. Is persisted.
+
 
 ## About
 
