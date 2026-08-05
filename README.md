@@ -16,10 +16,6 @@
 >
 > **Disclaimer:** *This software is for demostration and testing purposes only and is not provided by Swiss Timing.*  
 > *Swiss Timing Display and Wind Gauge Transmission Protocols as referenced are used though.*
->
-> Latest: Can choose at the splash screen, *(only)*,  whether the app uses the actual **Siricco** wind gauge or the simulator. Is persisted.  
-> Further: Actual and simulated Siricco pages have been merged.
-> Next: Create a "Sprint" page that can simultaneously handle wind gauge and a clock for 100/200m events. _(2Do)
 
 ## About
 
@@ -33,7 +29,11 @@ The app can also run in a mode where it can receive wind speed data from a Swiss
 
 ---
 
-> Latest: Can choose at the splash screen *(only)* whether the app uses the actual wind gauge or the simulator. Is persisted.
+> ***Latest:*** Can choose at the splash screen, *(only)*,  whether the app uses the actual **Siricco** wind gauge or the simulator. Is persisted.  
+> ***Further:*** Actual and Simulated Siricco pages have been merged.
+> ***Next:*** Create a **"Sprint"** page that can simultaneously handle wind gauge and a clock for 100/200m events. *(2Do)*
+
+---
 
 ## The Equipment
 
@@ -77,11 +77,13 @@ The app can also run in a mode where it can receive wind speed data from a Swiss
 
 > As per [MVACDisplayandWindGaugeCabling](/SwissTimingDisplay/docs/MVACDisplayandWindGaugeCabling.pdf) diagram
 >
-
-> - Display functionality has been successfully tested in the fieldwith a Gemini 6 Digit 7 Segment Display
-
 >
+> - Display functionality has been successfully tested in the fieldwith a Gemini 6 Digit 7 Segment Display
+>
+>
+
 > - Wind Gauge has been successfully tested in the field with a Siricco Wind Gauge.
+
 > - Mistral Wind Gauge has not yet been tested in the field.
 
 ### With Simulator
