@@ -365,3 +365,7 @@ FodyWeavers.xsd
 /SwissTimingDisplay/SiriccoWindow.xaml.cs
 /SwissTimingDisplay/SplashWindow - Copy.xaml
 /SwissTimingDisplay/SplashWindow - Copy.xaml.cs
+/SwissTimingDisplay/Controls/SiriccoWindGaugeControl.xaml
+/SwissTimingDisplay/Controls/SiriccoWindGaugeControl.xaml.cs
+/SwissTimingDisplay/SiriccoWindowControlled.xaml
+/SwissTimingDisplay/SiriccoWindowControlled.xaml.cs
