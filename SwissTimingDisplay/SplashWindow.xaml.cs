@@ -54,19 +54,6 @@ namespace SwissTimingDisplay
             this.Close();
         }
 
-        private void SiriccoWindGaugeButton_Click(object sender, RoutedEventArgs e)
-        {
-            // Get or create shared instance
-            _vm = MainViewModel.SharedInstance;
-
-            // Set active window and show WindGauge
-            _vm.CurrentWindow = MainViewModel.ActiveWindow.Siricco;
-            _vm.ShowWindGaugeWindow = true;
-
-            _siriccoWindow = new SiriccoWindowWG(_vm);
-            _siriccoWindow.Show();
-            this.Close();
-        }
 
         private void SiriccoWindGaugeButtonWG_Click(object sender, RoutedEventArgs e)
         {

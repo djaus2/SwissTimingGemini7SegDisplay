@@ -18,7 +18,7 @@ namespace SwissTimingDisplay
     public partial class MainWindow : Window
     {
         private static WindGaugeWindow? _windGaugeWindow;
-        private static SiriccoWindow? _siriccoWindow;
+        //private static SiriccoWindow? _siriccoWindow;
         private static SiriccoWindowWG? _siriccoWindowWG;
         private readonly MainViewModel _vm;
 
@@ -883,26 +883,26 @@ namespace SwissTimingDisplay
         }
         private void SiriccoButton_Click(object sender, RoutedEventArgs e)
         {
-            if (!Properties.Settings.Default.useSiriccoSimulator)
-            {
-                SiriccoWGButton_Click(sender, e);
-                return;
-            }
+        //    if (!Properties.Settings.Default.useSiriccoSimulator)
+        //    {
+        //        SiriccoWGButton_Click(sender, e);
+        //        return;
+        //    }
 
-            // Set current window and save state
-            _vm.CurrentWindow = MainViewModel.ActiveWindow.Siricco;
-            _vm.ShowSiriccoWindow = true;
+        //    // Set current window and save state
+        //    _vm.CurrentWindow = MainViewModel.ActiveWindow.Siricco;
+        //    _vm.ShowSiriccoWindow = true;
 
-            if (_siriccoWindow == null)
-            {
-                _siriccoWindow = new SiriccoWindow(_vm, this);
-            }
-            _siriccoWindow.Show();
-            this.Hide();
-        }
+        //    if (_siriccoWindow == null)
+        //    {
+        //        _siriccoWindow = new SiriccoWindow(_vm, this);
+        //    }
+        //    _siriccoWindow.Show();
+        //    this.Hide();
+        //}
 
-        private void SiriccoWGButton_Click(object sender, RoutedEventArgs e)
-        {
+        //private void SiriccoWGButton_Click(object sender, RoutedEventArgs e)
+        //{
             // Set current window and save state
             _vm.CurrentWindow = MainViewModel.ActiveWindow.SiriccoWG;
             _vm.ShowSiriccoWindow = true;
