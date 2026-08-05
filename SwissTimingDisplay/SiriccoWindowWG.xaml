@@ -158,21 +158,59 @@
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
-                <!--<TextBlock Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" Text="Simulator Send Port" FontWeight="Bold" FontStyle="Italic" Foreground="Purple" />
+                <TextBlock Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" Text="Send Port" FontWeight="Bold" FontStyle="Italic" Foreground="Purple">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Visibility" Value="Visible" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Source={x:Static properties:Settings.Default}, Path=useSiriccoSimulator}" Value="False">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
                 <ComboBox Grid.Row="0" Grid.Column="1"
                           Margin="12,0,0,0"
                           ItemsSource="{Binding SendPortsView}"
                           SelectedValuePath="PortName"
                           SelectedValue="{Binding SelectedSendPortName}"
-                          DisplayMemberPath="DisplayName"
-                          Style="{StaticResource ComboBoxStyle}" />-->
+                          DisplayMemberPath="DisplayName">
+                    <ComboBox.Style>
+                        <Style TargetType="ComboBox" BasedOn="{StaticResource ComboBoxStyle}">
+                            <Setter Property="Visibility" Value="Visible" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Source={x:Static properties:Settings.Default}, Path=useSiriccoSimulator}" Value="False">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ComboBox.Style>
+                </ComboBox>
+                <Button Grid.Row="0" Grid.Column="2" Grid.ColumnSpan="2" Margin="12,0,0,0" Padding="10,4" Command="{Binding SendConnectToggleCommand}" Click="Button_Click_1">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource SnazzyButtonStyle}">
+                            <Setter Property="Content" Value="Connect" />
+                            <Setter Property="Visibility" Value="Visible" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsConnected}" Value="True">
+                                    <Setter Property="Content" Value="Disconnect" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Source={x:Static properties:Settings.Default}, Path=useSiriccoSimulator}" Value="False">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+
 
                 <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,8,0,0" VerticalAlignment="Center" Text="Receive Port" FontWeight="Bold" FontStyle="Italic" Foreground="Purple">
                     <TextBlock.Style>
                         <Style TargetType="TextBlock">
                             <Setter Property="Visibility" Value="Visible" />
                             <Style.Triggers>
-                                <DataTrigger Binding="{Binding ShowSimulator}" Value="False">
+                                <DataTrigger Binding="{Binding Source={x:Static properties:Settings.Default}, Path=useSiriccoSimulator}" Value="True">
                                     <Setter Property="Visibility" Value="Collapsed" />
                                 </DataTrigger>
                             </Style.Triggers>
@@ -189,7 +227,7 @@
                         <Style TargetType="ComboBox" BasedOn="{StaticResource ComboBoxStyle}">
                             <Setter Property="Visibility" Value="Visible" />
                             <Style.Triggers>
-                                <DataTrigger Binding="{Binding Source={x:Static properties:Settings.Default}, Path=useSiriccoSimulator}" Value="False">
+                                <DataTrigger Binding="{Binding Source={x:Static properties:Settings.Default}, Path=useSiriccoSimulator}" Value="True">
                                     <Setter Property="Visibility" Value="Collapsed" />
                                 </DataTrigger>
                             </Style.Triggers>
@@ -197,18 +235,7 @@
                     </ComboBox.Style>
                 </ComboBox>
 
-                <!--<Button Grid.Row="0" Grid.Column="2" Grid.ColumnSpan="2" Margin="12,0,0,0" Padding="10,4" Command="{Binding SendConnectToggleCommand}">
-                    <Button.Style>
-                        <Style TargetType="Button" BasedOn="{StaticResource SnazzyButtonStyle}">
-                            <Setter Property="Content" Value="Connect" />
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding IsConnected}" Value="True">
-                                    <Setter Property="Content" Value="Disconnect" />
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Button.Style>
-                </Button>-->
+
 
                 <Button Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="2" Margin="12,8,0,0" Padding="10,4" Command="{Binding ReceiveConnectToggleCommand}" Height="26" VerticalAlignment="Top" Click="Button_Click">
                     <Button.Style>
@@ -219,7 +246,7 @@
                                 <DataTrigger Binding="{Binding IsReceiveConnected}" Value="True">
                                     <Setter Property="Content" Value="Disconnect" />
                                 </DataTrigger>
-                                <DataTrigger Binding="{Binding Source={x:Static properties:Settings.Default}, Path=useSiriccoSimulator}" Value="False">
+                                <DataTrigger Binding="{Binding Source={x:Static properties:Settings.Default}, Path=useSiriccoSimulator}" Value="True">
                                     <Setter Property="Visibility" Value="Collapsed" />
                                 </DataTrigger>
                             </Style.Triggers>

@@ -76,17 +76,10 @@ The app can also run in a mode where it can receive wind speed data from a Swiss
 ### With Hardware
 
 > As per [MVACDisplayandWindGaugeCabling](/SwissTimingDisplay/docs/MVACDisplayandWindGaugeCabling.pdf) diagram
->
->
 
-> - Display functionality has been successfully tested in the fieldwith a Gemini 6 Digit 7 Segment Display
-
->
->
->
-> - Wind Gauge has been successfully tested in the field with a Siricco Wind Gauge.
->
-> - Mistral Wind Gauge has not yet been tested in the field.
+- Display functionality has been successfully tested in the fieldwith a Gemini 6 Digit 7 Segment Display
+- Wind Gauge has been successfully tested in the field with a Siricco Wind Gauge.
+- Mistral Wind Gauge has not yet been tested in the field.
 
 ### With Simulator
 
@@ -237,8 +230,8 @@ See the end of this document. Unlike the Sirrico Wind Gauge, the Mistral one has
 - 2.0.0: Completed Display fixes.
   - Wind Gauge waits test with actual Mistral Wind Gauge.
 - 2.0.1: Display Time displayed MM:SS:DD is not from timer
-    - but from difference between system tics at start and at end.
-    - Much more accurate, not subject to latency of timer.
+  - but from difference between system tics at start and at end.
+  - Much more accurate, not subject to latency of timer.
 
 >Nb: Re ticks resolution:
 
@@ -280,7 +273,7 @@ For testing using one INT31:
 - [Mistral Wind Gauge Manual](https://www.swisstiming.com/fileadmin/Resources/Instruction_Manuals/3436.500.02_Mistral_User_Manual.pdf)
 - [Sirrico Wind Gauge](https://www.swisstiming.com/fileadmin/Resources/Instruction_Manuals/3436.501.02_Sirocco_User_Manual.pdf)
 
-## The App
+## The App2
 
 <img width="1632" height="1210" alt="image" src="https://github.com/user-attachments/assets/e6c3addc-868c-45ad-afe9-b43f98196cb7" />  
 
@@ -295,4 +288,3 @@ For testing using one INT31:
 <img width="1288" height="1286" alt="image" src="https://github.com/user-attachments/assets/aafbd4c7-fda9-4aa0-8a3b-3df035255282" />
 
 Also see [Models/CharCommand.cs](SwissTimingDisplay/Models/CharCommand.cs)
-
