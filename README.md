@@ -16,9 +16,9 @@
 >
 > **Disclaimer:** *This software is for demostration and testing purposes only and is not provided by Swiss Timing.*  
 > *Swiss Timing Display and Wind Gauge Transmission Protocols as referenced are used though.*
-  
-> Latest: Can choose at the splash screen, _(only)_,  whether the app uses the actual **Siricco** wind gauge or the simulator. Is persisted.
-
+>
+> Latest: Can choose at the splash screen, *(only)*,  whether the app uses the actual **Siricco** wind gauge or the simulator. Is persisted.  
+> Further: Actual and simulated Siricco pages have been merged.
 
 ## About
 
@@ -73,17 +73,17 @@ The app can also run in a mode where it can receive wind speed data from a Swiss
 ## Status
 
 ### With Hardware
+
 > As per [MVACDisplayandWindGaugeCabling](/SwissTimingDisplay/docs/MVACDisplayandWindGaugeCabling.pdf) diagram
-
-
+>
 > - Display functionality has been successfully tested in the fieldwith a Gemini 6 Digit 7 Segment Display
-
+>
 > - Wind Gauge has been successfully tested in the field with a Siricco Wind Gauge.
 > - Mistral Wind Gauge has not yet been tested in the field.
 
 ### With Simulator
-> All 3 simulators work OK :construction_worker:
 
+> All 3 simulators work OK :construction_worker:
 
 Use a loopback cable between 2 ports on the same INT131 to test the app with the simulators.  
 Can use RS232 or RS422/485 ports on the INT131 (Have tested OK with both)
@@ -97,7 +97,7 @@ As per [MVACDisplayandWindGaugeCabling](/SwissTimingDisplay/docs/MVACDisplayandW
 There are 2 RS422/485 sockets either side of the finish line with male 7 pin Tuchel sockets.
 
 > - The display takes power from infield mains via a mains power cable.  
-
+>
 > - The Sirrico Wind Gauge takes power from the INT131 via the RS422/485 port from Pin
 
 - NB There is a local issue (at MVAC) with inground wiring (under the finish line) in that only one of INT131 power pins (pins 1 & 2) on both RS422/485 ports is connected under the finish line.  
@@ -175,6 +175,7 @@ See the end of this document. Unlike the Sirrico Wind Gauge, the Mistral one has
  ***Wind Gauge Simulator***  
 
 ## Some previous history of the app
+
 - There is now a **Cosmetic** state variable that if true, the app adds appropiate colon/s and dot between digits in the simulated display for the selected time format.
 
   - If Receive port not connected then Cosmetic checkbox does not show.
@@ -276,7 +277,7 @@ For testing using one INT31:
 
 <img width="1632" height="1210" alt="image" src="https://github.com/user-attachments/assets/e6c3addc-868c-45ad-afe9-b43f98196cb7" />  
 
-**_The app displaying sent wallclock time_***The app displaying sent wallclock time*
+***The app displaying sent wallclock time****The app displaying sent wallclock time*
 
 ## RollerMode Commands
 
