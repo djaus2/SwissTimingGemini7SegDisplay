@@ -30,7 +30,7 @@ The app can also run in a mode where it can receive wind speed data from a Swiss
 ---
 
 > ***Latest:*** Can choose at the splash screen, *(only)*,  whether the app uses the actual **Siricco** wind gauge or the simulator. Is persisted.  
-> ***Further:*** Actual and Simulated Siricco pages have been merged.  _Nb: Receive port issue fixed._
+> ***Further:*** Actual and Simulated Siricco pages have been merged.  _Nb: Receive port issue fixed._  
 > ***And:*** Siricco UI and functionality now in reusable control.  
 > ***Next:*** Create a **"Sprint"** page that can simultaneously handle wind gauge and a clock for 100/200m events. *(2Do)*
 
