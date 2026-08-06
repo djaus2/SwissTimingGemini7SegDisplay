@@ -8,6 +8,7 @@
     xmlns:converters="clr-namespace:SwissTimingDisplay.Converters"
     xmlns:properties="clr-namespace:SwissTimingDisplay.Properties"
     xmlns:System="clr-namespace:System;assembly=mscorlib"
+    x:Name="controlRoot"
     mc:Ignorable="d"
     HorizontalAlignment="Stretch"
     VerticalAlignment="Stretch"
@@ -50,7 +51,10 @@
             <Setter Property="FontWeight" Value="SemiBold" />
         </Style>
     </UserControl.Resources>
-    <Grid x:Name="rootGrid" Margin="12">
+    <Grid x:Name="rootGrid" Margin="6">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
@@ -63,12 +67,12 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Center">
+        <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Center" Visibility="{Binding ControlVisibility, ElementName=controlRoot}" Margin="6">
             <Image Source="pack://application:,,,/docs/SwissTiming.png" Height="40" Stretch="Uniform" VerticalAlignment="Center" />
             <TextBlock FontSize="21" FontWeight="ExtraBlack"  FontStyle="Italic" Foreground="Black" VerticalAlignment="Center" Margin="8,0,0,0" ><Run Language="en-au" Text="WG Control SIRICCO "/></TextBlock>
         </StackPanel>
 
-        <GroupBox Grid.Row="2" Margin="0,12,0,0" Background="Beige">
+        <GroupBox Grid.Row="2" Margin="6" Background="Beige" Visibility="{Binding ControlVisibility, ElementName=controlRoot}">
             <GroupBox.Header>
                 <TextBlock FontWeight="Bold" FontStyle="Italic" Foreground="Blue" Text="Settings" />
             </GroupBox.Header>
@@ -144,7 +148,7 @@
             </Grid>
         </GroupBox>
 
-        <GroupBox Grid.Row="3" Margin="0,12,0,0" Background="Beige">
+        <GroupBox Grid.Row="3" Margin="6" Background="Beige" Visibility="{Binding ControlVisibility, ElementName=controlRoot}">
             <GroupBox.Header>
                 <TextBlock FontWeight="Bold" FontStyle="Italic" Foreground="Blue" Text="Serial" />
             </GroupBox.Header>
@@ -231,7 +235,7 @@
             </Grid>
         </GroupBox>
 
-        <Grid x:Name="commandsHostGrid" Grid.Row="4" Margin="0,12,0,0">
+        <Grid x:Name="commandsHostGrid" Grid.Row="4" Margin="6" Visibility="{Binding ControlVisibility, ElementName=controlRoot}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition x:Name="commandsColumn" Width="*" />
                 <ColumnDefinition x:Name="rightDisplayColumn" Width="0" />
@@ -257,7 +261,7 @@
                     <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,0,0,6" Text="TCP Command" FontWeight="Bold" FontStyle="Italic" Foreground="Purple" />
 
                     <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal" Margin="0,0,0,6">
-                        <Button x:Name="btnSiriccoStart" Margin="8,0,0,0" Padding="10,4" Content="      Start      " Click="Siricco_StartButton" Style="{StaticResource SnazzyButtonStyleGreen}" />
+                        <Button x:Name="btnSiriccoStart" Margin="8,0,0,0" Padding="10,4" Content="{Binding StartButtonContent, ElementName=controlRoot}" Click="Siricco_StartButton" Style="{StaticResource SnazzyButtonStyleGreen}" />
                         <Button x:Name="btnSendClear" Margin="12,0,0,0" Padding="10,4" Content="Send Stop and Clear" Click="SendClearButton_Click" Style="{StaticResource SnazzyButtonStyleRed}" />
                         <Button x:Name="btnResendLast" Margin="8,0,0,0" Padding="10,4" Content="Resend Last" Click="ResendLastButton_Click"  Style="{StaticResource SnazzyButtonStylePurple}" />
                         <CheckBox x:Name="cbDisplaySimulatorSpeed" Margin="12,0,0,0" VerticalAlignment="Center" IsChecked="{Binding DisplaySimulatorSpeed}">
@@ -370,20 +374,20 @@
             </Border>
         </Grid>
 
-        <Border x:Name="bottomSevenSegBorder" Grid.Row="5" Margin="0,12,0,0" BorderBrush="#FFCC0000" BorderThickness="3" CornerRadius="4" Background="Black" Padding="10" HorizontalAlignment="Left" Visibility="Visible">
+        <Border x:Name="bottomSevenSegBorder" Grid.Row="5" Margin="6" BorderBrush="#FFCC0000" BorderThickness="3" CornerRadius="4" Background="Black" Padding="10" HorizontalAlignment="Left" Visibility="Visible">
             <Viewbox x:Name="bottomSevenSegViewbox" Stretch="None" StretchDirection="Both" HorizontalAlignment="Left" VerticalAlignment="Center">
                 <Grid x:Name="bottomSevenSegContent">
                     <controls:FourDigitSevenSegmentDisplay TimeInput="{Binding WindGaugeDisplay}" NumDigits="4"  ShowDecimalDot="{Binding ShowDecimalDot}" />
                 </Grid>
             </Viewbox>
         </Border>
-        <Border x:Name="status1Border" Grid.Row="6" Margin="0,12,0,0" Padding="10" Background="#FFEFEFEF" CornerRadius="4">
+        <Border x:Name="status1Border" Grid.Row="6" Margin="6" Padding="10" Background="#FFEFEFEF" CornerRadius="4" Visibility="{Binding ControlVisibility, ElementName=controlRoot}">
             <TextBlock Text="{Binding SendStatus}" TextWrapping="Wrap" />
         </Border>
-        <Border x:Name="status2Border" Grid.Row="7" Margin="0,12,0,0" Padding="10" Background="#FFEFEFEF" CornerRadius="4">
+        <Border x:Name="status2Border" Grid.Row="7" Margin="6" Padding="10" Background="#FFEFEFEF" CornerRadius="4" Visibility="{Binding ControlVisibility, ElementName=controlRoot}">
             <TextBlock Text="{Binding RecvStatus}" TextWrapping="Wrap" />
         </Border>
-        <Border x:Name="statusBorder" Grid.Row="8" Margin="0,12,0,0" Padding="10" Background="#FFEFEFEF" CornerRadius="4">
+        <Border x:Name="statusBorder" Grid.Row="8" Margin="6" Padding="10" Background="#FFEFEFEF" CornerRadius="4" Visibility="{Binding ControlVisibility, ElementName=controlRoot}">
             <TextBlock Text="{Binding Status}" TextWrapping="Wrap" />
         </Border>
     </Grid>

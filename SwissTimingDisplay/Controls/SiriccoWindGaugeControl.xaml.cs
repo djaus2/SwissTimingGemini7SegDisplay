@@ -32,6 +32,46 @@ namespace SwissTimingDisplay.Controls
 
     public partial class SiriccoWindGaugeControl : UserControl
     {
+        public static readonly DependencyProperty ControlVisibilityProperty =
+            DependencyProperty.Register(
+                nameof(ControlVisibility),
+                typeof(Visibility),
+                typeof(SiriccoWindGaugeControl),
+                new PropertyMetadata(Visibility.Visible, OnControlVisibilityChanged));
+
+        public Visibility ControlVisibility
+        {
+            get => (Visibility)GetValue(ControlVisibilityProperty);
+            set => SetValue(ControlVisibilityProperty, value);
+        }
+
+        private static void OnControlVisibilityChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            var control = (SiriccoWindGaugeControl)d;
+            bool visible = (Visibility)e.NewValue == Visibility.Visible;
+            control.HorizontalAlignment = visible ? HorizontalAlignment.Stretch : HorizontalAlignment.Left;
+            control.VerticalAlignment = visible ? VerticalAlignment.Stretch : VerticalAlignment.Top;
+            control.rootGrid.RowDefinitions[5].Height = visible ? new GridLength(1, GridUnitType.Star) : GridLength.Auto;
+        }
+
+        public static readonly DependencyProperty StartButtonContentProperty =
+            DependencyProperty.Register(
+                nameof(StartButtonContent),
+                typeof(string),
+                typeof(SiriccoWindGaugeControl),
+                new PropertyMetadata("      Start      "));
+
+        public string StartButtonContent
+        {
+            get => (string)GetValue(StartButtonContentProperty);
+            set => SetValue(StartButtonContentProperty, value);
+        }
+
+        public void ToggleStart()
+        {
+            Siricco_StartButton(this, new RoutedEventArgs());
+        }
+
         private MainWindow? _mainWindow;
         private readonly MainViewModel _vm;
 
@@ -633,18 +673,13 @@ namespace SwissTimingDisplay.Controls
 
         private void UpdateSiriccoStartButtonContent()
         {
-            if (btnSiriccoStart is null)
-            {
-                return;
-            }
-
             if (_SiriccoIsRunning)
             {
-                btnSiriccoStart.Content = "Stop";
+                StartButtonContent = "      Stop      ";
                 return;
             }
 
-            btnSiriccoStart.Content = _SiriccoHasStartedSinceReset ? "Reset" : "Start";
+            StartButtonContent = _SiriccoHasStartedSinceReset ? "      Reset      " : "      Start      ";
         }
 
         private void UpdateLapContinueButton()
