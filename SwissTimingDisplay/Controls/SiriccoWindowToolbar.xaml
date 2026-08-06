@@ -1,0 +1,51 @@
+<UserControl x:Class="SwissTimingDisplay.Controls.SiriccoWindowToolbar"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:properties="clr-namespace:SwissTimingDisplay.Properties">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+        <Style x:Key="ComboBoxStyle" TargetType="ComboBox">
+            <Setter Property="Foreground" Value="DarkGreen" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="MinWidth" Value="120" />
+            <Setter Property="HorizontalAlignment" Value="Left" />
+        </Style>
+    </UserControl.Resources>
+    <StackPanel Orientation="Horizontal">
+        <Button x:Name="startButton" Content="{Binding StartButtonContent}" Click="StartButton_Click" Padding="10,4" Margin="0,0,6,0" Style="{StaticResource SnazzyButtonStyleGreen}" />
+        <Border BorderBrush="Gray" BorderThickness="1" CornerRadius="4" Padding="4" Margin="0,0,6,0" Background="Beige">
+            <StackPanel Orientation="Horizontal">
+                <CheckBox x:Name="showSetup" IsChecked="{Binding Source={x:Static properties:Settings.Default}, Path=ShowSetup, Mode=TwoWay}" VerticalAlignment="Center" Margin="0,0,6,0" Padding="6,2">
+                    <TextBlock FontWeight="Bold" FontStyle="Italic" Text="Setup" />
+                </CheckBox>
+                <StackPanel Orientation="Horizontal" Visibility="{Binding IsChecked, ElementName=showSetup, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <Button x:Name="toggleControls" Click="ToggleControls_Click" Padding="10,4" Margin="0,0,6,0" Style="{StaticResource SnazzyButtonStyle}">
+                        <Button.Content>
+                            <TextBlock FontWeight="Bold" FontStyle="Italic">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Text" Value="Show Controls" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding ControlVisibility}" Value="Visible">
+                                                <Setter Property="Text" Value="Hide Controls" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </Button.Content>
+                    </Button>
+                    <TextBlock Text="Receive Port" VerticalAlignment="Center" FontWeight="Bold" FontStyle="Italic" Foreground="Purple" Margin="0,0,6,0" />
+                    <ComboBox x:Name="receivePortCombo" Width="120" VerticalAlignment="Center" Style="{StaticResource ComboBoxStyle}" ItemsSource="{Binding DataContext.ReceivePortsView}" SelectedValuePath="PortName" SelectedValue="{Binding DataContext.SelectedReceivePortName, Mode=TwoWay}" DisplayMemberPath="DisplayName" Margin="0,0,6,0" />
+                    <Button x:Name="receiveConnectButton" Margin="0,0,6,0" DataContext="{Binding DataContext}" Style="{StaticResource SnazzyButtonStyleConnectToggle}" Command="{Binding ReceiveConnectToggleCommand}" />
+                    <Button x:Name="refreshPortsButton" Padding="10,4" Style="{StaticResource SnazzyButtonStylePurple}" Command="{Binding DataContext.RefreshPortsCommand}">
+                        <Button.Content>
+                            <TextBlock FontWeight="Bold" FontStyle="Italic" Text="Refresh Ports" />
+                        </Button.Content>
+                    </Button>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+        <Button x:Name="exitButton" Content="Exit" Click="ExitButton_Click" Padding="10,4" Style="{StaticResource SnazzyButtonStyleRed}" />
+    </StackPanel>
+</UserControl>

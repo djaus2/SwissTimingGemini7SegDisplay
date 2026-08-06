@@ -76,6 +76,7 @@ namespace SwissTimingDisplay.Controls
 
         private MainWindow? _mainWindow;
         private readonly MainViewModel _vm;
+        public MainViewModel ViewModel => _vm;
 
         private readonly DispatcherTimer _WindGaugeTimer;
         private readonly Stopwatch _raceStopwatch = new Stopwatch();
