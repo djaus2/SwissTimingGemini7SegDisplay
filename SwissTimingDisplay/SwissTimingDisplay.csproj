@@ -10,26 +10,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Controls\SiriccoWindGaugeControl.xaml.cs" />
-    <Compile Remove="SiriccoWindowControlled.xaml.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <None Remove="docs\mistralwindgauge.png" />
     <None Remove="docs\siriccoWindGauge2.png" />
     <None Remove="docs\SwissTiming.png" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Page Remove="Controls\SiriccoWindGaugeControl.xaml" />
-    <Page Remove="SiriccoWindowControlled.xaml" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="Controls\SiriccoWindGaugeControl.xaml" />
-    <None Include="Controls\SiriccoWindGaugeControl.xaml.cs" />
-    <None Include="SiriccoWindowControlled.xaml" />
-    <None Include="SiriccoWindowControlled.xaml.cs" />
   </ItemGroup>
 
 

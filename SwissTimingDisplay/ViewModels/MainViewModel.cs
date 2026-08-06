@@ -72,8 +72,8 @@ namespace SwissTimingDisplay.ViewModels
             Display,
             WindGauge,
             Siricco,
-            SiriccoWG//,
-            ////SiriccoWindowControlled     
+            SiriccoWG,
+            SiriccoWindowControlled     
         }
 
         private ActiveWindow _activeWindow = ActiveWindow.None;
@@ -1159,6 +1159,13 @@ namespace SwissTimingDisplay.ViewModels
             else if (CurrentWindow == ActiveWindow.SiriccoWG)
             {
                 Debug.WriteLine("Using Siricco (WG) line-based receive loop");
+                ConnectReceiveSiricco(portName, baudRate);
+                return;
+            }
+
+            else if (CurrentWindow == ActiveWindow.SiriccoWindowControlled)
+            {
+                Debug.WriteLine("Using Siricco (Controlled) line-based receive loop");
                 ConnectReceiveSiricco(portName, baudRate);
                 return;
             }

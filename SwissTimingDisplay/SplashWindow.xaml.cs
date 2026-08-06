@@ -8,9 +8,7 @@ namespace SwissTimingDisplay
         private static MainWindow? _mainWindow;
         private static WindGaugeWindow? _windGaugeWindow;
         private static SiriccoWindowWG? _siriccoWindow;
-        /// <summary>
-        /// private static SiriccoWindowControlled? _siriccoControlledWindow;
-        /// </summary>
+        private static SiriccoWindowControlled? _siriccoControlledWindow;
         private MainViewModel? _vm;
 
         public bool useSiriccoSimulator
@@ -72,19 +70,19 @@ namespace SwissTimingDisplay
             this.Close();
         }
 
-        //private void SiriccoWindGaugeButtonControlled_Click(object sender, RoutedEventArgs e)
-        //{
-        //    // Get or create shared instance
-        //    _vm = MainViewModel.SharedInstance;
+        private void SiriccoWindGaugeButtonControlled_Click(object sender, RoutedEventArgs e)
+        {
+            // Get or create shared instance
+            _vm = MainViewModel.SharedInstance;
 
-        //    // Set active window and show WindGauge
-        //    _vm.CurrentWindow = MainViewModel.ActiveWindow.SiriccoWindowControlled;
-        //    _vm.ShowWindGaugeWindow = true;
+            // Set active window and show WindGauge
+            _vm.CurrentWindow = MainViewModel.ActiveWindow.SiriccoWindowControlled;
+            _vm.ShowWindGaugeWindow = true;
 
-        //    _siriccoControlledWindow = new SiriccoWindowControlled(_vm);
-        //    _siriccoControlledWindow.Show();
-        //    this.Close();
-        //}
+            _siriccoControlledWindow = new SiriccoWindowControlled(_vm);
+            _siriccoControlledWindow.Show();
+            this.Close();
+        }
 
         private void ExitButton_Click(object sender, RoutedEventArgs e)
         {

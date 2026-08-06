@@ -205,35 +205,14 @@
                 </Button>
 
 
-                <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,8,0,0" VerticalAlignment="Center" Text="Receive Port" FontWeight="Bold" FontStyle="Italic" Foreground="Purple">
-                    <TextBlock.Style>
-                        <Style TargetType="TextBlock">
-                            <Setter Property="Visibility" Value="Visible" />
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding Source={x:Static properties:Settings.Default}, Path=useSiriccoSimulator}" Value="True">
-                                    <Setter Property="Visibility" Value="Collapsed" />
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </TextBlock.Style>
-                </TextBlock>
+                <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,8,0,0" VerticalAlignment="Center" Text="Receive Port" FontWeight="Bold" FontStyle="Italic" Foreground="Purple" />
                 <ComboBox Grid.Row="1" Grid.Column="1"
                           Margin="12,8,0,0"
                           ItemsSource="{Binding ReceivePortsView}"
                           SelectedValuePath="PortName"
                           SelectedValue="{Binding SelectedReceivePortName}"
-                          DisplayMemberPath="DisplayName">
-                    <ComboBox.Style>
-                        <Style TargetType="ComboBox" BasedOn="{StaticResource ComboBoxStyle}">
-                            <Setter Property="Visibility" Value="Visible" />
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding Source={x:Static properties:Settings.Default}, Path=useSiriccoSimulator}" Value="True">
-                                    <Setter Property="Visibility" Value="Collapsed" />
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </ComboBox.Style>
-                </ComboBox>
+                          DisplayMemberPath="DisplayName"
+                          Style="{StaticResource ComboBoxStyle}" />
 
 
 
@@ -245,9 +224,6 @@
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding IsReceiveConnected}" Value="True">
                                     <Setter Property="Content" Value="Disconnect" />
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding Source={x:Static properties:Settings.Default}, Path=useSiriccoSimulator}" Value="True">
-                                    <Setter Property="Visibility" Value="Collapsed" />
                                 </DataTrigger>
                             </Style.Triggers>
                         </Style>

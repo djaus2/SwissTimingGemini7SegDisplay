@@ -9,7 +9,9 @@
     xmlns:properties="clr-namespace:SwissTimingDisplay.Properties"
     xmlns:System="clr-namespace:System;assembly=mscorlib"
     mc:Ignorable="d"
-    Height="466" Width="775" Unloaded="SiriccoWindGaugeControl_Unloaded"
+    HorizontalAlignment="Stretch"
+    VerticalAlignment="Stretch"
+    Unloaded="SiriccoWindGaugeControl_Unloaded"
     Background="#E8F5E9">
     <UserControl.Resources>
         <ObjectDataProvider x:Key="SiriccoMessageModesEnum" MethodName="GetValues" ObjectType="{x:Type System:Enum}">
@@ -63,7 +65,7 @@
 
         <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Center">
             <Image Source="pack://application:,,,/docs/SwissTiming.png" Height="40" Stretch="Uniform" VerticalAlignment="Center" />
-            <TextBlock FontSize="21" FontWeight="ExtraBlack"  FontStyle="Italic" Foreground="Black" VerticalAlignment="Center" Margin="8,0,0,0" ><Run Language="en-au" Text="WG SIRICCO "/></TextBlock>
+            <TextBlock FontSize="21" FontWeight="ExtraBlack"  FontStyle="Italic" Foreground="Black" VerticalAlignment="Center" Margin="8,0,0,0" ><Run Language="en-au" Text="WG Control SIRICCO "/></TextBlock>
         </StackPanel>
 
         <GroupBox Grid.Row="2" Margin="0,12,0,0" Background="Beige">
@@ -98,7 +100,7 @@
                         <Style TargetType="CheckBox">
                             <Setter Property="Visibility" Value="Visible" />
                             <Style.Triggers>
-                                <DataTrigger Binding="{Binding Source={x:Static properties:Settings.Default}, Path=useSiriccoSimulator}" Value="True">
+                                <DataTrigger Binding="{Binding Source={x:Static properties:Settings.Default}, Path=useSiriccoSimulator}" Value="False">
                                     <Setter Property="Visibility" Value="Collapsed" />
                                 </DataTrigger>
                             </Style.Triggers>
@@ -158,57 +160,60 @@
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
-                <!--<TextBlock Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" Text="Simulator Send Port" FontWeight="Bold" FontStyle="Italic" Foreground="Purple" />
-                <ComboBox Grid.Row="0" Grid.Column="1"
-                          Margin="12,0,0,0"
-                          ItemsSource="{Binding SendPortsView}"
-                          SelectedValuePath="PortName"
-                          SelectedValue="{Binding SelectedSendPortName}"
-                          DisplayMemberPath="DisplayName"
-                          Style="{StaticResource ComboBoxStyle}" />-->
-
-                <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,8,0,0" VerticalAlignment="Center" Text="Receive Port" FontWeight="Bold" FontStyle="Italic" Foreground="Purple">
+                <TextBlock Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" Text="Send Port" FontWeight="Bold" FontStyle="Italic" Foreground="Purple">
                     <TextBlock.Style>
                         <Style TargetType="TextBlock">
                             <Setter Property="Visibility" Value="Visible" />
                             <Style.Triggers>
-                                <DataTrigger Binding="{Binding Source={x:Static properties:Settings.Default}, Path=useSiriccoSimulator}" Value="True">
+                                <DataTrigger Binding="{Binding Source={x:Static properties:Settings.Default}, Path=useSiriccoSimulator}" Value="False">
                                     <Setter Property="Visibility" Value="Collapsed" />
                                 </DataTrigger>
                             </Style.Triggers>
                         </Style>
                     </TextBlock.Style>
                 </TextBlock>
-                <ComboBox Grid.Row="1" Grid.Column="1"
-                          Margin="12,8,0,0"
-                          ItemsSource="{Binding ReceivePortsView}"
+                <ComboBox Grid.Row="0" Grid.Column="1"
+                          Margin="12,0,0,0"
+                          ItemsSource="{Binding SendPortsView}"
                           SelectedValuePath="PortName"
-                          SelectedValue="{Binding SelectedReceivePortName}"
+                          SelectedValue="{Binding SelectedSendPortName}"
                           DisplayMemberPath="DisplayName">
                     <ComboBox.Style>
                         <Style TargetType="ComboBox" BasedOn="{StaticResource ComboBoxStyle}">
                             <Setter Property="Visibility" Value="Visible" />
                             <Style.Triggers>
-                                <DataTrigger Binding="{Binding Source={x:Static properties:Settings.Default}, Path=useSiriccoSimulator}" Value="True">
+                                <DataTrigger Binding="{Binding Source={x:Static properties:Settings.Default}, Path=useSiriccoSimulator}" Value="False">
                                     <Setter Property="Visibility" Value="Collapsed" />
                                 </DataTrigger>
                             </Style.Triggers>
                         </Style>
                     </ComboBox.Style>
                 </ComboBox>
-
-                <!--<Button Grid.Row="0" Grid.Column="2" Grid.ColumnSpan="2" Margin="12,0,0,0" Padding="10,4" Command="{Binding SendConnectToggleCommand}">
+                <Button Grid.Row="0" Grid.Column="2" Grid.ColumnSpan="2" Margin="12,0,0,0" Padding="10,4" Command="{Binding SendConnectToggleCommand}" Click="Button_Click_1">
                     <Button.Style>
                         <Style TargetType="Button" BasedOn="{StaticResource SnazzyButtonStyle}">
                             <Setter Property="Content" Value="Connect" />
+                            <Setter Property="Visibility" Value="Visible" />
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding IsConnected}" Value="True">
                                     <Setter Property="Content" Value="Disconnect" />
                                 </DataTrigger>
+                                <DataTrigger Binding="{Binding Source={x:Static properties:Settings.Default}, Path=useSiriccoSimulator}" Value="False">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                </DataTrigger>
                             </Style.Triggers>
                         </Style>
                     </Button.Style>
-                </Button>-->
+                </Button>
+
+                <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,8,0,0" VerticalAlignment="Center" Text="Receive Port" FontWeight="Bold" FontStyle="Italic" Foreground="Purple" />
+                <ComboBox Grid.Row="1" Grid.Column="1"
+                          Margin="12,8,0,0"
+                          ItemsSource="{Binding ReceivePortsView}"
+                          SelectedValuePath="PortName"
+                          SelectedValue="{Binding SelectedReceivePortName}"
+                          DisplayMemberPath="DisplayName"
+                          Style="{StaticResource ComboBoxStyle}" />
 
                 <Button Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="2" Margin="12,8,0,0" Padding="10,4" Command="{Binding ReceiveConnectToggleCommand}" Height="26" VerticalAlignment="Top" Click="Button_Click">
                     <Button.Style>
@@ -218,9 +223,6 @@
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding IsReceiveConnected}" Value="True">
                                     <Setter Property="Content" Value="Disconnect" />
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding Source={x:Static properties:Settings.Default}, Path=useSiriccoSimulator}" Value="True">
-                                    <Setter Property="Visibility" Value="Collapsed" />
                                 </DataTrigger>
                             </Style.Triggers>
                         </Style>

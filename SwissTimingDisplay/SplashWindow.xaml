@@ -94,7 +94,7 @@
                         Foreground="White"
                         BorderThickness="0"
                         Cursor="Hand"
-                        Click="SiriccoWindGaugeButtonWG_Click"/>
+                        Click="SiriccoWindGaugeButtonControlled_Click"/>
 
                 <Button Name="WindGaugeButton"
                         Content="Mistral Wind Gauge"
