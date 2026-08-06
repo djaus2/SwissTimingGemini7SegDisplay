@@ -94,7 +94,7 @@
                         <TextBlock FontWeight="Bold" FontStyle="Italic" Foreground="Purple" Text="Only Prolific (PL*)" />
                     </CheckBox.Content>
                 </CheckBox>
-                <Button Grid.Column="1" Margin="12,0,0,0" Padding="10,4" Command="{Binding RefreshPortsCommand}" Style="{StaticResource SnazzyButtonStyle}">
+                <Button Grid.Column="1" Margin="12,0,0,0" Padding="10,4" Command="{Binding RefreshPortsCommand}" Style="{StaticResource SnazzyButtonStylePurple}">
                     <Button.Content>
                         <TextBlock FontWeight="Bold" FontStyle="Italic" Text="Refresh Ports" />
                     </Button.Content>
@@ -219,19 +219,7 @@
                           DisplayMemberPath="DisplayName"
                           Style="{StaticResource ComboBoxStyle}" />
 
-                <Button Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="2" Margin="12,8,0,0" Padding="10,4" Command="{Binding ReceiveConnectToggleCommand}" Height="26" VerticalAlignment="Top" Click="Button_Click">
-                    <Button.Style>
-                        <Style TargetType="Button" BasedOn="{StaticResource SnazzyButtonStyle}">
-                            <Setter Property="Content" Value="Connect" />
-                            <Setter Property="Visibility" Value="Visible" />
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding IsReceiveConnected}" Value="True">
-                                    <Setter Property="Content" Value="Disconnect" />
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Button.Style>
-                </Button>
+                <Button Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="2" Margin="12,8,0,0" Command="{Binding ReceiveConnectToggleCommand}" Height="26" VerticalAlignment="Top" Click="Button_Click" Style="{StaticResource SnazzyButtonStyleConnectToggle}" />
             </Grid>
         </GroupBox>
 

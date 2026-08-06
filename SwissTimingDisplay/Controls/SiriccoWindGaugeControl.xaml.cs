@@ -1,4 +1,5 @@
 using SwissTimingDisplay;
+using SwissTimingDisplay.Properties;
 using SwissTimingDisplay.Models;
 using SwissTimingDisplay.ViewModels;
 using System;
@@ -37,7 +38,7 @@ namespace SwissTimingDisplay.Controls
                 nameof(ControlVisibility),
                 typeof(Visibility),
                 typeof(SiriccoWindGaugeControl),
-                new PropertyMetadata(Visibility.Visible, OnControlVisibilityChanged));
+                new PropertyMetadata(Visibility.Collapsed, OnControlVisibilityChanged));
 
         public Visibility ControlVisibility
         {
@@ -52,6 +53,7 @@ namespace SwissTimingDisplay.Controls
             control.HorizontalAlignment = visible ? HorizontalAlignment.Stretch : HorizontalAlignment.Left;
             control.VerticalAlignment = visible ? VerticalAlignment.Stretch : VerticalAlignment.Top;
             control.rootGrid.RowDefinitions[5].Height = visible ? new GridLength(1, GridUnitType.Star) : GridLength.Auto;
+            Settings.Default.ShowSiriccoControls = visible;
         }
 
         public static readonly DependencyProperty StartButtonContentProperty =

@@ -11,6 +11,8 @@ namespace SwissTimingDisplay.Properties
         public static Settings Default => _default.Value;
 
         public bool useSiriccoSimulator { get; set; }
+        public bool ShowSetup { get; set; }
+        public bool ShowSiriccoControls { get; set; }
 
         private static string SettingsPath => Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),

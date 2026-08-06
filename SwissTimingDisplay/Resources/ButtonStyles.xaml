@@ -154,4 +154,36 @@
         </Style.Triggers>
     </Style>
 
+    <Style x:Key="SnazzyButtonStyleConnectToggle" TargetType="Button" BasedOn="{StaticResource SnazzyButtonStyle}">
+        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="FontStyle" Value="Italic" />
+        <Setter Property="Padding" Value="10,4" />
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding IsReceiveConnected}" Value="False">
+                <Setter Property="Content" Value="Connect" />
+                <Setter Property="Background">
+                    <Setter.Value>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                            <GradientStop Color="#2ECC71" Offset="0" />
+                            <GradientStop Color="#27AE60" Offset="1" />
+                        </LinearGradientBrush>
+                    </Setter.Value>
+                </Setter>
+                <Setter Property="BorderBrush" Value="#1E8449" />
+            </DataTrigger>
+            <DataTrigger Binding="{Binding IsReceiveConnected}" Value="True">
+                <Setter Property="Content" Value="Disconnect" />
+                <Setter Property="Background">
+                    <Setter.Value>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                            <GradientStop Color="#E74C3C" Offset="0" />
+                            <GradientStop Color="#C0392B" Offset="1" />
+                        </LinearGradientBrush>
+                    </Setter.Value>
+                </Setter>
+                <Setter Property="BorderBrush" Value="#922B21" />
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
 </ResourceDictionary>
