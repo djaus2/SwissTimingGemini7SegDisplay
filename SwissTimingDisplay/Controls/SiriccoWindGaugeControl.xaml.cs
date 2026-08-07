@@ -75,10 +75,10 @@ namespace SwissTimingDisplay.Controls
         }
 
         private MainWindow? _mainWindow;
-        private readonly MainViewModel _vm;
-        public MainViewModel ViewModel => _vm;
+        private /*readonly*/ MainViewModel? _vm;
+        public MainViewModel? ViewModel => _vm;
 
-        private readonly DispatcherTimer _WindGaugeTimer;
+        private /*readonly*/ DispatcherTimer? _WindGaugeTimer;
         private readonly Stopwatch _raceStopwatch = new Stopwatch();
         private bool _SiriccoIsRunning = false;
         private TimeSpan _raceElapsed = TimeSpan.Zero;
@@ -218,11 +218,12 @@ namespace SwissTimingDisplay.Controls
             }
         }
 
-        public SiriccoWindGaugeControl() : this(MainViewModel.SharedInstance, null)
+        public SiriccoWindGaugeControl()//: this(MainViewModel.SharedInstance, null)
         {
         }
 
-        public SiriccoWindGaugeControl(MainViewModel vm, MainWindow? mainWindow = null)
+
+        public void SetUp(MainViewModel vm, MainWindow? mainWindow = null)
         {
             _vm = vm;
             _mainWindow = mainWindow;
@@ -230,6 +231,9 @@ namespace SwissTimingDisplay.Controls
             _vm.WindGaugeStop = WindGaugeStop;
             InitializeComponent();
             DataContext = _vm;
+
+            ControlVisibility = Settings.Default.ShowSiriccoControls ? Visibility.Visible : Visibility.Collapsed;
+
             if (!string.IsNullOrEmpty(_vm.SelectedReceivePortName))
                 _vm.ConnectReceive(_vm.SelectedReceivePortName!);
 

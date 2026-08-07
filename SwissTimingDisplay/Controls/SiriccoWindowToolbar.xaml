@@ -12,7 +12,12 @@
         </Style>
     </UserControl.Resources>
     <StackPanel Orientation="Horizontal">
-        <Button x:Name="startButton" Content="{Binding StartButtonContent}" Click="StartButton_Click" Padding="10,4" Margin="0,0,6,0" Style="{StaticResource SnazzyButtonStyleGreen}" />
+        <Button x:Name="startButton"
+                Content="{Binding SiriccoControl.StartButtonContent, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                Click="StartButton_Click"
+                Padding="10,4"
+                Margin="0,0,6,0"
+                Style="{StaticResource SnazzyButtonStyleGreen}" />
         <Border BorderBrush="Gray" BorderThickness="1" CornerRadius="4" Padding="4" Margin="0,0,6,0" Background="Beige">
             <StackPanel Orientation="Horizontal">
                 <CheckBox x:Name="showSetup" IsChecked="{Binding Source={x:Static properties:Settings.Default}, Path=ShowSetup, Mode=TwoWay}" VerticalAlignment="Center" Margin="0,0,6,0" Padding="6,2">
@@ -26,7 +31,7 @@
                                     <Style TargetType="TextBlock">
                                         <Setter Property="Text" Value="Show Controls" />
                                         <Style.Triggers>
-                                            <DataTrigger Binding="{Binding ControlVisibility}" Value="Visible">
+                                            <DataTrigger Binding="{Binding SiriccoControl.ControlVisibility, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="Visible">
                                                 <Setter Property="Text" Value="Hide Controls" />
                                             </DataTrigger>
                                         </Style.Triggers>
@@ -36,9 +41,9 @@
                         </Button.Content>
                     </Button>
                     <TextBlock Text="Receive Port" VerticalAlignment="Center" FontWeight="Bold" FontStyle="Italic" Foreground="Purple" Margin="0,0,6,0" />
-                    <ComboBox x:Name="receivePortCombo" Width="120" VerticalAlignment="Center" Style="{StaticResource ComboBoxStyle}" ItemsSource="{Binding DataContext.ReceivePortsView}" SelectedValuePath="PortName" SelectedValue="{Binding DataContext.SelectedReceivePortName, Mode=TwoWay}" DisplayMemberPath="DisplayName" Margin="0,0,6,0" />
-                    <Button x:Name="receiveConnectButton" Margin="0,0,6,0" DataContext="{Binding DataContext}" Style="{StaticResource SnazzyButtonStyleConnectToggle}" Command="{Binding ReceiveConnectToggleCommand}" />
-                    <Button x:Name="refreshPortsButton" Padding="10,4" Style="{StaticResource SnazzyButtonStylePurple}" Command="{Binding DataContext.RefreshPortsCommand}">
+                    <ComboBox x:Name="receivePortCombo" Width="120" VerticalAlignment="Center" Style="{StaticResource ComboBoxStyle}" ItemsSource="{Binding ReceivePortsView}" SelectedValuePath="PortName" SelectedValue="{Binding SelectedReceivePortName, Mode=TwoWay}" DisplayMemberPath="DisplayName" Margin="0,0,6,0" />
+                    <Button x:Name="receiveConnectButton" Margin="0,0,6,0" Style="{StaticResource SnazzyButtonStyleConnectToggle}" Command="{Binding ReceiveConnectToggleCommand}" />
+                    <Button x:Name="refreshPortsButton" Padding="10,4" Style="{StaticResource SnazzyButtonStylePurple}" Command="{Binding RefreshPortsCommand}">
                         <Button.Content>
                             <TextBlock FontWeight="Bold" FontStyle="Italic" Text="Refresh Ports" />
                         </Button.Content>

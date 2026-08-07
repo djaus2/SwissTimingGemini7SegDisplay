@@ -7,9 +7,9 @@
     <Grid x:Name="LayoutRoot">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
-        <controls:SiriccoWindowToolbar Grid.Row="0" Margin="6" />
-        <Grid x:Name="controlHost" Grid.Row="1" />
+        <controls:SiriccoWindowToolbar Grid.Row="0" Margin="6" SiriccoControl="{x:Reference gauge}" />
+        <controls:SiriccoWindGaugeControl x:Name="gauge" Grid.Row="1" Margin="6"  />
     </Grid>
 </Window>
