@@ -69,6 +69,22 @@ namespace SwissTimingDisplay.Controls
             set => SetValue(StartButtonContentProperty, value);
         }
 
+        public static readonly DependencyProperty WindSpeedProperty =
+            DependencyProperty.Register(
+                nameof(WindSpeed),
+                typeof(double?),
+                typeof(SiriccoWindGaugeControl),
+                new PropertyMetadata(null));
+
+        public double? WindSpeed
+        {
+            get => (double?)GetValue(WindSpeedProperty);
+            set => SetValue(WindSpeedProperty, value);
+        }
+
+        public event EventHandler<double?>? WindSpeedDetermined;
+        public event EventHandler? CaptureStarted;
+
         public void ToggleStart()
         {
             Siricco_StartButton(this, new RoutedEventArgs());
@@ -552,6 +568,8 @@ namespace SwissTimingDisplay.Controls
                 double speed = Math.Round(speedTally / count, 1);
                 _vm.RecvStatus = $"Speed={speed:F1} {speedl:F3} (final,Total: {speedTally} over {count} measurements averaged over {_vm.WindGaugeCaptureCountdownPeriodSecs} sec )";
                 Debug.WriteLine($"{_vm.RecvStatus}");
+                WindSpeed = speed;
+                WindSpeedDetermined?.Invoke(this, speed);
                 WindGauge.WindSpeed = speed;
                 // Call the start button handler to reset/stop; provide non-null args to satisfy nullable analysis
                 Siricco_StartButton(this, new RoutedEventArgs());
@@ -604,6 +622,7 @@ namespace SwissTimingDisplay.Controls
             {
                 //SendCmd(TcpCommand.WindGauge_Reset_Stop_Clear);
                 speedTally = 0.0;
+                WindSpeed = null;
                 _raceStopwatch.Reset();
                 _raceElapsed = TimeSpan.Zero;
                 _sendWallClockWhileRunning = false;
@@ -651,6 +670,9 @@ namespace SwissTimingDisplay.Controls
             //WindGauge.SiriccoWindGaugeAcquisitionDurationSecs = period;
             ////MaxLoops = period * cps;
             speedTally = 0.0;
+            WindSpeed = null;
+
+            CaptureStarted?.Invoke(this, EventArgs.Empty);
 
             _sendWallClockWhileRunning = _vm.UseWallClockTimeOfDay;
             _SiriccoHasStartedSinceReset = true;

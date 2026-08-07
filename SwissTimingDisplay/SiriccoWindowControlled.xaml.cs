@@ -11,6 +11,8 @@ namespace SwissTimingDisplay
         {
             InitializeComponent();
             gauge.SetUp(vm, mainWindow);
+            gauge.CaptureStarted += (s, e) => windSpeedPanel.Visibility = Visibility.Collapsed;
+            gauge.WindSpeedDetermined += (s, e) => windSpeedPanel.Visibility = Visibility.Visible;
             DataContext = vm;
         }
 

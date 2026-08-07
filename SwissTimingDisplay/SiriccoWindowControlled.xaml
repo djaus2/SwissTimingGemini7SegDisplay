@@ -8,8 +8,13 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         <controls:SiriccoWindowToolbar Grid.Row="0" Margin="6" SiriccoControl="{x:Reference gauge}" />
         <controls:SiriccoWindGaugeControl x:Name="gauge" Grid.Row="1" Margin="6"  />
+        <StackPanel x:Name="windSpeedPanel" Grid.Row="2" Orientation="Horizontal" Margin="6,0,6,6" VerticalAlignment="Center" Visibility="Collapsed">
+            <TextBlock Text="Wind Speed:" FontWeight="Bold" FontStyle="Italic" Foreground="Purple" Margin="0,0,6,0" />
+            <TextBlock FontWeight="Bold" FontStyle="Italic" Foreground="DarkGreen" Text="{Binding WindSpeed, ElementName=gauge, TargetNullValue='', StringFormat='{}{0:F1}'}" />
+        </StackPanel>
     </Grid>
 </Window>
