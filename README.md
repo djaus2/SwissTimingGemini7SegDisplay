@@ -33,7 +33,8 @@ The app can also run in a mode where it can receive wind speed data from a Swiss
 > ***Further:*** Actual and Simulated Siricco pages have been merged.  _Nb: Receive port issue fixed._  
 > ***And:*** Siricco UI and functionality now in reusable control ...  
   as well as a Toolbar control that links to it and "orchestrates" the gauge.  
- Code for both has been mimimised.    
+ Code for both has been mimimised.   
+> ***Also:*** The control has 2 events: Start/stop countdown as well as last wind speed as a property.  
 > ***Next:*** Create a **"Sprint"** page that can simultaneously handle wind gauge and a clock for 100/200m events. *(2Do)*
 
 ---
