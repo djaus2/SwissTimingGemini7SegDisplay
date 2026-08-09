@@ -1,0 +1,427 @@
+﻿<UserControl x:Class="SwissTimingDisplay.Controls.SwissTimingDisplayControl"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:SwissTimingDisplay"
+        xmlns:controls="clr-namespace:SwissTimingDisplay.Controls"
+        xmlns:converters="clr-namespace:SwissTimingDisplay.Converters"
+        mc:Ignorable="d"
+        d:DesignHeight="610" d:DesignWidth="834"
+        Background="#E8F5E9">
+    <UserControl.Resources>
+        <converters:TimeInputDigitConverter x:Key="TimeInputDigitConverter" />
+        <converters:StringNotEmptyToVisibilityConverter x:Key="StringNotEmptyToVisibilityConverter" />
+        <converters:TimeInputSeparatorVisibilityConverter x:Key="TimeInputSeparatorVisibilityConverter" />
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+        <converters:EnumToBooleanConverter x:Key="EnumToBooleanConverter" />
+        <converters:UnderscoreToSpaceConverter x:Key="UnderscoreToSpaceConverter" />
+
+        <Style x:Key="ComboBoxStyle" TargetType="ComboBox">
+            <Setter Property="Foreground" Value="DarkGreen" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="MinWidth" Value="150" />
+            <Setter Property="HorizontalAlignment" Value="Left" />
+        </Style>
+
+        <Style x:Key="RadioButtonStyle" TargetType="RadioButton">
+            <Setter Property="Foreground" Value="Green" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+        </Style>
+    </UserControl.Resources>
+    <Grid x:Name="rootGrid" Margin="12">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Center">
+            <Image Source="pack://application:,,,/docs/SwissTiming.png" Height="40" Stretch="Uniform" VerticalAlignment="Center" />
+            <TextBlock FontSize="21" FontWeight="ExtraBlack"  FontStyle="Italic" Foreground="Black" VerticalAlignment="Center" Margin="8,0,0,0" ><Run Language="en-au" Text="GEMINI "/><Run Text="DISPLAY"/></TextBlock>
+        </StackPanel>
+        <TextBlock Visibility="Collapsed" Grid.Row="1" FontSize="18" FontWeight="SemiBold" Foreground="Red" Text="Swiss Timing Display" />
+
+        <GroupBox Grid.Row="2" Margin="0,12,0,0" Background="Beige" Visibility="{Binding ControlVisibility, RelativeSource={RelativeSource AncestorType=UserControl}}">
+            <GroupBox.Header>
+                <TextBlock FontWeight="Bold" FontStyle="Italic" Foreground="Blue" Text="Settings" />
+            </GroupBox.Header>
+            <Grid Margin="10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <CheckBox Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" IsChecked="{Binding OnlyProlific}">
+                    <CheckBox.Content>
+                        <TextBlock FontWeight="Bold" FontStyle="Italic" Foreground="Purple" Text="Only Prolific (PL*)" />
+                    </CheckBox.Content>
+                </CheckBox>
+                <Button Grid.Row="0"  Grid.Column="1" Margin="12,0,0,0" Padding="10,4" Command="{Binding RefreshPortsCommand}" Style="{StaticResource SnazzyButtonStyle}">
+                    <Button.Content>
+                        <TextBlock FontWeight="Bold" FontStyle="Italic" Text="Refresh Ports" />
+                    </Button.Content>
+                </Button>
+                <CheckBox x:Name="cbUseWallClock" Grid.Column="2" Margin="12,0,0,0" VerticalAlignment="Center" IsChecked="{Binding UseWallClockTimeOfDay}" Checked="UseWallClock_Checked" Unchecked="UseWallClock_Unchecked">
+                    <CheckBox.Content>
+                        <TextBlock FontWeight="Bold" FontStyle="Italic" Foreground="Purple" Text="Use wall clock" />
+                    </CheckBox.Content>
+                </CheckBox>
+                <CheckBox x:Name="cbAnchorDisplay" Grid.Row="0"  Grid.Column="3" Margin="12,0,0,0" VerticalAlignment="Center" IsChecked="{Binding AnchorDisplay}">
+                    <CheckBox.Content>
+                        <TextBlock FontWeight="Bold" FontStyle="Italic" Foreground="Purple" Text="Anchor Display" />
+                    </CheckBox.Content>
+                </CheckBox>
+                <CheckBox Grid.Row="1"  Grid.Column="2" Grid.ColumnSpan="2" Margin="12,0,0,0" VerticalAlignment="Center" IsChecked="{Binding Cosmetic}" Visibility="{Binding ShowCosmeticOptions, Converter={StaticResource BooleanToVisibilityConverter}}" ToolTip="Insert colon or period between digits in simulated display where appropriate">
+                    <CheckBox.Content>
+                        <TextBlock FontWeight="Bold" FontStyle="Italic" Foreground="Purple" Text="Show Punctuation in Simulated Display"  />
+                    </CheckBox.Content>
+                </CheckBox>
+                <TextBlock Grid.Row="1"  Grid.Column="3" Margin="12,0,0,0" VerticalAlignment="Center" FontWeight="Bold" FontStyle="Italic" Foreground="Purple" Text="{Binding LapCountDisplayModeLabel}" Visibility="{Binding ShowLapCountDisplayMode, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                <CheckBox x:Name="cbNumDigits" Grid.Row="0" Grid.Column="4" Margin="12,0,0,0" VerticalAlignment="Center" IsChecked="{Binding IsNumDigits9}">
+                    <CheckBox.Content>
+                        <TextBlock FontWeight="Bold" FontStyle="Italic" Foreground="Purple" Text="{Binding NumDigitsLabel}" />
+                    </CheckBox.Content>
+                </CheckBox>
+                <StackPanel Grid.Column="7" Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button x:Name="btnWindGauge" Margin="0,0,0,0" Padding="10,4" Content="Wind Gauge" Click="WindGaugeButton_Click" Style="{StaticResource SnazzyButtonStylePurple}" />
+                    <Button x:Name="btnSiricco" Margin="12,0,0,0" Padding="10,4" Content="Siricco" Click="SiriccoButton_Click" Style="{StaticResource SnazzyButtonStylePurple}" />
+                    <Button x:Name="btnExit" Margin="12,0,0,0" Padding="10,4" Content="Exit" Click="ExitButton_Click" Style="{StaticResource SnazzyButtonStyleRed}" />
+                </StackPanel>
+            </Grid>
+        </GroupBox>
+
+        <GroupBox Grid.Row="3" Margin="0,12,0,0" Background="Beige" Visibility="{Binding ControlVisibility, RelativeSource={RelativeSource AncestorType=UserControl}}">
+            <GroupBox.Header>
+                <TextBlock FontWeight="Bold" FontStyle="Italic" Foreground="Blue" Text="Serial" />
+            </GroupBox.Header>
+            <Grid Margin="10">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" Text="Send Port" FontWeight="Bold" FontStyle="Italic" Foreground="Purple" />
+                <ComboBox Grid.Row="0" Grid.Column="1"
+                          Margin="12,0,0,0"
+                          ItemsSource="{Binding SendPortsView}"
+                          SelectedValuePath="PortName"
+                          SelectedValue="{Binding SelectedSendPortName}"
+                          DisplayMemberPath="DisplayName"
+                          Style="{StaticResource ComboBoxStyle}" />
+
+                <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,8,0,0" VerticalAlignment="Center" Text="Receive Port" FontWeight="Bold" FontStyle="Italic" Foreground="Purple" />
+                <ComboBox Grid.Row="1" Grid.Column="1"
+                          Margin="12,8,0,0"
+                          ItemsSource="{Binding ReceivePortsView}"
+                          SelectedValuePath="PortName"
+                          SelectedValue="{Binding SelectedReceivePortName}"
+                          DisplayMemberPath="DisplayName"
+                          Style="{StaticResource ComboBoxStyle}" />
+
+                <Button Grid.Row="0" Grid.Column="2" Grid.ColumnSpan="2" Margin="12,0,0,0" Padding="10,4" Command="{Binding SendConnectToggleCommand}" >
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource SnazzyButtonStyle}">
+                            <Setter Property="Content" Value="Connect" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsConnected}" Value="True">
+                                    <Setter Property="Content" Value="Disconnect" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+
+                <Button Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="2" Margin="12,8,0,0" Padding="10,4" Command="{Binding ReceiveConnectToggleCommand}">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource SnazzyButtonStyle}">
+                            <Setter Property="Content" Value="Connect" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsReceiveConnected}" Value="True">
+                                    <Setter Property="Content" Value="Disconnect" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+            </Grid>
+        </GroupBox>
+
+        <Grid x:Name="commandsHostGrid" Grid.Row="4" Margin="0,12,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition x:Name="commandsColumn" Width="*" />
+                <ColumnDefinition x:Name="rightDisplayColumn" Width="0" />
+            </Grid.ColumnDefinitions>
+
+            <GroupBox x:Name="commandsGroupBox" Grid.Column="0" Background="Beige" Visibility="{Binding ControlVisibility, RelativeSource={RelativeSource AncestorType=UserControl}}">
+                <GroupBox.Header>
+                    <TextBlock FontWeight="Bold" FontStyle="Italic" Foreground="Blue" Text="Display Commands" />
+                </GroupBox.Header>
+                <Grid Margin="10" Grid.IsSharedSizeScope="True">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="134" />
+                        <ColumnDefinition Width="256.967"/>
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,0,0,6" Text="TCP Command" FontWeight="Bold" FontStyle="Italic" Foreground="Purple" Grid.ColumnSpan="3" />
+                    <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal" Grid.ColumnSpan="3" Margin="0,0,0,10" >
+
+                        <Button x:Name="btnRaceTimer" Margin="8,0,0,0" Padding="10,4" Content="{Binding StartButtonContent, RelativeSource={RelativeSource AncestorType=UserControl}}" Click="RaceTimerButton_Click" Style="{StaticResource SnazzyButtonStyleGreen}" />
+                        <Button x:Name="btnSendClear" Margin="12,0,0,0" Padding="10,4" Content="  Send Clear  " Click="SendClearButton_Click" Style="{StaticResource SnazzyButtonStyleRed}" />
+                        <Button x:Name="btnLapContinue" Margin="8,0,0,0" Padding="10,4" Content="{Binding LapButtonContent, RelativeSource={RelativeSource AncestorType=UserControl}}" Click="LapContinueButton_Click" Visibility="{Binding LapButtonVisibility, RelativeSource={RelativeSource AncestorType=UserControl}}" Style="{StaticResource SnazzyButtonStyle}" />
+                    </StackPanel>
+                    <StackPanel Grid.Row="2" Grid.Column="0" Orientation="Horizontal" Grid.ColumnSpan="3" Margin="0,0,0,10" >
+                        <ComboBox Margin="12,0,0,0"
+                                  ItemsSource="{Binding RollerTcpCommands}"
+                                  SelectedItem="{Binding SelectedTcpCommand}"
+                                  Style="{StaticResource ComboBoxStyle}">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Converter={StaticResource UnderscoreToSpaceConverter}}" />
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                        <Button x:Name="btnSend" Margin="8,0,0,0" Padding="10,4" Content="← Send selected command" Click="Button_Click" Style="{StaticResource SnazzyButtonStyle}" />
+                    </StackPanel>
+
+                    <Grid Grid.Row="3" Grid.Column="0" Margin="0,12,0,6" Grid.ColumnSpan="3">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" SharedSizeGroup="LabelColumn" />
+                            <ColumnDefinition Width="Auto" SharedSizeGroup="TextBoxColumn" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="Time Out:" FontWeight="Bold" FontStyle="Italic" Foreground="Purple" VerticalAlignment="Center" HorizontalAlignment="Right" />
+                        <TextBox x:Name="tbTime" Grid.Column="1" Margin="12,0,0,0" Width="100" Text="{Binding TimeInput, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center">
+                            <TextBox.Style>
+                                <Style TargetType="TextBox">
+                                    <Setter Property="IsEnabled" Value="True" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding UseWallClockTimeOfDay}" Value="True">
+                                            <Setter Property="IsEnabled" Value="False" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBox.Style>
+                        </TextBox>
+                    </Grid>
+
+                    <Grid Grid.Row="4" Grid.Column="0" Margin="0,12,0,6" Grid.ColumnSpan="3">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" SharedSizeGroup="LabelColumn" />
+                            <ColumnDefinition Width="Auto" SharedSizeGroup="TextBoxColumn" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="Time In:" FontWeight="Bold" FontStyle="Italic" Foreground="Purple" VerticalAlignment="Center" HorizontalAlignment="Right" />
+                        <TextBox x:Name="tbTimeIn" Grid.Column="1" Margin="12,0,0,0" Width="100" Text="{Binding TimeInputIn, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" />
+                    </Grid>
+
+                    <TextBlock Grid.Row="5" Grid.Column="0" Margin="0,12,0,6" Text="Send Bib No/Lap (0-999)            -             Recv Bib No/Lap (0-999) " FontWeight="Bold" FontStyle="Italic" Foreground="Purple" Grid.ColumnSpan="3" />
+                    <StackPanel Grid.Row="6" Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Grid.ColumnSpan="3">
+                        <RepeatButton Margin="0,0,4,0" Padding="8,4" Content="−" Command="{Binding BibNoDecrementCommand}" />
+                        <TextBox MinWidth="60" VerticalAlignment="Center" TextAlignment="Center" Text="{Binding BibNo, UpdateSourceTrigger=PropertyChanged}" FontWeight="SemiBold" FontSize="14" />
+                        <RepeatButton Margin="4,0,0,0" Padding="8,4" Content="+" Command="{Binding BibNoIncrementCommand}" />
+                        <Button Margin="12,0,0,0" Padding="8,4" Content="Clear" Command="{Binding BibNoClearCommand}" Style="{StaticResource SnazzyButtonStyleRed}" />
+                        <TextBlock Margin="12,0,0,0" VerticalAlignment="Center" Text="Recv:" FontWeight="Bold" FontStyle="Italic" Foreground="Purple" />
+                        <TextBox x:Name="tbRecvBibNo" MinWidth="60" MaxWidth="80" VerticalAlignment="Center" TextAlignment="Center" Text="{Binding RecvBibNoStr}" IsReadOnly="True" FontWeight="SemiBold" FontSize="14" Background="#FFEFEFEF" />
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="7" Grid.Column="0" Margin="0,10,0,0" Orientation="Horizontal" Grid.ColumnSpan="3">
+                        <TextBlock Text="Lap Count Mode" FontWeight="Bold" FontStyle="Italic" Foreground="Purple" VerticalAlignment="Top" />
+                        <RadioButton Margin="12,0,0,0" Content="None" IsChecked="{Binding LapCountMode, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=None}" GroupName="LapCountMode" VerticalAlignment="Top" Style="{StaticResource RadioButtonStyle}" />
+                        <RadioButton Margin="12,0,0,0" Content="Lap Count(Up)" IsChecked="{Binding LapCountMode, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=UpCount}" GroupName="LapCountMode" VerticalAlignment="Top" Style="{StaticResource RadioButtonStyle}" />
+                        <RadioButton Margin="12,0,0,0" Content="Laps to Go(Down)" IsChecked="{Binding LapCountMode, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=DownCount}" GroupName="LapCountMode" VerticalAlignment="Top" Style="{StaticResource RadioButtonStyle}" />
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="8" Grid.Column="0" Margin="0,10,0,10" Orientation="Horizontal" Grid.ColumnSpan="3">
+                        <StackPanel.Style>
+                            <Style TargetType="StackPanel">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding LapCountMode}" Value="None">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding LapCountMode}" Value="UpCount">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding LapCountMode}" Value="DownCount">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </StackPanel.Style>
+                        <TextBlock Text="Lap Count Display" FontWeight="Bold" FontStyle="Italic" Foreground="Purple" VerticalAlignment="Center" />
+                        <StackPanel Orientation="Horizontal">
+                            <StackPanel.Style>
+                                <Style TargetType="StackPanel">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding LapCountMode}" Value="DownCount">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </StackPanel.Style>
+                            <CheckBox Margin="12,0,0,0" IsChecked="{Binding StartAtFinish}" VerticalAlignment="Center" ToolTip="If Start is not at finish then don't decrement Lap Count first time past finish.">
+                                <CheckBox.Style>
+                                    <Style TargetType="CheckBox">
+                                        <Setter Property="IsEnabled" Value="False" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding RaceDistance}" Value="Other">
+                                                <Setter Property="IsEnabled" Value="True" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </CheckBox.Style>
+                                <CheckBox.Content>
+                                    <TextBlock FontWeight="SemiBold" Foreground="Green" Text="Start is at Finish" />
+                                </CheckBox.Content>
+                            </CheckBox>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <StackPanel.Style>
+                                <Style TargetType="StackPanel">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding LapCountMode}" Value="DownCount">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding LapCountMode}" Value="UpCount">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </StackPanel.Style>
+                            <TextBlock x:Name="LapForLabel1" Margin="15,0,0,0" Text="Show Time each Lap for" VerticalAlignment="Center" FontWeight="SemiBold" Foreground="Green" ToolTip="Hold leader's elapsed time for this time. Zero for not done" />
+                            <TextBox x:Name="LapForText" Width="60" Margin="10,0,10,0" VerticalAlignment="Center" Text="{Binding LapContinueDelaySeconds, UpdateSourceTrigger=PropertyChanged}" TextAlignment="Center" ToolTip="Hold leader's elapsed time for this time. Zero for not done" />
+                            <TextBlock x:Name="LapForLabel2" Margin="0,0,0,0" Text="(sec)" VerticalAlignment="Center" FontWeight="SemiBold" Foreground="Green" ToolTip="Hold leader's elapsed time for this time. Zero for not done" />
+                        </StackPanel>
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="9" Grid.Column="0" Margin="0,0,0,0" Orientation="Horizontal" Grid.ColumnSpan="3">
+                        <StackPanel.Style>
+                            <Style TargetType="StackPanel">
+                                <Setter Property="IsEnabled" Value="False" />
+                                <Setter Property="Visibility" Value="Collapsed" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding LapCountMode}" Value="DownCount">
+                                        <Setter Property="IsEnabled" Value="True" />
+                                        <Setter Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </StackPanel.Style>
+                        <TextBlock Text="Race Distance" FontWeight="Bold" FontStyle="Italic" Foreground="Purple" VerticalAlignment="Top" />
+                        <RadioButton Margin="12,0,0,0" Content="600m" IsChecked="{Binding RaceDistance, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Distance600m}" GroupName="RaceDistance" VerticalAlignment="Top" Style="{StaticResource RadioButtonStyle}" />
+                        <RadioButton Margin="12,0,0,0" Content="1K" IsChecked="{Binding RaceDistance, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Distance1K}" GroupName="RaceDistance" VerticalAlignment="Top" Style="{StaticResource RadioButtonStyle}" />
+                        <RadioButton Margin="12,0,0,0" Content="1500m" IsChecked="{Binding RaceDistance, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Distance1500m}" GroupName="RaceDistance" VerticalAlignment="Top" Style="{StaticResource RadioButtonStyle}" />
+                        <RadioButton Margin="12,0,0,0" Content="2K" IsChecked="{Binding RaceDistance, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Distance2K}" GroupName="RaceDistance" VerticalAlignment="Top" Style="{StaticResource RadioButtonStyle}" />
+                        <RadioButton Margin="12,0,0,0" Content="3K" IsChecked="{Binding RaceDistance, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Distance3K}" GroupName="RaceDistance" VerticalAlignment="Top" Style="{StaticResource RadioButtonStyle}" />
+                        <RadioButton Margin="12,0,0,0" Content="5K" IsChecked="{Binding RaceDistance, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Distance5K}" GroupName="RaceDistance" VerticalAlignment="Top" Style="{StaticResource RadioButtonStyle}" />
+                        <RadioButton Margin="12,0,0,0" Content="10K" IsChecked="{Binding RaceDistance, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Distance10K}" GroupName="RaceDistance" VerticalAlignment="Top" Style="{StaticResource RadioButtonStyle}" />
+                        <RadioButton Margin="12,0,0,0" Content="Other" IsChecked="{Binding RaceDistance, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Other}" GroupName="RaceDistance" VerticalAlignment="Top" Style="{StaticResource RadioButtonStyle}" />
+                    </StackPanel>
+                </Grid>
+            </GroupBox>
+
+        </Grid>
+
+        <Border x:Name="rightSevenSegBorder" Grid.Row="5" Margin="10,0,0,0" BorderBrush="#FFCC0000" BorderThickness="3" CornerRadius="4" Background="Black" Padding="10" VerticalAlignment="Stretch" Visibility="Collapsed">
+            <Viewbox x:Name="rightSevenSegViewbox" Stretch="Uniform" StretchDirection="Both" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <Grid x:Name="rightSevenSegContent">
+                    <controls:SixDigitSevenSegmentDisplay TimeInput="{Binding DisplayTime}">
+                        <controls:SixDigitSevenSegmentDisplay.Style>
+                            <Style TargetType="controls:SixDigitSevenSegmentDisplay">
+                                <Setter Property="Visibility" Value="Visible" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding NumDigits}" Value="9">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </controls:SixDigitSevenSegmentDisplay.Style>
+                    </controls:SixDigitSevenSegmentDisplay>
+                    <controls:NineDigitSevenSegmentDisplay TimeInput="{Binding DisplayTime}" BibNoInput="{Binding BibNoInputForDisplay}">
+                        <controls:NineDigitSevenSegmentDisplay.Style>
+                            <Style TargetType="controls:NineDigitSevenSegmentDisplay">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding NumDigits}" Value="9">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </controls:NineDigitSevenSegmentDisplay.Style>
+                    </controls:NineDigitSevenSegmentDisplay>
+                </Grid>
+            </Viewbox>
+        </Border>
+
+
+        <Border x:Name="bottomSevenSegBorder" Grid.Row="5" Margin="0,12,0,0" BorderBrush="#FFCC0000" BorderThickness="3" CornerRadius="4" Background="Black" Padding="10" HorizontalAlignment="Left" Visibility="Visible">
+            <Viewbox x:Name="bottomSevenSegViewbox" Stretch="None" StretchDirection="Both" HorizontalAlignment="Left" VerticalAlignment="Center">
+                <Grid x:Name="bottomSevenSegContent">
+                    <controls:SixDigitSevenSegmentDisplay TimeInput="{Binding DisplayTime}">
+                        <controls:SixDigitSevenSegmentDisplay.Style>
+                            <Style TargetType="controls:SixDigitSevenSegmentDisplay">
+                                <Setter Property="Visibility" Value="Visible" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding NumDigits}" Value="9">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </controls:SixDigitSevenSegmentDisplay.Style>
+                    </controls:SixDigitSevenSegmentDisplay>
+                    <controls:NineDigitSevenSegmentDisplay TimeInput="{Binding DisplayTime}" BibNoInput="{Binding BibNoInputForDisplay}">
+                        <controls:NineDigitSevenSegmentDisplay.Style>
+                            <Style TargetType="controls:NineDigitSevenSegmentDisplay">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding NumDigits}" Value="9">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </controls:NineDigitSevenSegmentDisplay.Style>
+                    </controls:NineDigitSevenSegmentDisplay>
+                </Grid>
+            </Viewbox>
+        </Border>
+
+        <Border x:Name="statusBorder" Grid.Row="6" Margin="0,12,0,0" Padding="10" Background="#FFEFEFEF" CornerRadius="4" Visibility="{Binding ControlVisibility, RelativeSource={RelativeSource AncestorType=UserControl}}">
+            <TextBlock Text="{Binding Status}" TextWrapping="Wrap" />
+        </Border>
+    </Grid>
+</UserControl>
