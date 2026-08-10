@@ -6,7 +6,7 @@
   <img width="200" alt="PXL_20260417_052157460" src="https://github.com/user-attachments/assets/1b730f14-3dcb-44e5-972a-ce1c5c4894e1" />
   </td>
   <td style="border: none; padding: 0;">
-<h2>Version: 3.0.0</h2>
+<h2>Version: 4.0.0</h2>
 </td>
 </tr>
 </table>
@@ -30,12 +30,12 @@ The app can also run in a mode where it can receive wind speed data from a Swiss
 ---
 
 > ***Latest:*** Can choose at the splash screen, *(only)*,  whether the app uses the actual **Siricco** wind gauge or the simulator. Is persisted.  
-> ***Further:*** Actual and Simulated Siricco pages have been merged.  _Nb: Receive port issue fixed._  
+> ***Further:*** Actual and Simulated Siricco pages have been merged.  *Nb: Receive port issue fixed.*  
 > ***And:*** Siricco UI and functionality now in reusable control ...  
   as well as a Toolbar control that links to it and "orchestrates" the gauge.  
- Code for both has been mimimised.   
+ Code for both has been mimimised.
 > ***Also:*** The control has 2 events: Start/stop countdown as well as last wind speed as a property.  
-> ***And also ...*** The display is now a control with its own toolbt as well. Some refinements to come though. *(2Do)*  
+> ***And*** The display is now a control with its own toolbar as well. Tidied up serial ports persistence etc. and settings.
 > ***Next:*** Create a **"Sprint"** page that can simultaneously handle wind gauge and a clock for 100/200m events. *(2Do)*
 
 ---
