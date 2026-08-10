@@ -1,9 +1,11 @@
 <UserControl x:Class="SwissTimingDisplay.Controls.SiriccoWindowToolbar"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:properties="clr-namespace:SwissTimingDisplay.Properties">
+             xmlns:properties="clr-namespace:SwissTimingDisplay.Properties"
+             xmlns:converters="clr-namespace:SwissTimingDisplay.Converters">
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+        <converters:StringNotEmptyToVisibilityConverter x:Key="StringNotEmptyToVisibilityConverter" />
         <Style x:Key="ComboBoxStyle" TargetType="ComboBox">
             <Setter Property="Foreground" Value="DarkGreen" />
             <Setter Property="FontWeight" Value="SemiBold" />
@@ -40,17 +42,27 @@
                             </TextBlock>
                         </Button.Content>
                     </Button>
-                    <TextBlock Text="Receive Port" VerticalAlignment="Center" FontWeight="Bold" FontStyle="Italic" Foreground="Purple" Margin="0,0,6,0" />
-                    <ComboBox x:Name="receivePortCombo" Width="120" VerticalAlignment="Center" Style="{StaticResource ComboBoxStyle}" ItemsSource="{Binding ReceivePortsView}" SelectedValuePath="PortName" SelectedValue="{Binding SelectedReceivePortName, Mode=TwoWay}" DisplayMemberPath="DisplayName" Margin="0,0,6,0" />
-                    <Button x:Name="receiveConnectButton" Margin="0,0,6,0" Style="{StaticResource SnazzyButtonStyleConnectToggle}" Command="{Binding ReceiveConnectToggleCommand}" />
-                    <Button x:Name="refreshPortsButton" Padding="10,4" Style="{StaticResource SnazzyButtonStylePurple}" Command="{Binding RefreshPortsCommand}">
-                        <Button.Content>
-                            <TextBlock FontWeight="Bold" FontStyle="Italic" Text="Refresh Ports" />
-                        </Button.Content>
-                    </Button>
                 </StackPanel>
             </StackPanel>
         </Border>
+        <StackPanel Orientation="Horizontal" Visibility="{Binding IsChecked, ElementName=showSetup, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <TextBlock VerticalAlignment="Center" FontWeight="Bold" FontStyle="Italic" Foreground="Purple" Margin="0,0,6,0"
+                       Text="{Binding SelectedReceivePortName, StringFormat='Receive: {0}'}"
+                       Visibility="{Binding IsReceiveConnected, Converter={StaticResource BooleanToVisibilityConverter}}" />
+            <TextBlock VerticalAlignment="Center" FontWeight="Bold" FontStyle="Italic" Foreground="Red" Margin="0,0,6,0" Text="Not Connected">
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                        <Setter Property="Visibility" Value="Collapsed" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsReceiveConnected}" Value="False">
+                                <Setter Property="Visibility" Value="Visible" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
+            <Button x:Name="backButton" Content="Back" Click="BackButton_Click" Padding="10,4" Margin="0,0,6,0" Style="{StaticResource SnazzyButtonStylePurple}" />
+        </StackPanel>
         <Button x:Name="exitButton" Content="Exit" Click="ExitButton_Click" Padding="10,4" Style="{StaticResource SnazzyButtonStyleRed}" />
     </StackPanel>
 </UserControl>

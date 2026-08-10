@@ -17,9 +17,9 @@ namespace SwissTimingDisplay.Controls
     /// </summary>
     public partial class SwissTimingDisplayControl : UserControl
     {
-        private static WindGaugeWindow? _windGaugeWindow;
+        private static MistralWindGaugeWindow? _windGaugeWindow;
         //private static SiriccoWindow? _siriccoWindow;
-        private static SiriccoWindowWG? _siriccoWindowWG;
+        private static SiriccoWindowControlled? _siriccoWindowControlled;
         private MainWindow? _mainWindow;
         private MainViewModel _vm = MainViewModel.SharedInstance;
 
@@ -933,7 +933,7 @@ namespace SwissTimingDisplay.Controls
             
             if (_windGaugeWindow == null)
             {
-                _windGaugeWindow = new WindGaugeWindow(_vm, _mainWindow);
+                _windGaugeWindow = new MistralWindGaugeWindow(_vm, _mainWindow);
             }
             _windGaugeWindow.Show();
             _mainWindow?.Hide();
@@ -961,14 +961,14 @@ namespace SwissTimingDisplay.Controls
         //private void SiriccoWGButton_Click(object sender, RoutedEventArgs e)
         //{
             // Set current window and save state
-            _vm.CurrentWindow = MainViewModel.ActiveWindow.SiriccoWG;
+            _vm.CurrentWindow = MainViewModel.ActiveWindow.SiriccoWindowControlled;
             _vm.ShowSiriccoWindow = true;
 
-            if (_siriccoWindowWG == null)
+            if (_siriccoWindowControlled == null)
             {
-                _siriccoWindowWG = new SiriccoWindowWG(_vm, _mainWindow);
+                _siriccoWindowControlled = new SiriccoWindowControlled(_vm, _mainWindow);
             }
-            _siriccoWindowWG.Show();
+            _siriccoWindowControlled.Show();
             _mainWindow?.Hide();
         }
 

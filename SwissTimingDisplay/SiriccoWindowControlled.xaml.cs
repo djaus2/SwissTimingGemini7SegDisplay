@@ -19,6 +19,15 @@ namespace SwissTimingDisplay
         private void Window_Closing(object sender, CancelEventArgs e)
         {
             Settings.Default.Save();
+            if (DataContext is MainViewModel vm)
+            {
+                vm.CurrentWindow = MainViewModel.ActiveWindow.None;
+                vm.BeginShutdown();
+                if (Application.Current.Windows.Count <= 1)
+                {
+                    Application.Current.Shutdown();
+                }
+            }
         }
     }
 }

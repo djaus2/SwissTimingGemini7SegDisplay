@@ -6,8 +6,7 @@ namespace SwissTimingDisplay
     public partial class SplashWindow : Window
     {
         private static MainWindow? _mainWindow;
-        private static WindGaugeWindow? _windGaugeWindow;
-        private static SiriccoWindowWG? _siriccoWindow;
+        private static MistralWindGaugeWindow? _mistralWindGaugeWindow;
         private static SiriccoWindowControlled? _siriccoControlledWindow;
         private MainViewModel? _vm;
 
@@ -50,25 +49,11 @@ namespace SwissTimingDisplay
             _vm.CurrentWindow = MainViewModel.ActiveWindow.WindGauge;
             _vm.ShowWindGaugeWindow = true;
             
-            _windGaugeWindow = new WindGaugeWindow(_vm);
-            _windGaugeWindow.Show();
+            _mistralWindGaugeWindow = new MistralWindGaugeWindow(_vm);
+            _mistralWindGaugeWindow.Show();
             this.Close();
         }
 
-
-        private void SiriccoWindGaugeButtonWG_Click(object sender, RoutedEventArgs e)
-        {
-            // Get or create shared instance
-            _vm = MainViewModel.SharedInstance;
-
-            // Set active window and show WindGauge
-            _vm.CurrentWindow = MainViewModel.ActiveWindow.SiriccoWG;
-            _vm.ShowWindGaugeWindow = true;
-
-            _siriccoWindow = new SiriccoWindowWG(_vm);
-            _siriccoWindow.Show();
-            this.Close();
-        }
 
         private void SiriccoWindGaugeButtonControlled_Click(object sender, RoutedEventArgs e)
         {

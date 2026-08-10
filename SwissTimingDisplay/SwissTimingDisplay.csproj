@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <Version>3.4.1</Version>
+    <Version>4.0.0</Version>
     <TargetFramework>net10.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -10,9 +10,22 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="SiriccoWindowWG.xaml.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Remove="docs\mistralwindgauge.png" />
     <None Remove="docs\siriccoWindGauge2.png" />
     <None Remove="docs\SwissTiming.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Remove="SiriccoWindowWG.xaml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="SiriccoWindowWG.xaml" />
+    <None Include="SiriccoWindowWG.xaml.cs" />
   </ItemGroup>
 
 

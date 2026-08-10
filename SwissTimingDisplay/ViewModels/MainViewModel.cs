@@ -170,6 +170,8 @@ namespace SwissTimingDisplay.ViewModels
         private bool _pendingPersistedWindGaugeSendPortConnected = false;
         private bool _pendingPersistedWindGaugeReceiveConnected = false;
 
+        private PersistedSettings _persistedSettings = new PersistedSettings();
+
         private readonly CollectionViewSource _sendPortsViewSource = new CollectionViewSource();
         private readonly CollectionViewSource _receivePortsViewSource = new CollectionViewSource();
 
@@ -499,31 +501,12 @@ namespace SwissTimingDisplay.ViewModels
             get => _showWindGaugeWindow;
             set
             {
-                // Only proceed if value is actually changing
-                if (_showWindGaugeWindow == value)
-                {
-                    return;
-                }
-
                 if (SetProperty(ref _showWindGaugeWindow, value))
                 {
-                    if (!_isLoadingSettings)
-                    {
-                        _isSwitchingWindows = true;
-                        try
-                        {
-                            // Switch to the new window's ports
-                            SwitchToWindowPorts(value);
-                            // Update the default TCP command for the new window
-                            SelectedTcpCommand = value
-                                ? TcpCommand.WindGauge_Acquisition_Duration
-                                : TcpCommand.Roller_Time_of_Day_or_Running_Time_;
-                        }
-                        finally
-                        {
-                            _isSwitchingWindows = false;
-                        }
-                    }
+                    // Update the default TCP command for the new window
+                    SelectedTcpCommand = value
+                        ? TcpCommand.WindGauge_Acquisition_Duration
+                        : TcpCommand.Roller_Time_of_Day_or_Running_Time_;
                 }
             }
         }
@@ -533,49 +516,12 @@ namespace SwissTimingDisplay.ViewModels
             get => _showSiriccoWindow;
             set
             {
-                // Only proceed if value is actually changing
-                if (_showSiriccoWindow == value)
-                {
-                    return;
-                }
-
                 if (SetProperty(ref _showSiriccoWindow, value))
                 {
-                    Debug.WriteLine($"ShowSiriccoWindow changed to: {value}");
-
-                    if (!_isLoadingSettings)
-                    {
-                        _isSwitchingWindows = true;
-                        try
-                        {
-                            // Set current window
-                            CurrentWindow = value ? ActiveWindow.Siricco : ActiveWindow.Display;
-                            Debug.WriteLine($"CurrentWindow set to: {CurrentWindow}");
-                            
-                            // Switch to the new window's ports
-                            if (value)
-                            {
-                                // Siricco mode - disconnect and let user select ports manually
-                                // Or we could add Siricco port persistence later
-                                Disconnect();
-                                DisconnectReceive();
-                            }
-                            else
-                            {
-                                // Switch to Display ports
-                                SwitchToWindowPorts(false);
-                            }
-                            
-                            // Update the default TCP command for the new window
-                            SelectedTcpCommand = value
-                                ? TcpCommand.WindGauge_Acquisition_Duration
-                                : TcpCommand.Roller_Time_of_Day_or_Running_Time_;
-                        }
-                        finally
-                        {
-                            _isSwitchingWindows = false;
-                        }
-                    }
+                    // Update the default TCP command for the new window
+                    SelectedTcpCommand = value
+                        ? TcpCommand.WindGauge_Acquisition_Duration
+                        : TcpCommand.Roller_Time_of_Day_or_Running_Time_;
                 }
             }
         }
@@ -778,26 +724,57 @@ namespace SwissTimingDisplay.ViewModels
             get => _activeWindow;
             set
             {
-                if (SetProperty(ref _activeWindow, value))
+                if (_activeWindow == value)
                 {
-                    // Disconnect ports when switching windows
-                    if (value == ActiveWindow.Display)
-                    {
-                        // Ensure only Display ports can be connected
-                    }
-                    else if (value == ActiveWindow.WindGauge)
-                    {
-                        // Ensure only WindGauge ports can be connected
-                    }
-                    else if (value == ActiveWindow.Siricco)
-                    {
-                        // Ensure only Siricco ports can be connected
-                    }
-                    else if (value == ActiveWindow.SiriccoWG)
-                    {
-                        // Ensure only Siricco ports can be connected
-                    }
+                    return;
                 }
+
+                // Re-enable persistence now that a new window is being activated
+                _isShuttingDown = false;
+                _isSwitchingWindows = true;
+                try
+                {
+                    // If a port is not actually connected, drop its selection so it isn't
+                    // persisted and later auto-reconnected when it shouldn't be.
+                    if (!IsConnected)
+                    {
+                        SelectedSendPortName = null;
+                    }
+                    if (!IsReceiveConnected)
+                    {
+                        SelectedReceivePortName = null;
+                    }
+
+                    // Persist the previous window's ports before disconnecting/switching
+                    if (_activeWindow != ActiveWindow.None)
+                    {
+                        SavePersistedPortNames();
+                    }
+
+                    Disconnect();
+                    DisconnectReceive();
+
+                    SetProperty(ref _activeWindow, value);
+
+                    // Update window state flags based on active window
+                    _showWindGaugeWindow = value == ActiveWindow.WindGauge;
+                    _showSiriccoWindow = value == ActiveWindow.Siricco
+                                         || value == ActiveWindow.SiriccoWG
+                                         || value == ActiveWindow.SiriccoWindowControlled;
+
+                    OnPropertyChanged(nameof(ShowWindGaugeWindow));
+                    OnPropertyChanged(nameof(ShowSiriccoWindow));
+
+                    // Load and auto-connect the new window's persisted ports
+                    SwitchToActiveWindowPorts();
+                }
+                finally
+                {
+                    _isSwitchingWindows = false;
+                }
+
+                // Persist the new window's ports after auto-connect
+                SavePersistedPortNames();
             }
         }
 
@@ -994,66 +971,33 @@ namespace SwissTimingDisplay.ViewModels
             var receivePortAvailable = !string.IsNullOrWhiteSpace(SelectedReceivePortName)
                 && Ports.Any(p => string.Equals(p.PortName, SelectedReceivePortName, StringComparison.OrdinalIgnoreCase));
 
-            if (ShowWindGaugeWindow)
+            // Auto-connect send port if it was connected for the active window
+            if (sendPortAvailable && _pendingPersistedSendPortConnected)
             {
-                // Auto-connect WindGauge ports (send and receive if it was connected)
-                if (sendPortAvailable && _pendingPersistedWindGaugeSendPortConnected)
+                try
                 {
-                    try
-                    {
-                        Connect();
-                        RaiseCommandStates();
-                        Status = $"Auto-connected to {SelectedSendPortName} (send).";
-                    }
-                    catch (Exception ex)
-                    {
-                        Status = $"Auto-connect failed: {ex.Message}";
-                    }
+                    Connect();
+                    RaiseCommandStates();
+                    Status = $"Auto-connected to {SelectedSendPortName} (send).";
                 }
-
-                if (receivePortAvailable && _pendingPersistedWindGaugeReceiveConnected)
+                catch (Exception ex)
                 {
-                    try
-                    {
-                        ConnectReceive(SelectedReceivePortName!);
-                        RaiseCommandStates();
-                        Status = $"Auto-connected to {SelectedSendPortName} (send) and {SelectedReceivePortName} (receive).";
-                    }
-                    catch (Exception ex)
-                    {
-                        Status = $"Auto-connect receive failed: {ex.Message}";
-                    }
+                    Status = $"Auto-connect failed: {ex.Message}";
                 }
             }
-            else
-            {
-                // Auto-connect MainWindow ports (send and receive if it was connected)
-                if (sendPortAvailable && _pendingPersistedSendPortConnected)
-                {
-                    try
-                    {
-                        Connect();
-                        RaiseCommandStates();
-                        Status = $"Auto-connected to {SelectedSendPortName} (send).";
-                    }
-                    catch (Exception ex)
-                    {
-                        Status = $"Auto-connect failed: {ex.Message}";
-                    }
-                }
 
-                if (receivePortAvailable && _pendingPersistedReceivePortConnected)
+            // Auto-connect receive port if it was connected for the active window
+            if (receivePortAvailable && _pendingPersistedReceivePortConnected)
+            {
+                try
                 {
-                    try
-                    {
-                        ConnectReceive(SelectedReceivePortName!);
-                        RaiseCommandStates();
-                        Status = $"Auto-connected to {SelectedSendPortName} (send) and {SelectedReceivePortName} (receive).";
-                    }
-                    catch (Exception ex)
-                    {
-                        Status = $"Auto-connect receive failed: {ex.Message}";
-                    }
+                    ConnectReceive(SelectedReceivePortName!);
+                    RaiseCommandStates();
+                    Status = $"Auto-connected to {SelectedSendPortName} (send) and {SelectedReceivePortName} (receive).";
+                }
+                catch (Exception ex)
+                {
+                    Status = $"Auto-connect receive failed: {ex.Message}";
                 }
             }
 
@@ -1642,6 +1586,10 @@ namespace SwissTimingDisplay.ViewModels
             [ObservableProperty] private bool _windGaugeSendPortConnected = true;
             [ObservableProperty] private string? _windGaugeReceivePortName;
             [ObservableProperty] private bool _windGaugeReceiveConnected = true;
+            [ObservableProperty] private string? _siriccoSendPortName;
+            [ObservableProperty] private bool _siriccoSendPortConnected = false;
+            [ObservableProperty] private string? _siriccoReceivePortName;
+            [ObservableProperty] private bool _siriccoReceiveConnected = false;
             [ObservableProperty] private bool _onlyProlific = true;
             [ObservableProperty] private bool _anchorDisplay;
             [ObservableProperty] private int _numDigits = 6;
@@ -1658,74 +1606,50 @@ namespace SwissTimingDisplay.ViewModels
         {
             try
             {
-                if (!File.Exists(SettingsFilePath))
+                if (File.Exists(SettingsFilePath))
                 {
-                    return;
+                    var json = File.ReadAllText(SettingsFilePath);
+                    var settings = JsonSerializer.Deserialize<PersistedSettings>(json);
+                    if (settings is not null)
+                    {
+                        _persistedSettings = settings;
+                    }
                 }
 
-                var json = File.ReadAllText(SettingsFilePath);
-                var settings = JsonSerializer.Deserialize<PersistedSettings>(json);
-                if (settings is null)
+                if (_persistedSettings is null)
                 {
-                    return;
+                    _persistedSettings = new PersistedSettings();
                 }
 
-                OnlyProlific = settings.OnlyProlific;
-                AnchorDisplay = settings.AnchorDisplay;
-                NumDigits = settings.NumDigits;
-                RaceDistance = settings.RaceDistance;
-                DisplaySimulatorSpeed = settings.DisplaySimulatorSpeed;
-                ShowSimulator = settings.ShowSimulator;
-                ShowWindGaugeWindow = settings.ShowWindGaugeWindow;
+                OnlyProlific = _persistedSettings.OnlyProlific;
+                AnchorDisplay = _persistedSettings.AnchorDisplay;
+                NumDigits = _persistedSettings.NumDigits;
+                RaceDistance = _persistedSettings.RaceDistance;
+                DisplaySimulatorSpeed = _persistedSettings.DisplaySimulatorSpeed;
+                ShowSimulator = _persistedSettings.ShowSimulator;
+                ShowWindGaugeWindow = _persistedSettings.ShowWindGaugeWindow;
 
                 // Load SiriccoMessageMode
-                if (!string.IsNullOrWhiteSpace(settings.SiriccoMessageMode) && Enum.TryParse<SiriccoMessageModes>(settings.SiriccoMessageMode, out var siriccoMode))
+                if (!string.IsNullOrWhiteSpace(_persistedSettings.SiriccoMessageMode) && Enum.TryParse<SiriccoMessageModes>(_persistedSettings.SiriccoMessageMode, out var siriccoMode))
                 {
                     _siriccoMessageMode = siriccoMode;
                 }
 
                 // Load capture properties
-                if (!string.IsNullOrWhiteSpace(settings.WindGaugeCaptureCountdown))
+                if (!string.IsNullOrWhiteSpace(_persistedSettings.WindGaugeCaptureCountdown))
                 {
-                    WindGaugeCaptureCountdownPeriodSecsStr = settings.WindGaugeCaptureCountdown;
+                    WindGaugeCaptureCountdownPeriodSecsStr = _persistedSettings.WindGaugeCaptureCountdown;
                 }
-                if (!string.IsNullOrWhiteSpace(settings.SiriccoCaptureCountsPerSec))
+                if (!string.IsNullOrWhiteSpace(_persistedSettings.SiriccoCaptureCountsPerSec))
                 {
-                    WindGaugeCaptureCountsPerSecStr = settings.SiriccoCaptureCountsPerSec;
+                    WindGaugeCaptureCountsPerSecStr = _persistedSettings.SiriccoCaptureCountsPerSec;
                 }
 
-                // Load the appropriate ports based on which window should be shown
-                if (ShowWindGaugeWindow)
-                {
-                    // Load WindGauge ports
-                    if (!string.IsNullOrWhiteSpace(settings.WindGaugeSendPortName))
-                    {
-                        _pendingPersistedSendPortName = settings.WindGaugeSendPortName;
-                    }
-                    if (!string.IsNullOrWhiteSpace(settings.WindGaugeReceivePortName))
-                    {
-                        _pendingPersistedReceivePortName = settings.WindGaugeReceivePortName;
-                    }
-                    _pendingPersistedWindGaugeSendPortConnected = settings.WindGaugeSendPortConnected;
-                    _pendingPersistedWindGaugeReceiveConnected = settings.WindGaugeReceiveConnected;
-                }
-                else
-                {
-                    // Load MainWindow ports
-                    if (!string.IsNullOrWhiteSpace(settings.DisplaySendPortName))
-                    {
-                        _pendingPersistedSendPortName = settings.DisplaySendPortName;
-                    }
-                    if (!string.IsNullOrWhiteSpace(settings.DisplayReceivePortName))
-                    {
-                        _pendingPersistedReceivePortName = settings.DisplayReceivePortName;
-                    }
-                    _pendingPersistedSendPortConnected = settings.DisplaySendPortConnected;
-                    _pendingPersistedReceivePortConnected = settings.DisplayReceivePortConnected;
-                }
+                // Note: ports are loaded on demand when a window becomes active
             }
             catch
             {
+                _persistedSettings = new PersistedSettings();
             }
         }
 
@@ -1734,39 +1658,44 @@ namespace SwissTimingDisplay.ViewModels
             try
             {
                 Directory.CreateDirectory(SettingsDirectoryPath);
-                var settings = new PersistedSettings
-                {
-                    DisplaySendPortName = SelectedSendPortName,
-                    DisplayReceivePortName = SelectedReceivePortName,
-                    OnlyProlific = OnlyProlific,
-                    AnchorDisplay = AnchorDisplay,
-                    NumDigits = NumDigits,
-                    RaceDistance = RaceDistance,
-                    DisplaySimulatorSpeed = _displaySimulatorSpeed,
-                    ShowSimulator = _showSimulator,
-                    WindGaugeCaptureCountdown = WindGaugeCaptureCountdownPeriodSecsStr,
-                    ShowWindGaugeWindow = _showWindGaugeWindow,
-                    SiriccoMessageMode = _siriccoMessageMode.ToString(),
-                    SiriccoCaptureCountsPerSec = WindGaugeCaptureCountsPerSecStr,
-                };
+
+                _persistedSettings.OnlyProlific = OnlyProlific;
+                _persistedSettings.AnchorDisplay = AnchorDisplay;
+                _persistedSettings.NumDigits = NumDigits;
+                _persistedSettings.RaceDistance = RaceDistance;
+                _persistedSettings.DisplaySimulatorSpeed = _displaySimulatorSpeed;
+                _persistedSettings.ShowSimulator = _showSimulator;
+                _persistedSettings.WindGaugeCaptureCountdown = WindGaugeCaptureCountdownPeriodSecsStr;
+                _persistedSettings.ShowWindGaugeWindow = _showWindGaugeWindow;
+                _persistedSettings.SiriccoMessageMode = _siriccoMessageMode.ToString();
+                _persistedSettings.SiriccoCaptureCountsPerSec = WindGaugeCaptureCountsPerSecStr;
 
                 // Save to window-specific properties based on current window
-                if (ShowWindGaugeWindow)
+                switch (_activeWindow)
                 {
-                    settings.WindGaugeSendPortName = SelectedSendPortName;
-                    settings.WindGaugeSendPortConnected = IsConnected;
-                    settings.WindGaugeReceivePortName = SelectedReceivePortName;
-                    settings.WindGaugeReceiveConnected = IsReceiveConnected;
-                }
-                else
-                {
-                    settings.DisplaySendPortName = SelectedSendPortName;
-                    settings.DisplaySendPortConnected = IsConnected;
-                    settings.DisplayReceivePortName = SelectedReceivePortName;
-                    settings.DisplayReceivePortConnected = IsReceiveConnected;
+                    case ActiveWindow.Display:
+                        _persistedSettings.DisplaySendPortName = SelectedSendPortName;
+                        _persistedSettings.DisplaySendPortConnected = IsConnected;
+                        _persistedSettings.DisplayReceivePortName = SelectedReceivePortName;
+                        _persistedSettings.DisplayReceivePortConnected = IsReceiveConnected;
+                        break;
+                    case ActiveWindow.WindGauge:
+                        _persistedSettings.WindGaugeSendPortName = SelectedSendPortName;
+                        _persistedSettings.WindGaugeSendPortConnected = IsConnected;
+                        _persistedSettings.WindGaugeReceivePortName = SelectedReceivePortName;
+                        _persistedSettings.WindGaugeReceiveConnected = IsReceiveConnected;
+                        break;
+                    case ActiveWindow.Siricco:
+                    case ActiveWindow.SiriccoWG:
+                    case ActiveWindow.SiriccoWindowControlled:
+                        _persistedSettings.SiriccoSendPortName = SelectedSendPortName;
+                        _persistedSettings.SiriccoSendPortConnected = IsConnected;
+                        _persistedSettings.SiriccoReceivePortName = SelectedReceivePortName;
+                        _persistedSettings.SiriccoReceiveConnected = IsReceiveConnected;
+                        break;
                 }
 
-                var json = JsonSerializer.Serialize(settings);
+                var json = JsonSerializer.Serialize(_persistedSettings);
                 File.WriteAllText(SettingsFilePath, json);
             }
             catch
@@ -1779,51 +1708,71 @@ namespace SwissTimingDisplay.ViewModels
             _isLoadingSettings = value;
         }
 
-        private void SwitchToWindowPorts(bool showWindGaugeWindow)
+        private void SwitchToActiveWindowPorts()
         {
-            // Disconnect current ports before switching
-            Disconnect();
-            DisconnectReceive();
-
-            // Load current settings to get the window-specific ports
-            try
+            if (_activeWindow == ActiveWindow.None)
             {
-                if (!File.Exists(SettingsFilePath))
-                {
-                    return;
-                }
-
-                var json = File.ReadAllText(SettingsFilePath);
-                var settings = JsonSerializer.Deserialize<PersistedSettings>(json);
-                if (settings is null)
-                {
-                    return;
-                }
-
-                _isLoadingSettings = true;
-
-                if (showWindGaugeWindow)
-                {
-                    // Switch to WindGauge ports
-                    SelectedSendPortName = settings.WindGaugeSendPortName;
-                    SelectedReceivePortName = settings.WindGaugeReceivePortName;
-                }
-                else
-                {
-                    // Switch to MainWindow ports
-                    SelectedSendPortName = settings.DisplaySendPortName;
-                    SelectedReceivePortName = null; // MainWindow doesn't use receive port
-                }
-
-                _isLoadingSettings = false;
-
-                // Auto-connect based on the new ports
-                AutoConnectIfNeeded();
+                return;
             }
-            catch
+
+            string? sendPortName = _activeWindow switch
             {
-                _isLoadingSettings = false;
+                ActiveWindow.Display => _persistedSettings.DisplaySendPortName,
+                ActiveWindow.WindGauge => _persistedSettings.WindGaugeSendPortName,
+                ActiveWindow.Siricco or ActiveWindow.SiriccoWG or ActiveWindow.SiriccoWindowControlled => _persistedSettings.SiriccoSendPortName,
+                _ => null
+            };
+
+            string? receivePortName = _activeWindow switch
+            {
+                ActiveWindow.Display => _persistedSettings.DisplayReceivePortName,
+                ActiveWindow.WindGauge => _persistedSettings.WindGaugeReceivePortName,
+                ActiveWindow.Siricco or ActiveWindow.SiriccoWG or ActiveWindow.SiriccoWindowControlled => _persistedSettings.SiriccoReceivePortName,
+                _ => null
+            };
+
+            _pendingPersistedSendPortConnected = _activeWindow switch
+            {
+                ActiveWindow.Display => _persistedSettings.DisplaySendPortConnected,
+                ActiveWindow.WindGauge => _persistedSettings.WindGaugeSendPortConnected,
+                ActiveWindow.Siricco or ActiveWindow.SiriccoWG or ActiveWindow.SiriccoWindowControlled => _persistedSettings.SiriccoSendPortConnected,
+                _ => false
+            };
+
+            _pendingPersistedReceivePortConnected = _activeWindow switch
+            {
+                ActiveWindow.Display => _persistedSettings.DisplayReceivePortConnected,
+                ActiveWindow.WindGauge => _persistedSettings.WindGaugeReceiveConnected,
+                ActiveWindow.Siricco or ActiveWindow.SiriccoWG or ActiveWindow.SiriccoWindowControlled => _persistedSettings.SiriccoReceiveConnected,
+                _ => false
+            };
+
+            _pendingPersistedSendPortName = sendPortName;
+            _pendingPersistedReceivePortName = receivePortName;
+
+            // Apply selected port names if the ports are currently available
+            if (!string.IsNullOrWhiteSpace(sendPortName)
+                && Ports.Any(p => string.Equals(p.PortName, sendPortName, StringComparison.OrdinalIgnoreCase)))
+            {
+                SelectedSendPortName = sendPortName;
             }
+            else
+            {
+                SelectedSendPortName = null;
+            }
+
+            if (!string.IsNullOrWhiteSpace(receivePortName)
+                && Ports.Any(p => string.Equals(p.PortName, receivePortName, StringComparison.OrdinalIgnoreCase)))
+            {
+                SelectedReceivePortName = receivePortName;
+            }
+            else
+            {
+                SelectedReceivePortName = null;
+            }
+
+            // Auto-connect if the persisted state was connected
+            AutoConnectIfNeeded();
         }
 
         private void RaiseCommandStates()

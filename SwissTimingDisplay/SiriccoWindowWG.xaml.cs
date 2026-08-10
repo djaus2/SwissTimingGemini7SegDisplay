@@ -1020,8 +1020,12 @@ namespace SwissTimingDisplay
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
+            _vm.CurrentWindow = MainViewModel.ActiveWindow.None;
             _vm.BeginShutdown();
-            Application.Current.Shutdown();
+            if (Application.Current.Windows.Count <= 1)
+            {
+                Application.Current.Shutdown();
+            }
         }
 
         private void tbTime_TextChanged(object sender, TextChangedEventArgs e)

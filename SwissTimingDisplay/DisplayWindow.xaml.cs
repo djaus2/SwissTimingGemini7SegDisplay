@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel;
+using System.Linq;
 using System.Windows;
 using SwissTimingDisplay.Controls;
 using SwissTimingDisplay.ViewModels;
@@ -27,15 +28,20 @@ namespace SwissTimingDisplay
 
         private void Window_Closing(object sender, CancelEventArgs e)
         {
+            _vm.CurrentWindow = MainViewModel.ActiveWindow.None;
             _vm.BeginShutdown();
-            _vm.Disconnect();
-            _vm.DisconnectReceive();
-            Application.Current.Shutdown();
+            if (Application.Current.Windows.Count <= 1)
+            {
+                Application.Current.Shutdown();
+            }
         }
 
         protected override void OnClosed(EventArgs e)
         {
-            _vm.Dispose();
+            if (!Application.Current.Windows.OfType<SplashWindow>().Any())
+            {
+                _vm.Dispose();
+            }
             base.OnClosed(e);
         }
     }

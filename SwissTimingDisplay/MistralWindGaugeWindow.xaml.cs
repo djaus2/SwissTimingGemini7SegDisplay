@@ -18,7 +18,7 @@ namespace SwissTimingDisplay
     /// And removing or commenting out Display functionality
     /// Needs a clean up/out.
     /// </summary>
-    public partial class WindGaugeWindow : Window
+    public partial class MistralWindGaugeWindow : Window
     {
         private MainWindow? _mainWindow;
         private readonly MainViewModel _vm;
@@ -36,11 +36,11 @@ namespace SwissTimingDisplay
         private static readonly TimeSpan RaceTimerInterval = TimeSpan.FromMilliseconds(200);
         private readonly DispatcherTimer _lapContinueTimer;
 
-        public WindGaugeWindow() : this(MainViewModel.SharedInstance, null)
+        public MistralWindGaugeWindow() : this(MainViewModel.SharedInstance, null)
         {
         }
 
-        public WindGaugeWindow(MainViewModel vm, MainWindow? mainWindow = null)
+        public MistralWindGaugeWindow(MainViewModel vm, MainWindow? mainWindow = null)
         {
             _vm = vm;
             _mainWindow = mainWindow;
@@ -782,22 +782,11 @@ namespace SwissTimingDisplay
 
         }
 
-        private void BackToMainButton_Click(object sender, RoutedEventArgs e)
+        private void BackButton_Click(object sender, RoutedEventArgs e)
         {
-            // Set current window and save state
-            _vm.CurrentWindow = MainViewModel.ActiveWindow.Display;
-            _vm.ShowWindGaugeWindow = false;
-
-            if (_mainWindow != null)
-            {
-                _mainWindow.Show();
-            }
-            else
-            {
-                _mainWindow = new MainWindow(_vm);
-                _mainWindow.Show();
-            }
-            this.Hide();
+            var splash = new SplashWindow();
+            splash.Show();
+            this.Close();
         }
 
         private void ExitButton_Click(object sender, RoutedEventArgs e)
@@ -808,8 +797,12 @@ namespace SwissTimingDisplay
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
+            _vm.CurrentWindow = MainViewModel.ActiveWindow.None;
             _vm.BeginShutdown();
-            Application.Current.Shutdown();
+            if (Application.Current.Windows.Count <= 1)
+            {
+                Application.Current.Shutdown();
+            }
         }
     }
 }

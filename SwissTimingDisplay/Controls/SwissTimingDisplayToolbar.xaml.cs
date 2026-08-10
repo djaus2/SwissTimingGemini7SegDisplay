@@ -40,14 +40,11 @@ namespace SwissTimingDisplay.Controls
             Control.ControlVisibility = Control.ControlVisibility == Visibility.Visible ? Visibility.Collapsed : Visibility.Visible;
         }
 
-        private void WindGaugeButton_Click(object sender, RoutedEventArgs e)
+        private void BackButton_Click(object sender, RoutedEventArgs e)
         {
-            Control?.ShowWindGauge();
-        }
-
-        private void SiriccoButton_Click(object sender, RoutedEventArgs e)
-        {
-            Control?.ShowSiricco();
+            var splash = new SwissTimingDisplay.SplashWindow();
+            splash.Show();
+            Window.GetWindow(this)?.Close();
         }
 
         private void ExitButton_Click(object sender, RoutedEventArgs e)
