@@ -53,6 +53,15 @@
                         Grid.Row="0"
                         Grid.RowSpan="2"
                        Grid.Column="2"/>
+                <Button x:Name="SprintButton"
+                    Content="Sprint"
+
+                    FontSize="16"
+                    Background="Orange"
+                    Foreground="White"
+                    BorderThickness="0"
+                    Cursor="Hand"
+                    Click="SprintButton_Click" Margin="8,105,42,-50" Grid.Row="1"/>
             </Grid>
 
 

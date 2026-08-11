@@ -1,0 +1,27 @@
+﻿<Window x:Class="SwissTimingDisplay.AthsSprintWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:controls="clr-namespace:SwissTimingDisplay.Controls"
+        mc:Ignorable="d"
+        Title="Swiss Timing Display" Height="660" Width="834" Closing="Window_Closing"
+        Background="#E8F5E9">
+    <Grid x:Name="rootGrid" Margin="6">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <controls:SwissTimingDisplayToolbar Grid.Row="0" DisplayControl="{x:Reference displayControl}" />
+        <controls:SwissTimingDisplayControl x:Name="displayControl" Grid.Row="1" />
+        <controls:SiriccoWindowToolbar Grid.Row="2" Margin="6" SiriccoControl="{x:Reference gauge}" />
+        <controls:SiriccoWindGaugeControl x:Name="gauge" Grid.Row="3" Margin="6"  />
+        <StackPanel x:Name="windSpeedPanel" Grid.Row="4" Orientation="Horizontal" Margin="6,0,6,6" VerticalAlignment="Center" Visibility="Collapsed">
+            <TextBlock Text="Wind Speed:" FontWeight="Bold" FontStyle="Italic" Foreground="Purple" Margin="0,0,6,0" />
+            <TextBlock FontWeight="Bold" FontStyle="Italic" Foreground="DarkGreen" Text="{Binding WindSpeed, ElementName=gauge, TargetNullValue='', StringFormat='{}{0:F1}'}" />
+        </StackPanel>
+    </Grid>
+</Window>

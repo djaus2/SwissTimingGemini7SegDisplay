@@ -21,6 +21,7 @@ namespace SwissTimingDisplay.Controls
         //private static SiriccoWindow? _siriccoWindow;
         private static SiriccoWindowControlled? _siriccoWindowControlled;
         private MainWindow? _mainWindow;
+        private AthsSprintWindow? _athsSprintWindow;
         private MainViewModel _vm = MainViewModel.SharedInstance;
 
         private DispatcherTimer _raceTimer = null!;
@@ -43,7 +44,7 @@ namespace SwissTimingDisplay.Controls
                 nameof(ControlVisibility),
                 typeof(Visibility),
                 typeof(SwissTimingDisplayControl),
-                new PropertyMetadata(Visibility.Visible, OnControlVisibilityChanged));
+                new PropertyMetadata(Visibility.Collapsed, OnControlVisibilityChanged));
 
         public Visibility ControlVisibility
         {
@@ -111,10 +112,11 @@ namespace SwissTimingDisplay.Controls
             InitializeComponent();
         }
 
-        public void SetUp(MainViewModel vm, MainWindow? mainWindow)
+        public void SetUp(MainViewModel vm, MainWindow? mainWindow, AthsSprintWindow? athsSprintWindow)
         {
             _vm = vm;
             _mainWindow = mainWindow;
+            _athsSprintWindow = athsSprintWindow;
             DataContext = _vm;
 
             _vm.PropertyChanged += VmOnPropertyChanged;
@@ -933,43 +935,26 @@ namespace SwissTimingDisplay.Controls
             
             if (_windGaugeWindow == null)
             {
-                _windGaugeWindow = new MistralWindGaugeWindow(_vm, _mainWindow);
+                _windGaugeWindow = new MistralWindGaugeWindow(_vm, _mainWindow, _athsSprintWindow);
             }
             _windGaugeWindow.Show();
             _mainWindow?.Hide();
+            _athsSprintWindow?.Hide();
         }
         private void SiriccoButton_Click(object sender, RoutedEventArgs e)
         {
-        //    if (!Properties.Settings.Default.useSiriccoSimulator)
-        //    {
-        //        SiriccoWGButton_Click(sender, e);
-        //        return;
-        //    }
 
-        //    // Set current window and save state
-        //    _vm.CurrentWindow = MainViewModel.ActiveWindow.Siricco;
-        //    _vm.ShowSiriccoWindow = true;
-
-        //    if (_siriccoWindow == null)
-        //    {
-        //        _siriccoWindow = new SiriccoWindow(_vm, this);
-        //    }
-        //    _siriccoWindow.Show();
-        //    this.Hide();
-        //}
-
-        //private void SiriccoWGButton_Click(object sender, RoutedEventArgs e)
-        //{
             // Set current window and save state
             _vm.CurrentWindow = MainViewModel.ActiveWindow.SiriccoWindowControlled;
             _vm.ShowSiriccoWindow = true;
 
             if (_siriccoWindowControlled == null)
             {
-                _siriccoWindowControlled = new SiriccoWindowControlled(_vm, _mainWindow);
+                _siriccoWindowControlled = new SiriccoWindowControlled(_vm, _mainWindow, _athsSprintWindow);
             }
             _siriccoWindowControlled.Show();
             _mainWindow?.Hide();
+            _athsSprintWindow?.Hide();
         }
 
 

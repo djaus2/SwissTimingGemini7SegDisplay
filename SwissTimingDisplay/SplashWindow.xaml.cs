@@ -6,6 +6,7 @@ namespace SwissTimingDisplay
     public partial class SplashWindow : Window
     {
         private static MainWindow? _mainWindow;
+        private static AthsSprintWindow? _athsSprintWindow;
         private static MistralWindGaugeWindow? _mistralWindGaugeWindow;
         private static SiriccoWindowControlled? _siriccoControlledWindow;
         private MainViewModel? _vm;
@@ -72,6 +73,19 @@ namespace SwissTimingDisplay
         private void ExitButton_Click(object sender, RoutedEventArgs e)
         {
             Application.Current.Shutdown();
+        }
+
+        private void SprintButton_Click(object sender, RoutedEventArgs e)
+        {
+            _vm = MainViewModel.SharedInstance;
+
+            // Set active window and show Display
+            _vm.CurrentWindow = MainViewModel.ActiveWindow.AthsSprint;
+            _vm.ShowWindGaugeWindow = false;
+
+            _athsSprintWindow = new AthsSprintWindow(_vm);
+            _athsSprintWindow.Show();
+            this.Close();   
         }
     }
 }

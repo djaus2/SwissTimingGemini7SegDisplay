@@ -24,6 +24,10 @@ namespace SwissTimingDisplay.Controls
 
         private SwissTimingDisplayControl? Control => DisplayControl;
 
+ 
+   
+
+
         private void StartButton_Click(object sender, RoutedEventArgs e)
         {
             Control?.ToggleStart();
@@ -51,5 +55,8 @@ namespace SwissTimingDisplay.Controls
         {
             Control?.Exit();
         }
+
+
+        /// ////////////////////////////////////////////////////////////////////////
     }
 }

@@ -91,6 +91,7 @@ namespace SwissTimingDisplay.Controls
         }
 
         private MainWindow? _mainWindow;
+        private AthsSprintWindow? _athsSprintWindow;
         private /*readonly*/ MainViewModel? _vm;
         public MainViewModel? ViewModel => _vm;
 
@@ -239,10 +240,11 @@ namespace SwissTimingDisplay.Controls
         }
 
 
-        public void SetUp(MainViewModel vm, MainWindow? mainWindow = null)
+        public void SetUp(MainViewModel vm, MainWindow? mainWindow = null, AthsSprintWindow? athsSprintWindow = null)
         {
             _vm = vm;
             _mainWindow = mainWindow;
+            _athsSprintWindow = athsSprintWindow;
             _vm.WindGaugeStart = WindGaugeStart;
             _vm.WindGaugeStop = WindGaugeStop;
             InitializeComponent();
@@ -1066,12 +1068,21 @@ namespace SwissTimingDisplay.Controls
 
             if (_mainWindow != null)
             {
+                _mainWindow.Show(); 
+            }
+            else if (_athsSprintWindow != null)
+            {
+                _athsSprintWindow.Show(); 
+            }
+            else if(false) // Placeholder for any other window type check   
+            {
+                _mainWindow = new MainWindow(_vm);
                 _mainWindow.Show();
             }
             else
             {
-                _mainWindow = new MainWindow(_vm);
-                _mainWindow.Show();
+                _athsSprintWindow = new AthsSprintWindow(_vm);
+                _athsSprintWindow.Show();
             }
             this.Visibility = Visibility.Collapsed;
         }

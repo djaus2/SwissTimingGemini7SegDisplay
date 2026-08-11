@@ -21,6 +21,7 @@ namespace SwissTimingDisplay
     public partial class MistralWindGaugeWindow : Window
     {
         private MainWindow? _mainWindow;
+        private AthsSprintWindow? _athsSprintWindow;
         private readonly MainViewModel _vm;
 
         private readonly DispatcherTimer _raceTimer;
@@ -40,10 +41,11 @@ namespace SwissTimingDisplay
         {
         }
 
-        public MistralWindGaugeWindow(MainViewModel vm, MainWindow? mainWindow = null)
+        public MistralWindGaugeWindow(MainViewModel vm, MainWindow? mainWindow = null, AthsSprintWindow? athsSprintWindow = null)
         {
             _vm = vm;
             _mainWindow = mainWindow;
+            _athsSprintWindow = athsSprintWindow;
             InitializeComponent();
             DataContext = _vm;
 

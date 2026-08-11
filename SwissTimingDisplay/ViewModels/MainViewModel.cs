@@ -73,7 +73,8 @@ namespace SwissTimingDisplay.ViewModels
             WindGauge,
             Siricco,
             SiriccoWG,
-            SiriccoWindowControlled     
+            SiriccoWindowControlled ,
+            AthsSprint
         }
 
         private ActiveWindow _activeWindow = ActiveWindow.None;

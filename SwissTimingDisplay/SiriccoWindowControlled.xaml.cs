@@ -7,10 +7,10 @@ namespace SwissTimingDisplay
 {
     public partial class SiriccoWindowControlled : Window
     {
-        public SiriccoWindowControlled(MainViewModel vm, MainWindow? mainWindow = null)
+        public SiriccoWindowControlled(MainViewModel vm, MainWindow? mainWindow = null, AthsSprintWindow? athsSprintWindow = null)
         {
             InitializeComponent();
-            gauge.SetUp(vm, mainWindow);
+            gauge.SetUp(vm, mainWindow, athsSprintWindow);
             gauge.CaptureStarted += (s, e) => windSpeedPanel.Visibility = Visibility.Collapsed;
             gauge.WindSpeedDetermined += (s, e) => windSpeedPanel.Visibility = Visibility.Visible;
             DataContext = vm;

@@ -8,22 +8,26 @@ using SwissTimingDisplay.ViewModels;
 namespace SwissTimingDisplay
 {
     /// <summary>
-    /// Interaction logic for MainWindow.xaml
+    /// Interaction logic for AthsSprintWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class AthsSprintWindow : Window
     {
         private readonly MainViewModel _vm;
 
-        public MainWindow() : this(MainViewModel.SharedInstance)
+        public AthsSprintWindow() : this(MainViewModel.SharedInstance)
         {
         }
 
-        public MainWindow(MainViewModel vm)
+        public AthsSprintWindow(MainViewModel vm)
         {
             _vm = vm;
             InitializeComponent();
             DataContext = _vm;
-            displayControl.SetUp(_vm, this,null);
+            displayControl.SetUp(_vm, null,this);
+
+            gauge.SetUp(vm, null, this);
+            gauge.CaptureStarted += (s, e) => windSpeedPanel.Visibility = Visibility.Collapsed;
+            gauge.WindSpeedDetermined += (s, e) => windSpeedPanel.Visibility = Visibility.Visible;
         }
 
         private void Window_Closing(object sender, CancelEventArgs e)
@@ -44,5 +48,6 @@ namespace SwissTimingDisplay
             }
             base.OnClosed(e);
         }
+
     }
 }
