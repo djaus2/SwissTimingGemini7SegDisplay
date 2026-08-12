@@ -54,11 +54,11 @@
         </Border>
         <StackPanel Orientation="Horizontal" Visibility="{Binding IsChecked, ElementName=showSetup, Converter={StaticResource BooleanToVisibilityConverter}}">
             <TextBlock VerticalAlignment="Center" FontWeight="Bold" FontStyle="Italic" Foreground="Purple" Margin="0,0,6,0"
-                       Text="{Binding SelectedSendPortName, StringFormat='Send: {0}'}"
-                       Visibility="{Binding IsConnected, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                       Text="{Binding DisplaySelectedSendPortName, StringFormat='Send: {0}'}"
+                       Visibility="{Binding DisplayIsConnected, Converter={StaticResource BooleanToVisibilityConverter}}" />
             <TextBlock VerticalAlignment="Center" FontWeight="Bold" FontStyle="Italic" Foreground="Purple" Margin="0,0,6,0"
-                       Text="{Binding SelectedReceivePortName, StringFormat='Receive: {0}'}"
-                       Visibility="{Binding IsReceiveConnected, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                       Text="{Binding DisplaySelectedReceivePortName, StringFormat='Receive: {0}'}"
+                       Visibility="{Binding DisplayIsReceiveConnected, Converter={StaticResource BooleanToVisibilityConverter}}" />
             <TextBlock VerticalAlignment="Center" FontWeight="Bold" FontStyle="Italic" Foreground="Red" Margin="0,0,6,0" Text="Not Connected">
                 <TextBlock.Style>
                     <Style TargetType="TextBlock">
@@ -66,8 +66,8 @@
                         <Style.Triggers>
                             <MultiDataTrigger>
                                 <MultiDataTrigger.Conditions>
-                                    <Condition Binding="{Binding IsConnected}" Value="False" />
-                                    <Condition Binding="{Binding IsReceiveConnected}" Value="False" />
+                                    <Condition Binding="{Binding DisplayIsConnected}" Value="False" />
+                                    <Condition Binding="{Binding DisplayIsReceiveConnected}" Value="False" />
                                 </MultiDataTrigger.Conditions>
                                 <Setter Property="Visibility" Value="Visible" />
                             </MultiDataTrigger>

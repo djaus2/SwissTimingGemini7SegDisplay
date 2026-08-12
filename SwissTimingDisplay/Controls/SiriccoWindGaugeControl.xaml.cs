@@ -252,8 +252,11 @@ namespace SwissTimingDisplay.Controls
 
             ControlVisibility = Settings.Default.ShowSiriccoControls ? Visibility.Visible : Visibility.Collapsed;
 
-            if (!string.IsNullOrEmpty(_vm.SelectedReceivePortName))
-                _vm.ConnectReceive(_vm.SelectedReceivePortName!);
+            if (!string.IsNullOrEmpty(_vm.SiriccoSelectedReceivePortName))
+                _vm.ConnectReceiveSiricco(_vm.SiriccoSelectedReceivePortName!);
+
+            if (!string.IsNullOrEmpty(_vm.SiriccoSelectedSendPortName) && _vm.SiriccoIsConnected)
+                _vm.ConnectSiricco();
 
             _vm.PropertyChanged += VmOnPropertyChanged;
             _vm.SiriccoDataReceived += VmOnSiriccoDataReceived;
@@ -585,7 +588,7 @@ namespace SwissTimingDisplay.Controls
         private void SiriccoWindGaugeControl_Unloaded(object? sender, RoutedEventArgs e)
         {
             _isClosing = true;
-            _WindGaugeTimer.Stop();
+            _WindGaugeTimer?.Stop();
             _vm.PropertyChanged -= VmOnPropertyChanged;
             _vm.SiriccoDataReceived -= VmOnSiriccoDataReceived;
             SiriccoData.SiriccoModeChanged -= OnSiriccoModeChanged;
@@ -633,7 +636,7 @@ namespace SwissTimingDisplay.Controls
                 _vm.IsRaceRunning = false;
 
                 // Send clear command to display
-                if (_vm.IsConnected)
+                if (_vm.SiriccoIsConnected)
                 {
                     try
                     {
@@ -764,7 +767,7 @@ namespace SwissTimingDisplay.Controls
             }
 
             // Disable Send after Start has been pressed until Reset returns to Start state.
-            btnSend.IsEnabled = true;// _vm.IsConnected && !_raceIsRunning && !_raceHasStartedSinceReset;
+            btnSend.IsEnabled = true;// _vm.SiriccoIsConnected && !_raceIsRunning && !_raceHasStartedSinceReset;
         }
 
         private void UpdateRaceTimerEnabledState()
@@ -774,7 +777,7 @@ namespace SwissTimingDisplay.Controls
                 return;
             }
 
-            var enabled = _vm.IsConnected;
+            var enabled = _vm.SiriccoIsConnected;
             btnSiriccoStart.IsEnabled = enabled;
 
             if (!enabled && (_SiriccoIsRunning || _SiriccoHasStartedSinceReset))
@@ -795,7 +798,7 @@ namespace SwissTimingDisplay.Controls
             _vm.RaceHasStartedSinceReset = false;
 
             // Send clear command to display
-            if (_vm.IsConnected)
+            if (_vm.SiriccoIsConnected)
             {
                 try
                 {
@@ -907,7 +910,7 @@ namespace SwissTimingDisplay.Controls
                 //    cmdx = charCommands.ToArray<CharCommand>();
                 //    cmdbytes = cmdx.Select(c => (byte)c).ToArray();
 
-                //    if (_vm.IsConnected)
+                //    if (_vm.SiriccoIsConnected)
                 //    {
                 //        var portName = _vm.ConnectedPortName ?? "(unknown)";
                 //        var send = MessageBoxResult.Yes;
@@ -931,7 +934,7 @@ namespace SwissTimingDisplay.Controls
                     cmdx = charCommands.ToArray<CharCommand>();
                     cmdbytes = cmdx.Select(c => (byte)c).ToArray();
 
-                    if (_vm.IsConnected)
+                    if (_vm.SiriccoIsConnected)
                     {
                         var portName = _vm.ConnectedPortName ?? "(unknown)";
                         var send = MessageBoxResult.Yes;
@@ -961,7 +964,7 @@ namespace SwissTimingDisplay.Controls
                 cmdbytes[cmdbytes.Length - 1] = (byte)CharCommand.LF;
                 var payload = cmdbytes;
 
-                if (_vm.IsConnected)
+                if (_vm.SiriccoIsConnected)
                 {
                     var portName = _vm.ConnectedPortName ?? "(unknown)";
                     var send = MessageBoxResult.Yes;

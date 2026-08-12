@@ -7,6 +7,9 @@
         mc:Ignorable="d"
         Title="Swiss Timing Display" Height="660" Width="834" Closing="Window_Closing"
         Background="#E8F5E9">
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+    </Window.Resources>
     <Grid x:Name="rootGrid" Margin="6">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -14,12 +17,14 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
-        <controls:SwissTimingDisplayToolbar Grid.Row="0" DisplayControl="{x:Reference displayControl}" />
-        <controls:SwissTimingDisplayControl x:Name="displayControl" Grid.Row="1" />
-        <controls:SiriccoWindowToolbar Grid.Row="2" Margin="6" SiriccoControl="{x:Reference gauge}" />
-        <controls:SiriccoWindGaugeControl x:Name="gauge" Grid.Row="3" Margin="6"  />
-        <StackPanel x:Name="windSpeedPanel" Grid.Row="4" Orientation="Horizontal" Margin="6,0,6,6" VerticalAlignment="Center" Visibility="Collapsed">
+        <controls:SprintToolbar Grid.Row="0" Margin="6" DisplayControl="{x:Reference displayControl}" GaugeControl="{x:Reference gauge}" />
+        <controls:SwissTimingDisplayToolbar Grid.Row="1" DisplayControl="{x:Reference displayControl}" Visibility="{Binding SprintShowSetup, Converter={StaticResource BooleanToVisibilityConverter}}" />
+        <controls:SwissTimingDisplayControl x:Name="displayControl" Grid.Row="2" />
+        <controls:SiriccoWindowToolbar Grid.Row="3" Margin="6" SiriccoControl="{x:Reference gauge}" Visibility="{Binding SprintShowSetup, Converter={StaticResource BooleanToVisibilityConverter}}" />
+        <controls:SiriccoWindGaugeControl x:Name="gauge" Grid.Row="4" Margin="6" Visibility="{Binding ShowWindGauge, Converter={StaticResource BooleanToVisibilityConverter}}" />
+        <StackPanel x:Name="windSpeedPanel" Grid.Row="5" Orientation="Horizontal" Margin="6,0,6,6" VerticalAlignment="Center" Visibility="{Binding ShowWindGauge, Converter={StaticResource BooleanToVisibilityConverter}}">
             <TextBlock Text="Wind Speed:" FontWeight="Bold" FontStyle="Italic" Foreground="Purple" Margin="0,0,6,0" />
             <TextBlock FontWeight="Bold" FontStyle="Italic" Foreground="DarkGreen" Text="{Binding WindSpeed, ElementName=gauge, TargetNullValue='', StringFormat='{}{0:F1}'}" />
         </StackPanel>

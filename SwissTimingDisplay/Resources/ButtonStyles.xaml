@@ -149,7 +149,7 @@
         <Setter Property="FontStyle" Value="Italic" />
         <Setter Property="Padding" Value="10,4" />
         <Style.Triggers>
-            <DataTrigger Binding="{Binding IsReceiveConnected}" Value="False">
+            <DataTrigger Binding="{Binding SiriccoIsReceiveConnected}" Value="False">
                 <Setter Property="Content" Value="Connect" />
                 <Setter Property="Background">
                     <Setter.Value>
@@ -161,7 +161,7 @@
                 </Setter>
                 <Setter Property="BorderBrush" Value="#1E8449" />
             </DataTrigger>
-            <DataTrigger Binding="{Binding IsReceiveConnected}" Value="True">
+            <DataTrigger Binding="{Binding SiriccoIsReceiveConnected}" Value="True">
                 <Setter Property="Content" Value="Disconnect" />
                 <Setter Property="Background">
                     <Setter.Value>

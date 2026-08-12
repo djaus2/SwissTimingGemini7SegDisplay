@@ -26,10 +26,16 @@ namespace SwissTimingDisplay.Controls
 
         private DispatcherTimer _raceTimer = null!;
         private readonly Stopwatch _raceStopwatch = new Stopwatch();
+
         private bool _raceIsRunning = false;
+        public bool RaceIsRunning => _raceIsRunning;
+
         private TimeSpan _raceElapsed = TimeSpan.Zero;
         private bool _sendWallClockWhileRunning = false;
+
         private bool _raceHasStartedSinceReset = false;
+        public bool RaceHasStartedSinceReset => _raceHasStartedSinceReset;
+
         private bool _autoSendInProgress = false;
         private bool _showingLapTime = false;
         private TimeSpan _lapTime = TimeSpan.Zero;
@@ -163,7 +169,7 @@ namespace SwissTimingDisplay.Controls
                     }
                 }
 
-                if (!_vm.IsConnected)
+                if (!_vm.DisplayIsConnected)
                 {
                     return;
                 }
@@ -342,7 +348,7 @@ namespace SwissTimingDisplay.Controls
 
         private async void RaceTimerButton_Click(object sender, RoutedEventArgs e)
         {
-            if (!_vm.IsConnected)
+            if (!_vm.DisplayIsConnected)
             {
                 MessageBox.Show(
                     "Send port not connected.",
@@ -397,7 +403,7 @@ namespace SwissTimingDisplay.Controls
                 _vm.IsRaceRunning = false;
 
                 // Send clear command to display
-                if (_vm.IsConnected)
+                if (_vm.DisplayIsConnected)
                 {
                     try
                     {
@@ -599,7 +605,7 @@ namespace SwissTimingDisplay.Controls
             }
 
             // Disable Send after Start has been pressed until Reset returns to Start state.
-            btnSend.IsEnabled = _vm.IsConnected && !_raceIsRunning && !_raceHasStartedSinceReset;
+            btnSend.IsEnabled = _vm.DisplayIsConnected && !_raceIsRunning && !_raceHasStartedSinceReset;
         }
 
 
@@ -628,7 +634,7 @@ namespace SwissTimingDisplay.Controls
             _firstLapCounted = false;
 
             // Send clear command to display
-            if (_vm.IsConnected)
+            if (_vm.DisplayIsConnected)
             {
                 try
                 {
@@ -872,7 +878,7 @@ namespace SwissTimingDisplay.Controls
 
                 var timeLine = needsTime ? $"Time: {timeDigits} ({usedTimeStandard})\n\n" : string.Empty;
 
-                if (_vm.IsConnected)
+                if (_vm.DisplayIsConnected)
                 {
                     var portName = _vm.ConnectedPortName ?? "(unknown)";
                     await _vm.SendRawAsync(expandedBytes);
@@ -896,7 +902,7 @@ namespace SwissTimingDisplay.Controls
 
         private async void SendClearButton_Click(object sender, RoutedEventArgs e)
         {
-            if (!_vm.IsConnected)
+            if (!_vm.DisplayIsConnected)
             {
                 MessageBox.Show(
                     "Send port not connected.",
@@ -963,7 +969,7 @@ namespace SwissTimingDisplay.Controls
         {
             _vm.BeginShutdown();
             _vm.Disconnect();
-            _vm.DisconnectReceive();
+            _vm.DisconnectDisplayReceive();
             Application.Current.Shutdown();
         }
 

@@ -47,14 +47,14 @@
         </Border>
         <StackPanel Orientation="Horizontal" Visibility="{Binding IsChecked, ElementName=showSetup, Converter={StaticResource BooleanToVisibilityConverter}}">
             <TextBlock VerticalAlignment="Center" FontWeight="Bold" FontStyle="Italic" Foreground="Purple" Margin="0,0,6,0"
-                       Text="{Binding SelectedReceivePortName, StringFormat='Receive: {0}'}"
-                       Visibility="{Binding IsReceiveConnected, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                       Text="{Binding SiriccoSelectedReceivePortName, StringFormat='Receive: {0}'}"
+                       Visibility="{Binding SiriccoIsReceiveConnected, Converter={StaticResource BooleanToVisibilityConverter}}" />
             <TextBlock VerticalAlignment="Center" FontWeight="Bold" FontStyle="Italic" Foreground="Red" Margin="0,0,6,0" Text="Not Connected">
                 <TextBlock.Style>
                     <Style TargetType="TextBlock">
                         <Setter Property="Visibility" Value="Collapsed" />
                         <Style.Triggers>
-                            <DataTrigger Binding="{Binding IsReceiveConnected}" Value="False">
+                            <DataTrigger Binding="{Binding SiriccoIsReceiveConnected}" Value="False">
                                 <Setter Property="Visibility" Value="Visible" />
                             </DataTrigger>
                         </Style.Triggers>

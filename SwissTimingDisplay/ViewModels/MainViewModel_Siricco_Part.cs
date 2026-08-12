@@ -15,6 +15,7 @@ namespace SwissTimingDisplay.ViewModels
 {
     public sealed partial class MainViewModel
     {
+        private SerialPort? _siriccoReceivePort;
         private CancellationTokenSource? _siriccoReceiveCts;
         private Task? _siriccoReceiveTask;
         private readonly StringBuilder _siriccoLineBuffer = new StringBuilder();
@@ -77,33 +78,45 @@ namespace SwissTimingDisplay.ViewModels
         /// <summary>
         /// Connect receive port for Siricco mode using line-based reading
         /// </summary>
-        private void ConnectReceiveSiricco(string portName, int baudRate = 9600)
+        public void ConnectReceiveSiricco(string portName, int baudRate = 9600)
         {
             Debug.WriteLine($"ConnectReceiveSiricco called with port: {portName}");
-            
-            DisconnectReceive();
-            StopSiriccoReceiveLoop();
+
+            DisconnectSiriccoReceive();
             _siriccoLineBuffer.Clear();
 
-            var port = new SerialPort(portName, baudRate)
+            try
             {
-                Parity = Parity.None,
-                DataBits = 8,
-                StopBits = StopBits.One,
-                Handshake = Handshake.None,
-                ReadTimeout = 100,
-                WriteTimeout = 1000,
-                NewLine = "\r\n"  // Ensure CR-LF line termination
-            };
+                var port = new SerialPort(portName, baudRate)
+                {
+                    Parity = Parity.None,
+                    DataBits = 8,
+                    StopBits = StopBits.One,
+                    Handshake = Handshake.None,
+                    ReadTimeout = 100,
+                    WriteTimeout = 1000,
+                    NewLine = "\r\n"  // Ensure CR-LF line termination
+                };
 
-            port.Open();
-            _receivePort = port;
-            IsReceiveConnected = true;
-            ConnectedReceivePortName = portName;
-            OnPropertyChanged(nameof(DisplayTime));
+                port.Open();
+                _siriccoReceivePort = port;
+                SiriccoIsReceiveConnected = true;
+                OnPropertyChanged(nameof(DisplayTime));
+                RaiseCommandStates();
 
-            // Start the Siricco line-based receive loop
-            _ = StartSiriccoReceiveLoopAsync(port);
+                // Start the Siricco line-based receive loop
+                _ = StartSiriccoReceiveLoopAsync(port);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Failed to connect Siricco receive to {portName}: {ex.Message}", "Serial Port Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                SiriccoSelectedReceivePortName = null;
+                _persistedSettings.SiriccoReceivePortName = null;
+                SiriccoIsReceiveConnected = false;
+                Status = ex.Message;
+                OnPropertyChanged(nameof(DisplayTime));
+                RaiseCommandStates();
+            }
         }
 
         /// <summary>
@@ -245,6 +258,36 @@ namespace SwissTimingDisplay.ViewModels
             {
                 Debug.WriteLine($"Siricco receive loop error: {ex.Message}");
             }
+        }
+
+        /// <summary>
+        /// Disconnect the Siricco receive port and stop its loop
+        /// </summary>
+        private void DisconnectSiriccoReceive()
+        {
+            StopSiriccoReceiveLoop();
+
+            var port = _siriccoReceivePort;
+            _siriccoReceivePort = null;
+
+            if (port is not null)
+            {
+                try
+                {
+                    if (port.IsOpen)
+                    {
+                        port.Close();
+                    }
+                }
+                finally
+                {
+                    port.Dispose();
+                }
+            }
+
+            SiriccoIsReceiveConnected = false;
+            OnPropertyChanged(nameof(DisplayTime));
+            RaiseCommandStates();
         }
 
         /// <summary>

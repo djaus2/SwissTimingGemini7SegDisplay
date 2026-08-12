@@ -45,6 +45,20 @@ namespace SwissTimingDisplay.ViewModels
         Other,
     }
 
+    public enum Sprints
+    {
+        Distance100m,
+        Distance200m,
+        Distance300m,
+        Distance400m,
+        Distance100mHurdles,
+        Distance110mHurdles,
+        Distance200mHurdles,
+        Distance300mHurdles,
+        Distance400mHurdles,
+        Other,
+    }
+
     public sealed partial class MainViewModel : ObservableObject, IDisposable
     {
         private static MainViewModel? _sharedInstance;
@@ -105,8 +119,22 @@ namespace SwissTimingDisplay.ViewModels
             return metres % 400 == 0;
         }
 
+        public static int GetSprintDistanceInMetres(Sprints sprint)
+        {
+            return sprint switch
+            {
+                Sprints.Distance100m or Sprints.Distance100mHurdles => 100,
+                Sprints.Distance110mHurdles => 110,
+                Sprints.Distance200m or Sprints.Distance200mHurdles => 200,
+                Sprints.Distance300m or Sprints.Distance300mHurdles => 300,
+                Sprints.Distance400m => 400,
+                _ => 0,
+            };
+        }
+
         private readonly SerialPortDiscoveryService _discoveryService = new SerialPortDiscoveryService();
         private readonly SerialPortService _serialPortService = new SerialPortService();
+        private readonly SerialPortService _siriccoSerialPortService = new SerialPortService();
 
         private SerialPortInfo? _selectedPort;
         private SerialPortInfo? _selectedReceivePort;
@@ -136,6 +164,19 @@ namespace SwissTimingDisplay.ViewModels
         private bool _isLoadingSettings = false;
         private bool _isShuttingDown = false;
         private bool _isSwitchingWindows = false;
+        private Sprints _sprint = Sprints.Distance100m;
+        private bool _showWindGaugeButton = false;
+        private bool _showWindGauge = true;
+        private bool _sprintShowSetup = false;
+
+        private string? _displaySelectedSendPortName;
+        private string? _displaySelectedReceivePortName;
+        private bool _displayIsConnected;
+        private bool _displayIsReceiveConnected;
+        private string? _siriccoSelectedSendPortName;
+        private string? _siriccoSelectedReceivePortName;
+        private bool _siriccoIsConnected;
+        private bool _siriccoIsReceiveConnected;
 
         private SiriccoMessageModes _siriccoMessageMode = SiriccoMessageModes.Gill_UVContinuous;
 
@@ -185,6 +226,11 @@ namespace SwissTimingDisplay.ViewModels
 
             SendConnectToggleCommand = new RelayCommand(ToggleSendConnection, () => (!string.IsNullOrWhiteSpace(SelectedSendPortName) && !IsConnected) || IsConnected);
             ReceiveConnectToggleCommand = new RelayCommand(ToggleReceiveConnection, () => (!string.IsNullOrWhiteSpace(SelectedReceivePortName) && !IsReceiveConnected) || IsReceiveConnected);
+
+            DisplaySendConnectToggleCommand = new RelayCommand(ToggleDisplaySendConnection, () => (!string.IsNullOrWhiteSpace(DisplaySelectedSendPortName) && !IsConnected) || IsConnected);
+            DisplayReceiveConnectToggleCommand = new RelayCommand(ToggleDisplayReceiveConnection, () => (!string.IsNullOrWhiteSpace(DisplaySelectedReceivePortName) && !IsReceiveConnected) || IsReceiveConnected);
+            SiriccoSendConnectToggleCommand = new RelayCommand(ToggleSiriccoSendConnection, () => (!string.IsNullOrWhiteSpace(SiriccoSelectedSendPortName) && !SiriccoIsConnected) || SiriccoIsConnected);
+            SiriccoReceiveConnectToggleCommand = new RelayCommand(ToggleSiriccoReceiveConnection, () => (!string.IsNullOrWhiteSpace(SiriccoSelectedReceivePortName) && !SiriccoIsReceiveConnected) || SiriccoIsReceiveConnected);
 
             BibNoDecrementCommand = new RelayCommand(() => BibNoInt--, () => BibNoInt > 0);
             BibNoIncrementCommand = new RelayCommand(() => BibNoInt++, () => BibNoInt < 999);
@@ -484,7 +530,7 @@ namespace SwissTimingDisplay.ViewModels
                     if (!value)
                     {
                         // Disconnect receive port when hiding simulator
-                        DisconnectReceive();
+                        DisconnectDisplayReceive();
                         // Set DisplaySimulatorSpeed to false when hiding simulator
                         if (_displaySimulatorSpeed)
                         {
@@ -753,7 +799,7 @@ namespace SwissTimingDisplay.ViewModels
                     }
 
                     Disconnect();
-                    DisconnectReceive();
+                    DisconnectDisplayReceive();
 
                     SetProperty(ref _activeWindow, value);
 
@@ -806,6 +852,149 @@ namespace SwissTimingDisplay.ViewModels
                     }
                 }
             }
+        }
+
+        public Sprints Sprint
+        {
+            get => _sprint;
+            set
+            {
+                if (SetProperty(ref _sprint, value))
+                {
+                    UpdateSprintDerivedProperties();
+                }
+            }
+        }
+
+        public bool ShowWindGaugeButton
+        {
+            get => _showWindGaugeButton;
+            set => SetProperty(ref _showWindGaugeButton, value);
+        }
+
+        public bool ShowWindGauge
+        {
+            get => _showWindGauge;
+            set => SetProperty(ref _showWindGauge, value);
+        }
+
+        public bool SprintShowSetup
+        {
+            get => _sprintShowSetup;
+            set => SetProperty(ref _sprintShowSetup, value);
+        }
+
+        public string? DisplaySelectedSendPortName
+        {
+            get => _displaySelectedSendPortName;
+            set
+            {
+                if (SetProperty(ref _displaySelectedSendPortName, value))
+                {
+                    RaiseCommandStates();
+                }
+            }
+        }
+
+        public string? DisplaySelectedReceivePortName
+        {
+            get => _displaySelectedReceivePortName;
+            set
+            {
+                if (SetProperty(ref _displaySelectedReceivePortName, value))
+                {
+                    RaiseCommandStates();
+                }
+            }
+        }
+
+        public bool DisplayIsConnected
+        {
+            get => _displayIsConnected;
+            private set
+            {
+                if (SetProperty(ref _displayIsConnected, value))
+                {
+                    RaiseCommandStates();
+                }
+            }
+        }
+
+        public bool DisplayIsReceiveConnected
+        {
+            get => _displayIsReceiveConnected;
+            private set
+            {
+                if (SetProperty(ref _displayIsReceiveConnected, value))
+                {
+                    RaiseCommandStates();
+                }
+            }
+        }
+
+        public string? SiriccoSelectedSendPortName
+        {
+            get => _siriccoSelectedSendPortName;
+            set
+            {
+                bool changed = SetProperty(ref _siriccoSelectedSendPortName, value);
+                if (string.IsNullOrWhiteSpace(value) && SiriccoIsConnected)
+                {
+                    SiriccoIsConnected = false;
+                }
+                if (changed)
+                {
+                    RaiseCommandStates();
+                }
+            }
+        }
+
+        public string? SiriccoSelectedReceivePortName
+        {
+            get => _siriccoSelectedReceivePortName;
+            set
+            {
+                bool changed = SetProperty(ref _siriccoSelectedReceivePortName, value);
+                if (string.IsNullOrWhiteSpace(value) && SiriccoIsReceiveConnected)
+                {
+                    SiriccoIsReceiveConnected = false;
+                }
+                if (changed)
+                {
+                    RaiseCommandStates();
+                }
+            }
+        }
+
+        public bool SiriccoIsConnected
+        {
+            get => _siriccoIsConnected;
+            private set
+            {
+                if (SetProperty(ref _siriccoIsConnected, value))
+                {
+                    RaiseCommandStates();
+                }
+            }
+        }
+
+        public bool SiriccoIsReceiveConnected
+        {
+            get => _siriccoIsReceiveConnected;
+            private set
+            {
+                if (SetProperty(ref _siriccoIsReceiveConnected, value))
+                {
+                    RaiseCommandStates();
+                }
+            }
+        }
+
+        private void UpdateSprintDerivedProperties()
+        {
+            var metres = GetSprintDistanceInMetres(_sprint);
+            ShowWindGaugeButton = _sprint == Sprints.Distance200m || _sprint == Sprints.Distance200mHurdles;
+            ShowWindGauge = metres > 0 && metres <= 200;
         }
 
         public string BibNo
@@ -911,6 +1100,14 @@ namespace SwissTimingDisplay.ViewModels
 
         public RelayCommand ReceiveConnectToggleCommand { get; }
 
+        public RelayCommand DisplaySendConnectToggleCommand { get; }
+
+        public RelayCommand DisplayReceiveConnectToggleCommand { get; }
+
+        public RelayCommand SiriccoSendConnectToggleCommand { get; }
+
+        public RelayCommand SiriccoReceiveConnectToggleCommand { get; }
+
         public RelayCommand BibNoDecrementCommand { get; }
         public RelayCommand BibNoIncrementCommand { get; }
         public RelayCommand BibNoClearCommand { get; }
@@ -975,31 +1172,15 @@ namespace SwissTimingDisplay.ViewModels
             // Auto-connect send port if it was connected for the active window
             if (sendPortAvailable && _pendingPersistedSendPortConnected)
             {
-                try
-                {
-                    Connect();
-                    RaiseCommandStates();
-                    Status = $"Auto-connected to {SelectedSendPortName} (send).";
-                }
-                catch (Exception ex)
-                {
-                    Status = $"Auto-connect failed: {ex.Message}";
-                }
+                Connect();
+                RaiseCommandStates();
             }
 
             // Auto-connect receive port if it was connected for the active window
             if (receivePortAvailable && _pendingPersistedReceivePortConnected)
             {
-                try
-                {
-                    ConnectReceive(SelectedReceivePortName!);
-                    RaiseCommandStates();
-                    Status = $"Auto-connected to {SelectedSendPortName} (send) and {SelectedReceivePortName} (receive).";
-                }
-                catch (Exception ex)
-                {
-                    Status = $"Auto-connect receive failed: {ex.Message}";
-                }
+                ConnectDisplayReceive(SelectedReceivePortName!);
+                RaiseCommandStates();
             }
 
             // Clear pending connection states after use
@@ -1027,7 +1208,21 @@ namespace SwissTimingDisplay.ViewModels
             }
             catch (Exception ex)
             {
+                MessageBox.Show($"Failed to connect to {SelectedSendPortName}: {ex.Message}", "Serial Port Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                SelectedSendPortName = null;
+                if (CurrentWindow != ActiveWindow.WindGauge)
+                {
+                    DisplaySelectedSendPortName = null;
+                    _persistedSettings.DisplaySendPortName = null;
+                }
+                else
+                {
+                    _persistedSettings.WindGaugeSendPortName = null;
+                }
                 Status = ex.Message;
+                OnPropertyChanged(nameof(IsConnected));
+                OnPropertyChanged(nameof(ConnectedPortName));
+                RaiseCommandStates();
             }
         }
 
@@ -1039,6 +1234,47 @@ namespace SwissTimingDisplay.ViewModels
                 Status = "Disconnected.";
                 OnPropertyChanged(nameof(IsConnected));
                 OnPropertyChanged(nameof(ConnectedPortName));
+                RaiseCommandStates();
+            }
+            catch (Exception ex)
+            {
+                Status = ex.Message;
+            }
+        }
+
+        public void ConnectSiricco()
+        {
+            if (string.IsNullOrWhiteSpace(SiriccoSelectedSendPortName))
+            {
+                Status = "Select a Siricco COM port.";
+                return;
+            }
+
+            try
+            {
+                _siriccoSerialPortService.Connect(SiriccoSelectedSendPortName);
+                Status = $"Siricco connected to {SiriccoSelectedSendPortName}.";
+                SiriccoIsConnected = true;
+                RaiseCommandStates();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Failed to connect Siricco send to {SiriccoSelectedSendPortName}: {ex.Message}", "Serial Port Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                SiriccoSelectedSendPortName = null;
+                _persistedSettings.SiriccoSendPortName = null;
+                SiriccoIsConnected = false;
+                Status = ex.Message;
+                RaiseCommandStates();
+            }
+        }
+
+        private void DisconnectSiricco()
+        {
+            try
+            {
+                _siriccoSerialPortService.Disconnect();
+                Status = "Siricco disconnected.";
+                SiriccoIsConnected = false;
                 RaiseCommandStates();
             }
             catch (Exception ex)
@@ -1063,7 +1299,7 @@ namespace SwissTimingDisplay.ViewModels
         {
             if (IsReceiveConnected)
             {
-                DisconnectReceive();
+                DisconnectDisplayReceive();
                 RaiseCommandStates();
                 return;
             }
@@ -1077,7 +1313,7 @@ namespace SwissTimingDisplay.ViewModels
 
             try
             {
-                ConnectReceive(SelectedReceivePortName);
+                ConnectDisplayReceive(SelectedReceivePortName);
                 Status = $"Receive connected to {SelectedReceivePortName}.";
             }
             catch (Exception ex)
@@ -1089,58 +1325,110 @@ namespace SwissTimingDisplay.ViewModels
             RaiseCommandStates();
         }
 
-        public void ConnectReceive(string portName, int baudRate = 9600)
+        private void ToggleDisplaySendConnection()
         {
-            Debug.WriteLine($"ConnectReceive called. CurrentWindow: {CurrentWindow}, IsSiricco: {CurrentWindow == ActiveWindow.Siricco}");
-            
-            // If in Siricco mode, use line-based reading
-            if (CurrentWindow == ActiveWindow.Siricco)
+            SelectedSendPortName = DisplaySelectedSendPortName;
+            if (IsConnected)
             {
-                Debug.WriteLine("Using Siricco line-based receive loop");
-                ConnectReceiveSiricco(portName, baudRate);
-                return;
+                Disconnect();
             }
-
-            else if (CurrentWindow == ActiveWindow.SiriccoWG)
+            else if (!string.IsNullOrWhiteSpace(SelectedSendPortName))
             {
-                Debug.WriteLine("Using Siricco (WG) line-based receive loop");
-                ConnectReceiveSiricco(portName, baudRate);
-                return;
+                Connect();
             }
-
-            else if (CurrentWindow == ActiveWindow.SiriccoWindowControlled)
-            {
-                Debug.WriteLine("Using Siricco (Controlled) line-based receive loop");
-                ConnectReceiveSiricco(portName, baudRate);
-                return;
-            }
-
-            DisconnectReceive();
-
-            var port = new SerialPort(portName, baudRate)
-            {
-                Parity = Parity.None,
-                DataBits = 8,
-                StopBits = StopBits.One,
-                Handshake = Handshake.None,
-                ReadTimeout = 1000,
-                WriteTimeout = 1000,
-            };
-
-            port.Open();
-            _receivePort = port;
-            IsReceiveConnected = true;
-            ConnectedReceivePortName = portName;
-            OnPropertyChanged(nameof(DisplayTime));
-
-            _receiveCts = new CancellationTokenSource();
-            _receiveTask = Task.Run(() => ReceiveLoopAsync(port, _receiveCts.Token));
+            DisplayIsConnected = IsConnected;
         }
 
-        public void DisconnectReceive()
+        private void ToggleSiriccoSendConnection()
         {
-            StopSiriccoReceiveLoop();
+            if (SiriccoIsConnected)
+            {
+                DisconnectSiricco();
+            }
+            else if (!string.IsNullOrWhiteSpace(SiriccoSelectedSendPortName))
+            {
+                ConnectSiricco();
+            }
+        }
 
+        private void ToggleDisplayReceiveConnection()
+        {
+            SelectedReceivePortName = DisplaySelectedReceivePortName;
+            if (IsReceiveConnected)
+            {
+                DisconnectDisplayReceive();
+            }
+            else if (!string.IsNullOrWhiteSpace(SelectedReceivePortName))
+            {
+                ConnectDisplayReceive(SelectedReceivePortName);
+                Status = $"Display receive connected to {SelectedReceivePortName}.";
+            }
+            DisplayIsReceiveConnected = IsReceiveConnected;
+            OnPropertyChanged(nameof(DisplayTime));
+        }
+
+        private void ToggleSiriccoReceiveConnection()
+        {
+            if (SiriccoIsReceiveConnected)
+            {
+                DisconnectSiriccoReceive();
+            }
+            else if (!string.IsNullOrWhiteSpace(SiriccoSelectedReceivePortName))
+            {
+                ConnectReceiveSiricco(SiriccoSelectedReceivePortName);
+                Status = $"Siricco receive connected to {SiriccoSelectedReceivePortName}.";
+            }
+        }
+
+        public void ConnectDisplayReceive(string portName, int baudRate = 9600)
+        {
+            DisconnectDisplayReceive();
+
+            try
+            {
+                var port = new SerialPort(portName, baudRate)
+                {
+                    Parity = Parity.None,
+                    DataBits = 8,
+                    StopBits = StopBits.One,
+                    Handshake = Handshake.None,
+                    ReadTimeout = 1000,
+                    WriteTimeout = 1000,
+                };
+
+                port.Open();
+                _receivePort = port;
+                IsReceiveConnected = true;
+                ConnectedReceivePortName = portName;
+                OnPropertyChanged(nameof(DisplayTime));
+                RaiseCommandStates();
+
+                _receiveCts = new CancellationTokenSource();
+                _receiveTask = Task.Run(() => ReceiveLoopAsync(port, _receiveCts.Token));
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Failed to connect display receive to {portName}: {ex.Message}", "Serial Port Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                SelectedReceivePortName = null;
+                if (CurrentWindow != ActiveWindow.WindGauge)
+                {
+                    DisplaySelectedReceivePortName = null;
+                    _persistedSettings.DisplayReceivePortName = null;
+                }
+                else
+                {
+                    _persistedSettings.WindGaugeReceivePortName = null;
+                }
+                IsReceiveConnected = false;
+                ConnectedReceivePortName = null;
+                Status = ex.Message;
+                OnPropertyChanged(nameof(DisplayTime));
+                RaiseCommandStates();
+            }
+        }
+
+        public void DisconnectDisplayReceive()
+        {
             var cts = _receiveCts;
             _receiveCts = null;
             if (cts is not null)
@@ -1177,6 +1465,7 @@ namespace SwissTimingDisplay.ViewModels
             IsReceiveConnected = false;
             ConnectedReceivePortName = null;
             OnPropertyChanged(nameof(DisplayTime));
+            RaiseCommandStates();
         }
 
         public enum OpMode { display,windgauge,siricco, unknown}
@@ -1572,9 +1861,11 @@ namespace SwissTimingDisplay.ViewModels
 
         public void Dispose()
         {
-            DisconnectReceive();
+            DisconnectDisplayReceive();
+            DisconnectSiriccoReceive();
             _serialPortService.DataReceived -= OnSendPortDataReceived;
             _serialPortService.Dispose();
+            _siriccoSerialPortService.Dispose();
         }
 
         private sealed partial class PersistedSettings : ObservableObject
@@ -1646,6 +1937,21 @@ namespace SwissTimingDisplay.ViewModels
                     WindGaugeCaptureCountsPerSecStr = _persistedSettings.SiriccoCaptureCountsPerSec;
                 }
 
+                DisplaySelectedSendPortName = _persistedSettings.DisplaySendPortName;
+                DisplayIsConnected = _persistedSettings.DisplaySendPortConnected;
+                DisplaySelectedReceivePortName = _persistedSettings.DisplayReceivePortName;
+                DisplayIsReceiveConnected = _persistedSettings.DisplayReceivePortConnected;
+
+                SiriccoSelectedSendPortName = _persistedSettings.SiriccoSendPortName;
+                SiriccoIsConnected = _persistedSettings.SiriccoSendPortConnected;
+                SiriccoSelectedReceivePortName = _persistedSettings.SiriccoReceivePortName;
+                SiriccoIsReceiveConnected = _persistedSettings.SiriccoReceiveConnected;
+
+                if (string.IsNullOrWhiteSpace(SiriccoSelectedSendPortName))
+                    SiriccoIsConnected = false;
+                if (string.IsNullOrWhiteSpace(SiriccoSelectedReceivePortName))
+                    SiriccoIsReceiveConnected = false;
+
                 // Note: ports are loaded on demand when a window becomes active
             }
             catch
@@ -1671,30 +1977,21 @@ namespace SwissTimingDisplay.ViewModels
                 _persistedSettings.SiriccoMessageMode = _siriccoMessageMode.ToString();
                 _persistedSettings.SiriccoCaptureCountsPerSec = WindGaugeCaptureCountsPerSecStr;
 
-                // Save to window-specific properties based on current window
-                switch (_activeWindow)
-                {
-                    case ActiveWindow.Display:
-                        _persistedSettings.DisplaySendPortName = SelectedSendPortName;
-                        _persistedSettings.DisplaySendPortConnected = IsConnected;
-                        _persistedSettings.DisplayReceivePortName = SelectedReceivePortName;
-                        _persistedSettings.DisplayReceivePortConnected = IsReceiveConnected;
-                        break;
-                    case ActiveWindow.WindGauge:
-                        _persistedSettings.WindGaugeSendPortName = SelectedSendPortName;
-                        _persistedSettings.WindGaugeSendPortConnected = IsConnected;
-                        _persistedSettings.WindGaugeReceivePortName = SelectedReceivePortName;
-                        _persistedSettings.WindGaugeReceiveConnected = IsReceiveConnected;
-                        break;
-                    case ActiveWindow.Siricco:
-                    case ActiveWindow.SiriccoWG:
-                    case ActiveWindow.SiriccoWindowControlled:
-                        _persistedSettings.SiriccoSendPortName = SelectedSendPortName;
-                        _persistedSettings.SiriccoSendPortConnected = IsConnected;
-                        _persistedSettings.SiriccoReceivePortName = SelectedReceivePortName;
-                        _persistedSettings.SiriccoReceiveConnected = IsReceiveConnected;
-                        break;
-                }
+                // Save all port sets independently
+                _persistedSettings.DisplaySendPortName = DisplaySelectedSendPortName;
+                _persistedSettings.DisplaySendPortConnected = DisplayIsConnected;
+                _persistedSettings.DisplayReceivePortName = DisplaySelectedReceivePortName;
+                _persistedSettings.DisplayReceivePortConnected = DisplayIsReceiveConnected;
+
+                _persistedSettings.SiriccoSendPortName = SiriccoSelectedSendPortName;
+                _persistedSettings.SiriccoSendPortConnected = SiriccoIsConnected;
+                _persistedSettings.SiriccoReceivePortName = SiriccoSelectedReceivePortName;
+                _persistedSettings.SiriccoReceiveConnected = SiriccoIsReceiveConnected;
+
+                _persistedSettings.WindGaugeSendPortName = SelectedSendPortName;
+                _persistedSettings.WindGaugeSendPortConnected = IsConnected;
+                _persistedSettings.WindGaugeReceivePortName = SelectedReceivePortName;
+                _persistedSettings.WindGaugeReceiveConnected = IsReceiveConnected;
 
                 var json = JsonSerializer.Serialize(_persistedSettings);
                 File.WriteAllText(SettingsFilePath, json);
@@ -1783,6 +2080,11 @@ namespace SwissTimingDisplay.ViewModels
             SendCommand.RaiseCanExecuteChanged();
             SendConnectToggleCommand.RaiseCanExecuteChanged();
             ReceiveConnectToggleCommand.RaiseCanExecuteChanged();
+
+            DisplaySendConnectToggleCommand.RaiseCanExecuteChanged();
+            DisplayReceiveConnectToggleCommand.RaiseCanExecuteChanged();
+            SiriccoSendConnectToggleCommand.RaiseCanExecuteChanged();
+            SiriccoReceiveConnectToggleCommand.RaiseCanExecuteChanged();
         }
 
         private void RefreshPortViews()

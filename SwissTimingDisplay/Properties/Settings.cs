@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace SwissTimingDisplay.Properties
 {
@@ -11,8 +12,10 @@ namespace SwissTimingDisplay.Properties
         public static Settings Default => _default.Value;
 
         public bool useSiriccoSimulator { get; set; }
-        public bool ShowSetup { get; set; }
-        public bool ShowSiriccoControls { get; set; }
+        [JsonIgnore]
+    public bool ShowSetup { get; set; }
+        [JsonIgnore]
+    public bool ShowSiriccoControls { get; set; }
 
         private static string SettingsPath => Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
