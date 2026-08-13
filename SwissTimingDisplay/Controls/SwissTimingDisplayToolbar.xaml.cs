@@ -17,6 +17,31 @@ namespace SwissTimingDisplay.Controls
             set => SetValue(DisplayControlProperty, value);
         }
 
+        public static readonly DependencyProperty SiriccoControlProperty =
+            DependencyProperty.Register(
+                nameof(SiriccoControl),
+                typeof(SiriccoWindGaugeControl),
+                typeof(SwissTimingDisplayToolbar));
+
+        public SiriccoWindGaugeControl? SiriccoControl
+        {
+            get => (SiriccoWindGaugeControl?)GetValue(SiriccoControlProperty);
+            set => SetValue(SiriccoControlProperty, value);
+        }
+
+        public static readonly DependencyProperty ShowBackExitProperty =
+            DependencyProperty.Register(
+                nameof(ShowBackExit),
+                typeof(bool),
+                typeof(SwissTimingDisplayToolbar),
+                new PropertyMetadata(true));
+
+        public bool ShowBackExit
+        {
+            get => (bool)GetValue(ShowBackExitProperty);
+            set => SetValue(ShowBackExitProperty, value);
+        }
+
         public SwissTimingDisplayToolbar()
         {
             InitializeComponent();
@@ -42,6 +67,10 @@ namespace SwissTimingDisplay.Controls
         {
             if (Control == null) return;
             Control.ControlVisibility = Control.ControlVisibility == Visibility.Visible ? Visibility.Collapsed : Visibility.Visible;
+            if (Control.ControlVisibility == Visibility.Visible && SiriccoControl is not null)
+            {
+                SiriccoControl.ControlVisibility = Visibility.Collapsed;
+            }
         }
 
         private void BackButton_Click(object sender, RoutedEventArgs e)
@@ -53,7 +82,8 @@ namespace SwissTimingDisplay.Controls
 
         private void ExitButton_Click(object sender, RoutedEventArgs e)
         {
-            Control?.Exit();
+            Control?.ViewModel?.BeginShutdown();
+            Application.Current.Shutdown();
         }
 
 

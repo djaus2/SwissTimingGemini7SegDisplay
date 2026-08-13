@@ -107,11 +107,6 @@ namespace SwissTimingDisplay.Controls
 
         public void ToggleStart() => RaceTimerButton_Click(this, new RoutedEventArgs());
 
-        public void ShowWindGauge() => WindGaugeButton_Click(this, new RoutedEventArgs());
-
-        public void ShowSiricco() => SiriccoButton_Click(this, new RoutedEventArgs());
-
-        public void Exit() => ExitButton_Click(this, new RoutedEventArgs());
 
         public SwissTimingDisplayControl()
         {
@@ -931,46 +926,6 @@ namespace SwissTimingDisplay.Controls
                     MessageBoxButton.OK,
                     MessageBoxImage.Error);
             }
-        }
-
-        private void WindGaugeButton_Click(object sender, RoutedEventArgs e)
-        {
-            // Set current window and save state
-            _vm.CurrentWindow = MainViewModel.ActiveWindow.WindGauge;
-            _vm.ShowWindGaugeWindow = true;
-            
-            if (_windGaugeWindow == null)
-            {
-                _windGaugeWindow = new MistralWindGaugeWindow(_vm, _mainWindow, _athsSprintWindow);
-            }
-            _windGaugeWindow.Show();
-            _mainWindow?.Hide();
-            _athsSprintWindow?.Hide();
-        }
-        private void SiriccoButton_Click(object sender, RoutedEventArgs e)
-        {
-
-            // Set current window and save state
-            _vm.CurrentWindow = MainViewModel.ActiveWindow.SiriccoWindowControlled;
-            _vm.ShowSiriccoWindow = true;
-
-            if (_siriccoWindowControlled == null)
-            {
-                _siriccoWindowControlled = new SiriccoWindowControlled(_vm, _mainWindow, _athsSprintWindow);
-            }
-            _siriccoWindowControlled.Show();
-            _mainWindow?.Hide();
-            _athsSprintWindow?.Hide();
-        }
-
-
-
-        private void ExitButton_Click(object sender, RoutedEventArgs e)
-        {
-            _vm.BeginShutdown();
-            _vm.Disconnect();
-            _vm.DisconnectDisplayReceive();
-            Application.Current.Shutdown();
         }
 
     }

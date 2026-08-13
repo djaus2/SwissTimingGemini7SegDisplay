@@ -264,6 +264,9 @@ namespace SwissTimingDisplay.ViewModels
             AutoConnectIfNeeded();
             _isLoadingSettings = false;
 
+            // Ensure sprint-derived UI states are correct from the start
+            UpdateSprintDerivedProperties();
+
             // Initialize static current mode with loaded value
             SiriccoData.CurrentSiriccoMode = _siriccoMessageMode;
 

@@ -20,9 +20,9 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         <controls:SprintToolbar Grid.Row="0" Margin="6" DisplayControl="{x:Reference displayControl}" GaugeControl="{x:Reference gauge}" />
-        <controls:SwissTimingDisplayToolbar Grid.Row="1" DisplayControl="{x:Reference displayControl}" Visibility="{Binding SprintShowSetup, Converter={StaticResource BooleanToVisibilityConverter}}" />
+        <controls:SwissTimingDisplayToolbar Grid.Row="1" DisplayControl="{x:Reference displayControl}" SiriccoControl="{x:Reference gauge}" ShowBackExit="False" Visibility="{Binding SprintShowSetup, Converter={StaticResource BooleanToVisibilityConverter}}" />
         <controls:SwissTimingDisplayControl x:Name="displayControl" Grid.Row="2" />
-        <controls:SiriccoWindowToolbar Grid.Row="3" Margin="6" SiriccoControl="{x:Reference gauge}" Visibility="{Binding SprintShowSetup, Converter={StaticResource BooleanToVisibilityConverter}}" />
+        <controls:SiriccoWindowToolbar Grid.Row="3" Margin="6" SiriccoControl="{x:Reference gauge}" DisplayControl="{x:Reference displayControl}" ShowBackExit="False" Visibility="{Binding SprintShowSetup, Converter={StaticResource BooleanToVisibilityConverter}}" />
         <controls:SiriccoWindGaugeControl x:Name="gauge" Grid.Row="4" Margin="6" Visibility="{Binding ShowWindGauge, Converter={StaticResource BooleanToVisibilityConverter}}" />
         <StackPanel x:Name="windSpeedPanel" Grid.Row="5" Orientation="Horizontal" Margin="6,0,6,6" VerticalAlignment="Center" Visibility="{Binding ShowWindGauge, Converter={StaticResource BooleanToVisibilityConverter}}">
             <TextBlock Text="Wind Speed:" FontWeight="Bold" FontStyle="Italic" Foreground="Purple" Margin="0,0,6,0" />

@@ -1063,38 +1063,7 @@ namespace SwissTimingDisplay.Controls
 
         }
 
-        private void BackToMainButton_Click(object sender, RoutedEventArgs e)
-        {
-            // Set current window and save state
-            _vm.CurrentWindow = MainViewModel.ActiveWindow.Display;
-            _vm.ShowWindGaugeWindow = false;
 
-            if (_mainWindow != null)
-            {
-                _mainWindow.Show(); 
-            }
-            else if (_athsSprintWindow != null)
-            {
-                _athsSprintWindow.Show(); 
-            }
-            else if(false) // Placeholder for any other window type check   
-            {
-                _mainWindow = new MainWindow(_vm);
-                _mainWindow.Show();
-            }
-            else
-            {
-                _athsSprintWindow = new AthsSprintWindow(_vm);
-                _athsSprintWindow.Show();
-            }
-            this.Visibility = Visibility.Collapsed;
-        }
-
-        private void ExitButton_Click(object sender, RoutedEventArgs e)
-        {
-            _vm.BeginShutdown();
-            Application.Current.Shutdown();
-        }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {

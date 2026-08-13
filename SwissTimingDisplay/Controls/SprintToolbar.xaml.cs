@@ -73,25 +73,23 @@ namespace SwissTimingDisplay.Controls
 
         private void ToggleControls_Click(object sender, RoutedEventArgs e)
         {
-            if (DisplayControl == null) return;
-            DisplayControl.ControlVisibility = DisplayControl.ControlVisibility == Visibility.Visible ? Visibility.Collapsed : Visibility.Visible;
+            if (DataContext is MainViewModel vm)
+            {
+                vm.SprintShowSetup = !vm.SprintShowSetup;
+            }
         }
 
         private void ShowSetup_Unchecked(object sender, RoutedEventArgs e)
         {
-            if (DisplayControl is not null)
+            if (DataContext is MainViewModel vm)
             {
-                DisplayControl.ControlVisibility = Visibility.Collapsed;
-            }
-            if (GaugeControl is not null)
-            {
-                GaugeControl.ControlVisibility = Visibility.Collapsed;
+                vm.SprintShowSetup = false;
             }
         }
 
         private void ShowSetup_Checked(object sender, RoutedEventArgs e)
         {
-            // Toolbars become visible; controls stay hidden until the user clicks Show Controls
+            // Setup just reveals the Show/Hide Controls button; it does not show the toolbars.
         }
 
         private void BackButton_Click(object sender, RoutedEventArgs e)

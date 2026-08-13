@@ -116,10 +116,7 @@
                 </CheckBox>
                 <TextBlock Grid.Column="3" Margin="12,0,4,0" VerticalAlignment="Center" FontWeight="Bold" FontStyle="Italic" Foreground="Purple" Text="Message Mode:" />
                 <ComboBox Grid.Column="4" Margin="4,0,0,0" VerticalAlignment="Center" Style="{StaticResource ComboBoxStyle}" ItemsSource="{Binding Source={StaticResource SiriccoMessageModesFiltered}}" SelectedItem="{Binding SiriccoMessageMode}" SelectionChanged="SiriccoMessageMode_SelectionChanged" />
-                <StackPanel Grid.Column="7" Orientation="Horizontal" HorizontalAlignment="Right">
-                    <Button x:Name="btnBackToMain" Margin="0,0,0,0" Padding="10,4" Content="Back to Main" Click="BackToMainButton_Click" Style="{StaticResource SnazzyButtonStylePurple}" />
-                    <Button x:Name="btnExit" Margin="12,0,0,0" Padding="10,4" Content="Exit" Click="ExitButton_Click" Style="{StaticResource SnazzyButtonStyleRed}" />
-                </StackPanel>
+
                 <CheckBox x:Name="cbUseWallClock" Grid.Column="2" Margin="12,0,0,0" VerticalAlignment="Center" IsChecked="{Binding UseWallClockTimeOfDay}" Checked="UseWallClock_Checked" Unchecked="UseWallClock_Unchecked" Visibility="Collapsed">
                     <CheckBox.Content>
                         <TextBlock FontWeight="Bold" FontStyle="Italic" Foreground="Purple" Text="Use wall clock" />
