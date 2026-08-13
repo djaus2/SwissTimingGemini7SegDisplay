@@ -39,7 +39,7 @@ The app can also run in a mode where it can receive wind speed data from a Swiss
 > ****Prelim*** version of Sprint page available* Can simultaneously handle wind gauge and a clock for 100/200m events.  
 > ***Latest:*** Significant UI refinements especially to Sprint page.
 
-[Latest Release](/Releases)
+[Latest Release](https://github.com/djaus2/SwissTimingGemini7SegDisplay/releases)
 
 ---
 
