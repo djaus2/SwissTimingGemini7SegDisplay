@@ -99,6 +99,7 @@ namespace SwissTimingDisplay.ViewModels
                 if (SetProperty(ref _isRaceRunning, value))
                 {
                     OnPropertyChanged(nameof(DisplayTime));
+                    OnPropertyChanged(nameof(CanStartRace));
                 }
             }
         }
@@ -106,7 +107,13 @@ namespace SwissTimingDisplay.ViewModels
         public bool RaceHasStartedSinceReset
         {
             get => _raceHasStartedSinceReset;
-            set => SetProperty(ref _raceHasStartedSinceReset, value);
+            set
+            {
+                if (SetProperty(ref _raceHasStartedSinceReset, value))
+                {
+                    OnPropertyChanged(nameof(CanStartRace));
+                }
+            }
         }
 
         public Task SendRawAsync(byte[] payload)

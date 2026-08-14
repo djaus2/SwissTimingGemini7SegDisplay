@@ -33,6 +33,13 @@ namespace SwissTimingDisplay.ViewModels
         DownCount,
     }
 
+    public enum WindGaugeState
+    {
+        Ready,
+        Acquiring,
+        Acquired,
+    }
+
     public enum RaceDistance
     {
         Distance600m,
@@ -177,6 +184,7 @@ namespace SwissTimingDisplay.ViewModels
         private string? _siriccoSelectedReceivePortName;
         private bool _siriccoIsConnected;
         private bool _siriccoIsReceiveConnected;
+        private WindGaugeState _siriccoState;
 
         private SiriccoMessageModes _siriccoMessageMode = SiriccoMessageModes.Gill_UVContinuous;
 
@@ -992,6 +1000,21 @@ namespace SwissTimingDisplay.ViewModels
                 }
             }
         }
+
+        public WindGaugeState SiriccoState
+        {
+            get => _siriccoState;
+            set
+            {
+                if (SetProperty(ref _siriccoState, value))
+                {
+                    OnPropertyChanged(nameof(CanStartRace));
+                }
+            }
+        }
+
+        public bool CanStartRace =>
+            !(SiriccoState == WindGaugeState.Acquiring && !IsRaceRunning && RaceHasStartedSinceReset);
 
         private void UpdateSprintDerivedProperties()
         {

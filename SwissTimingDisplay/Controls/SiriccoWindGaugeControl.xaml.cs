@@ -46,6 +46,18 @@ namespace SwissTimingDisplay.Controls
             set => SetValue(ControlVisibilityProperty, value);
         }
 
+        private WindGaugeState _state = WindGaugeState.Ready;
+        public WindGaugeState State
+        {
+            get => _state;
+            set
+            {
+                _state = value;
+                if (_vm is not null)
+                    _vm.SiriccoState = value;
+            }
+        }
+
         private static void OnControlVisibilityChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             var control = (SiriccoWindGaugeControl)d;
@@ -599,6 +611,7 @@ namespace SwissTimingDisplay.Controls
         {
             if (_SiriccoIsRunning)
             {
+                State = WindGaugeState.Acquired;
                 _SiriccoIsRunning = false;
                 _vm.SiriccoIsRunning = false;
                 _vm.IsRaceRunning = false;
@@ -625,6 +638,7 @@ namespace SwissTimingDisplay.Controls
 
             if (_SiriccoHasStartedSinceReset)
             {
+                State = WindGaugeState.Ready;
                 //SendCmd(TcpCommand.WindGauge_Reset_Stop_Clear);
                 speedTally = 0.0;
                 WindSpeed = null;
@@ -666,6 +680,7 @@ namespace SwissTimingDisplay.Controls
             _SiriccoIsRunning = true;
             _vm.SiriccoIsRunning = true;
             _vm.IsRaceRunning = true;
+            State = WindGaugeState.Acquiring;
 
             ClearLoopCount2();
 

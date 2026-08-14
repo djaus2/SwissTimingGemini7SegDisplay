@@ -16,10 +16,29 @@
     <StackPanel Orientation="Horizontal">
         <Button x:Name="startRaceButton"
                 Content="{Binding DisplayControl.StartButtonContent, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                IsEnabled="{Binding CanStartRace, Mode=OneWay}"
                 Click="StartRaceButton_Click"
                 Padding="10,4"
-                Margin="0,0,6,0"
-                Style="{StaticResource SnazzyButtonStyleGreen}" />
+                Margin="0,0,6,0">
+            <Button.Style>
+                <Style TargetType="Button" BasedOn="{StaticResource SnazzyButtonStyleGreen}">
+                    <Style.Triggers>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Background">
+                                <Setter.Value>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                        <GradientStop Color="#95A5A6" Offset="0" />
+                                        <GradientStop Color="#7F8C8D" Offset="1" />
+                                    </LinearGradientBrush>
+                                </Setter.Value>
+                            </Setter>
+                            <Setter Property="BorderBrush" Value="#555555" />
+                            <Setter Property="Foreground" Value="#DDDDDD" />
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </Button.Style>
+        </Button>
         <Button x:Name="startWindGaugeButton"
                 Content="Start Wind Gauge"
                 Click="StartWindGaugeButton_Click"
