@@ -37,7 +37,7 @@ The app can also run in a mode where it can receive wind speed data from a Swiss
 > ***Also:*** The control has 2 events: Start/stop countdown as well as last wind speed as a property.  
 > ***And*** The display is now a control with its own toolbar as well. Tidied up serial ports persistence etc. and settings.  
 > ****Prelim*** version of Sprint page available* Can simultaneously handle wind gauge and a clock for 100/200m events.  
-> ***Latest:*** Significant UI refinements especially to Sprint page.
+> ***Latest:*** Significant UI refinements especially to Sprint page including can't reset until Wind Gauge finishes.
 
 [Latest Release](https://github.com/djaus2/SwissTimingGemini7SegDisplay/releases)
 
