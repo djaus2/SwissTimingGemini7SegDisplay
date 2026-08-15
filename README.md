@@ -31,7 +31,7 @@ The app can also run in a mode where it can receive wind speed data from a Swiss
 
 > ***Now:*** Can choose at the splash screen, whether the app uses the actual **Display** and  **Siricco** wind gauge ... viz the simulator. Is persisted.  
 > ***And:*** Siricco and Display UIs and functionality now in reusable controls with a seprate toolbar for each.  
-> ***Also:*** Wind Gauge has last wind speed as a property.
+> ***Also:*** Wind Gauge has last wind speed as a property.  
 > ****Sprint page now available**** Can simultaneously handle wind gauge and a clock for 100/200m events.  
 > ***Nb:***  Can't reset on Sprint page until Wind Gauge finishes.  
 > ***Latest:*** Siricco Simulator now works (again) especially in Sprint page context. And can clear all settings at Sprint page.  
