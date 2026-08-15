@@ -286,7 +286,8 @@ namespace SwissTimingDisplay.Controls
             var xx = WindGauge.SiriccoWindGaugeAcquisitionDurationSecs;
             _WindGaugeTimer = new DispatcherTimer
             {
-                Interval = SiriccoWindGaugePeriodSec
+                Interval = SiriccoWindGaugePeriodSec,
+                IsEnabled = false
             };
             SetupSimulatedWindGaugeTimerInitial();
             _WindGaugeTimer.Tick += async (_, _) =>
@@ -683,7 +684,7 @@ namespace SwissTimingDisplay.Controls
             State = WindGaugeState.Acquiring;
 
             ClearLoopCount2();
-
+            
             //int period = _vm.WindGaugeCaptureCountdownPeriodSecs;
             //int cps = _vm.WindGaugeCaptureCountsPerSec;
             //WindGauge.SiriccoWindGaugeCaptureCountsPerSec = cps;
@@ -699,7 +700,7 @@ namespace SwissTimingDisplay.Controls
             _vm.RaceHasStartedSinceReset = true;
 
             _vm.StartCountDown(MaxLoops);
-
+            //_vm.StartSimulatedSiriccoWindGauge();
             UpdateTimeInputFromRaceElapsed();
             _vm.Status = "Siricco Wind Gauge capture started.";
 
@@ -708,6 +709,28 @@ namespace SwissTimingDisplay.Controls
             UpdateNumDigitsEnabledState();
             UpdateSendEnabledState();
             UpdateLapContinueButton();
+
+            /* Mistral version
+             _WindGaugeIsRunning = true;
+            _vm.IsRaceRunning = true;
+            SendCmd(TcpCommand.WindGauge_Start_of_Measurement);
+            _sendWallClockWhileRunning = _vm.UseWallClockTimeOfDay;
+            _windGaugeHasStartedSinceReset = true;
+            _vm.RaceHasStartedSinceReset = true;
+            _showingLapTime = false;
+            _lapTime = TimeSpan.Zero;
+
+
+
+            UpdateTimeInputFromRaceElapsed();
+            _vm.Status = "Race timer started.";
+
+            UpdateWindGaugeStartButtonContent();
+            UpdateWallClockEnabledState();
+            UpdateNumDigitsEnabledState();
+            UpdateSendEnabledState();
+            UpdateLapContinueButton(); 
+             */
         }
 
 
@@ -849,8 +872,10 @@ namespace SwissTimingDisplay.Controls
             {
                 if (!_isClosing)
                 {
-                    await _vm.SendRawAsync(cmdbytes);
-                    //_vm.SendStatus = $"Sent {cmdbytes.Length} byte(s) {cmdbytes} to {portName}.";
+                    //await _vm.SendRawAsync(cmdbytes);
+                    await _vm.SendRawAsyncReceive(cmdbytes);
+                    //
+                    _vm.SendStatus = $"Sent {cmdbytes.Length} byte(s) {cmdbytes} to {_vm.ConnectedPortName}.";
                     string csv = string.Join("_", cmdbytes.Select(b => MainViewModel.CharCommandToString((CharCommand)b)));
                     csv = csv.Replace(" ", "<SPC>");
                     csv = csv.Replace("_", "");

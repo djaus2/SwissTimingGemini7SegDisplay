@@ -121,6 +121,18 @@
             </StackPanel>
 
             <StackPanel Orientation="Horizontal">
+                <Button Name="ClearSettingsButton"
+                    Content="Clear Settings"
+                    Width="120"
+                    Height="45"
+                    FontSize="16"
+                    FontStyle="Italic"
+                    Margin="5,0,5,0"
+                    Background="SlateGray"
+                    Foreground="White"
+                    BorderThickness="0"
+                    Cursor="Hand"
+                    Click="ClearSettingsButton_Click"/>
                 <Button Name="ExitButton"
                     Content="Exit"
                     Width="100"

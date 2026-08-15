@@ -7,9 +7,20 @@ namespace SwissTimingDisplay.Properties
 {
     public sealed class Settings
     {
-        private static readonly Lazy<Settings> _default = new Lazy<Settings>(Load);
+        private static Lazy<Settings> _default = new Lazy<Settings>(Load);
 
         public static Settings Default => _default.Value;
+
+        public static void Reset()
+        {
+            _default = new Lazy<Settings>(() =>
+            {
+                var s = new Settings();
+                s.Save();
+                return s;
+            });
+            _ = _default.Value;
+        }
 
         public bool useSiriccoSimulator { get; set; }
         [JsonIgnore]

@@ -57,6 +57,18 @@ namespace SwissTimingDisplay.ViewModels
 
         private static readonly string SettingsFilePath = Path.Combine(SettingsDirectoryPath, "settings.json");
 
+        public static void ClearSavedSettings()
+        {
+            try
+            {
+                if (File.Exists(SettingsFilePath))
+                    File.Delete(SettingsFilePath);
+            }
+            catch
+            {
+            }
+        }
+
         public static MainViewModel SharedInstance
         {
             get
@@ -1249,7 +1261,7 @@ namespace SwissTimingDisplay.ViewModels
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Failed to connect Siricco send to {SiriccoSelectedSendPortName}: {ex.Message}", "Serial Port Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                //MessageBox.Show($"Failed to connect Siricco send to {SiriccoSelectedSendPortName}: {ex.Message}", "Serial Port Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 SiriccoSelectedSendPortName = null;
                 _persistedSettings.SiriccoSendPortName = null;
                 SiriccoIsConnected = false;

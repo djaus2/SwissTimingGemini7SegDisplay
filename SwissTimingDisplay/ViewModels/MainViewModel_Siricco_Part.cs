@@ -109,7 +109,7 @@ namespace SwissTimingDisplay.ViewModels
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Failed to connect Siricco receive to {portName}: {ex.Message}", "Serial Port Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                //MessageBox.Show($"Failed to connect Siricco receive to {portName}: {ex.Message}", "Serial Port Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 SiriccoSelectedReceivePortName = null;
                 _persistedSettings.SiriccoReceivePortName = null;
                 SiriccoIsReceiveConnected = false;
@@ -154,6 +154,7 @@ namespace SwissTimingDisplay.ViewModels
             //int capturesPerSec = WindGaugeCaptureCountsPerSec;
             //int MaxLoops = AcquistionPeriod * capturesPerSec; ;
             currentCount = maxLoops;
+            //StartSimulatedSiriccoWindGauge();
         }
 
         /// <summary>

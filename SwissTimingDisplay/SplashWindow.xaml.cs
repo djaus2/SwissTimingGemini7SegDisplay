@@ -70,6 +70,13 @@ namespace SwissTimingDisplay
             this.Close();
         }
 
+        private void ClearSettingsButton_Click(object sender, RoutedEventArgs e)
+        {
+            Properties.Settings.Reset();
+            MainViewModel.ClearSavedSettings();
+            MessageBox.Show("Saved settings have been cleared.", "Settings Cleared", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
         private void ExitButton_Click(object sender, RoutedEventArgs e)
         {
             Application.Current.Shutdown();
