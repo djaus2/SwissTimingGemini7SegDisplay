@@ -127,5 +127,10 @@ namespace SwissTimingDisplay.ViewModels
 
             return _serialPortService.SendAsync(payload);
         }
+
+        public Task SiriccoSendRawAsync(byte[] payload)
+        {
+            return _siriccoSerialPortService.SendAsync(payload);
+        }
     }
 }

@@ -369,6 +369,7 @@ namespace SwissTimingDisplay.Controls
                 await BeginAutoSend(payload);
             };
 
+            _vm.SimulatedSiriccoWindGaugeRunning = Settings.Default.useSiriccoSimulator;
 
             //UpdateSiriccoStartButtonContent();
             //UpdateWallClockEnabledState();
@@ -656,8 +657,8 @@ namespace SwissTimingDisplay.Controls
                     try
                     {
                         var clearCommand = TcpCommandDefinitions.GetPayloadBytes(TcpCommand.Roller_Time_Mode_Clear).ToArray();
-                        await _vm.SendRawAsync(clearCommand);
-                        _vm.Status = $"Sent {clearCommand.Length} byte(s) to {_vm.ConnectedPortName}.";
+                        await _vm.SiriccoSendRawAsync(clearCommand);
+                        _vm.Status = $"Sent {clearCommand.Length} byte(s) to {_vm.SiriccoSelectedSendPortName}.";
                     }
                     catch (Exception ex)
                     {
@@ -841,8 +842,8 @@ namespace SwissTimingDisplay.Controls
                 try
                 {
                     var clearCommand = TcpCommandDefinitions.GetPayloadBytes(TcpCommand.Roller_Time_Mode_Clear).ToArray();
-                    await _vm.SendRawAsync(clearCommand);
-                    _vm.Status = $"Sent {clearCommand.Length} byte(s) to {_vm.ConnectedPortName}.";
+                    await _vm.SiriccoSendRawAsync(clearCommand);
+                    _vm.Status = $"Sent {clearCommand.Length} byte(s) to {_vm.SiriccoSelectedSendPortName}.";
                 }
                 catch (Exception ex)
                 {
@@ -872,10 +873,8 @@ namespace SwissTimingDisplay.Controls
             {
                 if (!_isClosing)
                 {
-                    //await _vm.SendRawAsync(cmdbytes);
-                    await _vm.SendRawAsyncReceive(cmdbytes);
-                    //
-                    _vm.SendStatus = $"Sent {cmdbytes.Length} byte(s) {cmdbytes} to {_vm.ConnectedPortName}.";
+                    await _vm.SiriccoSendRawAsync(cmdbytes);
+                    _vm.SendStatus = $"Sent {cmdbytes.Length} byte(s) {cmdbytes} to {_vm.SiriccoSelectedSendPortName}.";
                     string csv = string.Join("_", cmdbytes.Select(b => MainViewModel.CharCommandToString((CharCommand)b)));
                     csv = csv.Replace(" ", "<SPC>");
                     csv = csv.Replace("_", "");
@@ -952,12 +951,12 @@ namespace SwissTimingDisplay.Controls
 
                 //    if (_vm.SiriccoIsConnected)
                 //    {
-                //        var portName = _vm.ConnectedPortName ?? "(unknown)";
+                //        var portName = _vm.SiriccoSelectedSendPortName ?? "(unknown)";
                 //        var send = MessageBoxResult.Yes;
 
                 //        if (send == MessageBoxResult.Yes)
                 //        {
-                //            await _vm.SendRawAsync(cmdbytes);
+                //            await _vm.SiriccoSendRawAsync(cmdbytes);
                 //            _vm.Status = $"Sent {cmdbytes.Length} byte(s) to {portName}.";
 
 
@@ -976,12 +975,12 @@ namespace SwissTimingDisplay.Controls
 
                     if (_vm.SiriccoIsConnected)
                     {
-                        var portName = _vm.ConnectedPortName ?? "(unknown)";
+                        var portName = _vm.SiriccoSelectedSendPortName ?? "(unknown)";
                         var send = MessageBoxResult.Yes;
 
                         if (send == MessageBoxResult.Yes)
                         {
-                            await _vm.SendRawAsync(cmdbytes);
+                            await _vm.SiriccoSendRawAsync(cmdbytes);
                             _vm.Status = $"Sent {cmdbytes.Length} byte(s) to {portName}.";
 
 
@@ -1006,12 +1005,12 @@ namespace SwissTimingDisplay.Controls
 
                 if (_vm.SiriccoIsConnected)
                 {
-                    var portName = _vm.ConnectedPortName ?? "(unknown)";
+                    var portName = _vm.SiriccoSelectedSendPortName ?? "(unknown)";
                     var send = MessageBoxResult.Yes;
 
                     if (send == MessageBoxResult.Yes)
                     {
-                        await _vm.SendRawAsync(cmdbytes);
+                        await _vm.SiriccoSendRawAsync(cmdbytes);
                         //_vm.SendStatus = $"Sent {cmdbytes.Length} byte(s) {cmdbytes} to {portName}.";
                         string csv = string.Join("_", cmdbytes.Select(b => MainViewModel.CharCommandToString((CharCommand)b)));
                         csv = csv.Replace(" ", "<SPC>");
@@ -1116,14 +1115,5 @@ namespace SwissTimingDisplay.Controls
 
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
-
-        private void Button_Click_1(object sender, RoutedEventArgs e)
-        {
-
-        }
     }
 }

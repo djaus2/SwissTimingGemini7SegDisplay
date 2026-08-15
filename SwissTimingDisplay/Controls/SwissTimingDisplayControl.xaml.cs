@@ -343,15 +343,6 @@ namespace SwissTimingDisplay.Controls
 
         private async void RaceTimerButton_Click(object sender, RoutedEventArgs e)
         {
-            if (!_vm.DisplayIsConnected)
-            {
-                MessageBox.Show(
-                    "Send port not connected.",
-                    "Error",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Warning);
-                return;
-            }
             if (_raceIsRunning)
             {
                 _raceIsRunning = false;
