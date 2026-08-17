@@ -35,7 +35,7 @@ The app can also run in a mode where it can receive wind speed data from a Swiss
 > ****Sprint page now available**** Can simultaneously handle wind gauge and a clock for 100/200m events.  
 > ***Nb:***  Can't reset on Sprint page until Wind Gauge finishes.  
 > ***Latest:*** Siricco Simulator now works (again) especially in Sprint page context.  
-And can clear all settings at Sprint page.  
+And can clear all settings at Splash page.  
 And improved Toolbar UI and refined Release builds *(eg. Don't build if only ReadMe changes.)*  
 > ***Coming:*** When wind gauge is used on sprint page, after finish, display auto toggles between stop time and wind speed.  
 [Latest Release](https://github.com/djaus2/SwissTimingGemini7SegDisplay/releases)
