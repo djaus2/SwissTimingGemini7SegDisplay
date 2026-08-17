@@ -70,7 +70,8 @@ jobs:
           # Try to get the csproj content from the previous commit
           $oldContent = $null
           try {
-            $oldContent = git show "$before:$csprojPath" 2>$null
+            # Use ${before} to avoid PowerShell parsing the ':' as part of a variable name
+            $oldContent = git show "${before}:$csprojPath" 2>$null
           } catch {
             $oldContent = $null
           }
