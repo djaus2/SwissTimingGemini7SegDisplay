@@ -30,30 +30,25 @@
                 Style="{StaticResource SnazzyButtonStyle}" />
         <Border BorderBrush="Gray" BorderThickness="1" CornerRadius="4" Padding="4" Margin="0,0,6,0" Background="Beige">
             <StackPanel Orientation="Horizontal">
-                <CheckBox x:Name="showSetup" IsChecked="{Binding Source={x:Static properties:Settings.Default}, Path=ShowSetup, Mode=TwoWay}" VerticalAlignment="Center" Margin="0,0,6,0" Padding="6,2">
-                    <TextBlock FontWeight="Bold" FontStyle="Italic" Text="Setup" />
-                </CheckBox>
-                <StackPanel Orientation="Horizontal" Visibility="{Binding IsChecked, ElementName=showSetup, Converter={StaticResource BooleanToVisibilityConverter}}">
-                    <Button x:Name="toggleControls" Click="ToggleControls_Click" Padding="10,4" Margin="0,0,6,0" Style="{StaticResource SnazzyButtonStyle}">
-                        <Button.Content>
-                            <TextBlock FontWeight="Bold" FontStyle="Italic">
-                                <TextBlock.Style>
-                                    <Style TargetType="TextBlock">
-                                        <Setter Property="Text" Value="Show Controls" />
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding DisplayControl.ControlVisibility, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="Visible">
-                                                <Setter Property="Text" Value="Hide Controls" />
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </TextBlock.Style>
-                            </TextBlock>
-                        </Button.Content>
-                    </Button>
-                </StackPanel>
+                <Button x:Name="toggleControls" Click="ToggleControls_Click" Padding="10,4" Margin="0,0,6,0" Style="{StaticResource SnazzyButtonStyle}">
+                    <Button.Content>
+                        <TextBlock FontWeight="Bold" FontStyle="Italic">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Text" Value="Show Controls" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding DisplayControl.ControlVisibility, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="Visible">
+                                            <Setter Property="Text" Value="Hide Controls" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </Button.Content>
+                </Button>
             </StackPanel>
         </Border>
-        <StackPanel Orientation="Horizontal" Visibility="{Binding IsChecked, ElementName=showSetup, Converter={StaticResource BooleanToVisibilityConverter}}">
+        <StackPanel Orientation="Horizontal">
             <TextBlock VerticalAlignment="Center" FontWeight="Bold" FontStyle="Italic" Foreground="Purple" Margin="0,0,6,0"
                        Text="{Binding DisplaySelectedSendPortName, StringFormat='Send: {0}'}"
                        Visibility="{Binding DisplayIsConnected, Converter={StaticResource BooleanToVisibilityConverter}}" />

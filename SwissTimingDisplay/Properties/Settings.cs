@@ -24,9 +24,7 @@ namespace SwissTimingDisplay.Properties
 
         public bool useSiriccoSimulator { get; set; }
         [JsonIgnore]
-    public bool ShowSetup { get; set; }
-        [JsonIgnore]
-    public bool ShowSiriccoControls { get; set; }
+        public bool ShowSiriccoControls { get; set; }
 
         private static string SettingsPath => Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),

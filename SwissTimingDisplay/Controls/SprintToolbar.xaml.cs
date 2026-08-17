@@ -79,18 +79,6 @@ namespace SwissTimingDisplay.Controls
             }
         }
 
-        private void ShowSetup_Unchecked(object sender, RoutedEventArgs e)
-        {
-            if (DataContext is MainViewModel vm)
-            {
-                vm.SprintShowSetup = false;
-            }
-        }
-
-        private void ShowSetup_Checked(object sender, RoutedEventArgs e)
-        {
-            // Setup just reveals the Show/Hide Controls button; it does not show the toolbars.
-        }
 
         private void BackButton_Click(object sender, RoutedEventArgs e)
         {

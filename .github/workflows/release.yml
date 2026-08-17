@@ -29,6 +29,99 @@ jobs:
       with:
         fetch-depth: 0
 
+    - name: Check for README-only change
+      id: check_changes
+      shell: pwsh
+      run: |
+        # For workflow_dispatch we always proceed
+        if ('${{ github.event_name }}' -eq 'workflow_dispatch') {
+          Write-Host "Triggered by workflow_dispatch - not skipping"
+          "skip=false" >> $env:GITHUB_OUTPUT
+          exit 0
+        }
+
+        $before = '${{ github.event.before }}'
+        $after = '${{ github.sha }}'
+
+        if ($before -eq '0000000000000000000000000000000000000000') {
+          Write-Host "Initial commit or branch created - proceeding"
+          "skip=false" >> $env:GITHUB_OUTPUT
+          exit 0
+        }
+
+        $files = git diff --name-only $before $after | ForEach-Object { $_.Trim() } | Where-Object { $_ -ne '' }
+        Write-Host "Changed files:`n$files"
+
+        # If the project csproj itself changed, always proceed with a release
+        $csprojPath = 'SwissTimingDisplay/SwissTimingDisplay.csproj'
+        if ($files -contains $csprojPath) {
+          Write-Host "Project csproj changed in this push - proceeding with release"
+          "skip=false" >> $env:GITHUB_OUTPUT
+          exit 0
+        }
+
+        $readmeOnly = ($files.Count -eq 1 -and ($files[0] -match '^(README\.md|readme\.md)$'))
+
+        # If only the root README changed, normally skip. However, if the project csproj's Version/VersionPrefix
+        # changed between commits, force a release. Compare the version in the csproj at $before and current.
+        if ($readmeOnly) {
+          $csprojPath = 'SwissTimingDisplay/SwissTimingDisplay.csproj'
+
+          # Try to get the csproj content from the previous commit
+          $oldContent = $null
+          try {
+            $oldContent = git show "$before:$csprojPath" 2>$null
+          } catch {
+            $oldContent = $null
+          }
+
+          # Read current csproj content from workspace
+          $newContent = $null
+          try {
+            $newContent = Get-Content $csprojPath -Raw
+          } catch {
+            $newContent = $null
+          }
+
+          $oldVersion = $null
+          $newVersion = $null
+
+          if ($oldContent) {
+            try {
+              [xml]$oldXml = $oldContent
+              $oldVersion = $oldXml.Project.PropertyGroup.Version
+              if (-not $oldVersion) { $oldVersion = $oldXml.Project.PropertyGroup.VersionPrefix }
+            } catch {
+              $oldVersion = $null
+            }
+          }
+
+          if ($newContent) {
+            try {
+              [xml]$newXml = $newContent
+              $newVersion = $newXml.Project.PropertyGroup.Version
+              if (-not $newVersion) { $newVersion = $newXml.Project.PropertyGroup.VersionPrefix }
+            } catch {
+              $newVersion = $null
+            }
+          }
+
+          Write-Host "Old csproj version: $oldVersion"
+          Write-Host "New csproj version: $newVersion"
+
+          if ($oldVersion -and $newVersion -and ($oldVersion -ne $newVersion)) {
+            Write-Host "Project version changed between commits - proceeding with release"
+            "skip=false" >> $env:GITHUB_OUTPUT
+            exit 0
+          }
+
+          Write-Host "Only root README changed and project version did not change - skipping release creation and build steps."
+          "skip=true" >> $env:GITHUB_OUTPUT
+          exit 0
+        }
+
+        "skip=false" >> $env:GITHUB_OUTPUT
+
     - name: Fetch tags
       run: git fetch --tags
 
@@ -40,6 +133,7 @@ jobs:
     - name: Read project version
       id: version
       shell: pwsh
+      if: steps.check_changes.outputs.skip != 'true'
       run: |
         [xml]$proj = Get-Content "SwissTimingDisplay/SwissTimingDisplay.csproj"
 
@@ -61,6 +155,7 @@ jobs:
     - name: Determine next release tag
       id: tag
       shell: pwsh
+      if: steps.check_changes.outputs.skip != 'true'
       run: |
 
         $baseVersion = "${{ steps.version.outputs.VERSION }}"
@@ -89,10 +184,12 @@ jobs:
         "RELEASE_TAG=$releaseTag" >> $env:GITHUB_OUTPUT
 
     - name: Restore dependencies
+      if: steps.check_changes.outputs.skip != 'true'
       run: dotnet restore
 
     - name: Publish WPF App
       shell: pwsh
+      if: steps.check_changes.outputs.skip != 'true'
       run: |
         dotnet publish SwissTimingDisplay/SwissTimingDisplay.csproj `
           -c Release `
@@ -103,6 +200,7 @@ jobs:
 
     - name: Zip published output
       shell: pwsh
+      if: steps.check_changes.outputs.skip != 'true'
       run: |
         Compress-Archive `
           -Path publish\* `
@@ -110,6 +208,7 @@ jobs:
 
     - name: Create git tag
       shell: pwsh
+      if: steps.check_changes.outputs.skip != 'true'
       run: |
         git config user.name "github-actions[bot]"
         git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -119,12 +218,14 @@ jobs:
 
     - name: Upload published artifact
       uses: actions/upload-artifact@v4
+      if: steps.check_changes.outputs.skip != 'true'
       with:
         name: ${{ env.APP_NAME }}-${{ steps.tag.outputs.RELEASE_TAG }}
         path: ${{ env.APP_NAME }}-${{ steps.tag.outputs.RELEASE_TAG }}.zip
 
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v2
+      if: steps.check_changes.outputs.skip != 'true'
       with:
         tag_name: ${{ steps.tag.outputs.RELEASE_TAG }}
         generate_release_notes: true
