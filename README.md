@@ -16,6 +16,8 @@
 >
 > **Disclaimer:** *This software is for demostration and testing purposes only and is not provided by Swiss Timing.*  
 > *Swiss Timing Display and Wind Gauge Transmission Protocols as referenced are used though.*
+  
+> [Blog Posts about this project](https://davidjones.sportronics.com.au/search.html?query=Swiss+Timing)
 
 ## About
 
